@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Main text style -->
+    <style name="MainTextStyle">
+        <item name="android:textColor">@color/MainTextColor</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:fontFamily">sans-serif-light</item>
+    </style>
+
+    <!-- Sub text style -->
+    <style name="SubTextStyle">
+        <item name="android:textColor">@color/SubTextColor</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:fontFamily">sans-serif-light</item>
+        <item name="android:gravity">center</item>
+    </style>
+
+    <!-- Numeric text style -->
+    <style name="NumericTextStyle">
+        <item name="android:textColor">@color/SubTextColor</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:fontFamily">sans-serif-light</item>
+        <item name="android:letterSpacing">0.5</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:gravity">center</item>
+    </style>
+
+</resources>

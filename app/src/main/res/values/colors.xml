@@ -6,26 +6,26 @@
     <!-- Base Colors -->
     <color name="BackgroundColor">#161618</color>
     <color name="TopBarColor">#161618</color>
-    <color name="MenuBackgroundColor">#505359</color>
     <color name="ItemBackgroundColor">#212327</color>
     <color name="SubItemBackgroundColor">#2E2F34</color>
+    <color name="MenuBackgroundColor">#505359</color>
 
     <!-- Text & Icons -->
     <color name="MainTextColor">#FFFFFF</color>
     <color name="SubTextColor">#505359</color>
+    <color name="HighlightTextColor">#BAE655</color>
     <color name="PositiveBalanceColor">#77B950</color>
     <color name="NegativeBalanceColor">#E94444</color>
 
-    <!-- Buttons, Icons & Highlights -->
+    <!-- Buttons & Icons -->
     <color name="ButtonColor">#B9D5A1</color>
     <color name="IconColor">#BED1CA</color>
-    <color name="HighlightColor">#BAE655</color>
 
     <!-- Categories -->
     <color name="NeedsCategoryColor">#BD804A</color>
-    <color name="NeedsSubCategoryColor">#8A80BC</color>
+    <color name="NeedsSubCategoryColor">#C5AF96</color>
     <color name="WantsCategoryColor">#88618E</color>
-    <color name="WantsSubCategoryColor">#A3E8DE</color>
+    <color name="WantsSubCategoryColor">#8A80BC</color>
     <color name="SavingsCategoryColor">#6EA19E</color>
-    <color name="SavingsSubCategoryColor">#DDCAB2</color>
+    <color name="SavingsSubCategoryColor">#8BD0C7</color>
 </resources>
