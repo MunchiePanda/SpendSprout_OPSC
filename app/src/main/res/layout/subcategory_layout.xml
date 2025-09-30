@@ -18,7 +18,7 @@
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/txt_Date"
+            android:id="@+id/txt_Category"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="12 December 2025"
@@ -34,7 +34,7 @@
     </LinearLayout>
 
     <TextView
-        android:id="@+id/txt_Amount"
+        android:id="@+id/txt_Balance"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="- R100 000"
