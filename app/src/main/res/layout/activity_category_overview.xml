@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
@@ -8,4 +8,102 @@
     tools:context=".CategoryOverviewActivity">
 
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <!-- Layout with filter and main categories -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <!-- Spacer so that Top Bar is visible -->
+        <Space
+            android:id="@+id/spacer_header"
+            android:layout_width="match_parent"
+            android:layout_height="60dp" />
+
+        <!-- Filter with background image/layout -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:background="@drawable/roundedcorners_background"
+            android:backgroundTint="@color/ItemBackgroundColor"
+            android:padding="5dp"
+            android:layout_marginVertical="10dp"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/imageView2"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:srcCompat="@drawable/filter_icon" />
+
+            <Spinner
+                android:id="@+id/spinner2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:backgroundTint="@color/ButtonColor" />
+
+
+        </LinearLayout>
+
+        <!-- Main Category 1 with 2 Subcategories -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:layout_marginHorizontal="15dp"
+            android:layout_marginVertical="0dp"
+            android:background="@drawable/roundedcorners_background"
+            android:backgroundTint="@color/ItemBackgroundColor"
+            android:orientation="vertical">
+
+            <include layout="@layout/category_layout" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_margin="10dp"
+                android:background="@drawable/roundedcorners_background"
+                android:backgroundTint="@color/SubItemBackgroundColor"
+                tools:itemCount="2"
+                tools:listitem="@layout/subcategory_layout" />
+
+            <!-- Main Category 2 with 2 Subcategories -->
+            <include layout="@layout/category_layout" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_margin="10dp"
+                android:background="@drawable/roundedcorners_background"
+                android:backgroundTint="@color/SubItemBackgroundColor"
+                tools:itemCount="2"
+                tools:listitem="@layout/subcategory_layout" />
+
+            <!-- Main Category 3 with 2 Subcategories -->
+            <include layout="@layout/category_layout"/>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_margin="10dp"
+                android:background="@drawable/roundedcorners_background"
+                android:backgroundTint="@color/SubItemBackgroundColor"
+                tools:itemCount="2"
+                tools:listitem="@layout/subcategory_layout" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <include
+        android:id="@+id/layout_HeaderBar"
+        layout="@layout/header_bar_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+</FrameLayout>
