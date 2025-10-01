@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">SpendSprout_OPSC</string>
+    <string name="blank_string"></string>
 </resources>

@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Header text style -->
+    <style name="HeaderTextStyle">
+        <item name="android:textColor">@color/MainTextColor</item>
+        <item name="android:textSize">40sp</item>
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:layout_gravity">center</item>
+    </style>
+
     <!-- Main text style -->
     <style name="MainTextStyle">
         <item name="android:textColor">@color/MainTextColor</item>
@@ -25,4 +33,13 @@
         <item name="android:gravity">center</item>
     </style>
 
+    <!-- Button Style -->
+    <style name="CircularImageButton" parent="Widget.AppCompat.ImageButton">
+        <item name="android:layout_width">50dp</item>
+        <item name="android:layout_height">50dp</item>
+        <item name="android:layout_margin">5dp</item>
+        <item name="android:background">@drawable/circle_icon</item>
+        <item name="android:backgroundTint">@color/ButtonColor</item>
+        <item name="android:scaleType">centerInside</item>
+    </style>
 </resources>

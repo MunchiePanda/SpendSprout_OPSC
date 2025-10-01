@@ -6,7 +6,7 @@
     <color name="TransparentColor">#00000000</color>
 
     <!-- Base Colors -->
-    <color name="BackgroundColor">#161618</color>
+    <color name="BackgroundColor">#18181A</color>
     <color name="TopBarColor">#161618</color>
     <color name="ItemBackgroundColor">#212327</color>
     <color name="SubItemBackgroundColor">#2E2F34</color>
