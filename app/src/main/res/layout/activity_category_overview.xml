@@ -60,7 +60,10 @@
             android:backgroundTint="@color/ItemBackgroundColor"
             android:orientation="vertical">
 
-            <include layout="@layout/category_layout" />
+            <com.example.spendsprout_opsc.CategoryView
+                android:id="@+id/categoryView1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:layout_width="wrap_content"
@@ -73,7 +76,10 @@
                 tools:listitem="@layout/subcategory_layout" />
 
             <!-- Main Category 2 with 2 Subcategories -->
-            <include layout="@layout/category_layout" />
+            <com.example.spendsprout_opsc.CategoryView
+                android:id="@+id/categoryView2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:layout_width="wrap_content"
@@ -86,7 +92,10 @@
                 tools:listitem="@layout/subcategory_layout" />
 
             <!-- Main Category 3 with 2 Subcategories -->
-            <include layout="@layout/category_layout"/>
+            <com.example.spendsprout_opsc.CategoryView
+                android:id="@+id/categoryView3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:layout_width="wrap_content"
