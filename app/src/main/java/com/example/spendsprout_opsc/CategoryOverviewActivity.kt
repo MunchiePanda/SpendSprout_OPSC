@@ -34,7 +34,7 @@ class CategoryOverviewActivity : AppCompatActivity() {
 
         // Set data for the first category
         categoryView1.setName("Needs")
-        categoryView1.setBalance(-1500.0)  // Negative balance
+        categoryView1.setBalance(1500.0)  // Negative balance
         categoryView1.setCategory("Needs")
 
         // Set data for the second category

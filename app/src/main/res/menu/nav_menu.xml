@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_overview"
+            android:icon="@drawable/ic_launcher_foreground"
+            android:title="Overview" />
+        <item
+            android:id="@+id/nav_categories"
+            android:icon="@drawable/ic_launcher_foreground"
+            android:title="Categories" />
+        <item
+            android:id="@+id/nav_transactions"
+            android:icon="@drawable/ic_launcher_foreground"
+            android:title="Transactions" />
+        <item
+            android:id="@+id/nav_accounts"
+            android:icon="@drawable/ic_launcher_foreground"
+            android:title="Accounts" />
+        <item
+            android:id="@+id/nav_reports"
+            android:icon="@drawable/ic_launcher_foreground"
+            android:title="Reports" />
+        <item
+            android:id="@+id/nav_settings"
+            android:icon="@drawable/ic_launcher_foreground"
+            android:title="Settings" />
+    </group>
+
+    <item android:title="Actions">
+        <menu>
+            <item
+                android:id="@+id/nav_exit"
+                android:title="Exit" />
+        </menu>
+    </item>
+</menu>

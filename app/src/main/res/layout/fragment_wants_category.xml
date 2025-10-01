@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    tools:context=".WantsCategoryFragment">
+
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        app:navigationIcon="@drawable/ic_menu"
+        app:title="Wants"
+        app:titleTextColor="@android:color/white"/>
+
+    <TextView
+        android:id="@+id/textCurrentAmount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Current: R0.00"
+        android:textSize="18sp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Subcategories"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="8dp"/>
+
+    <!-- This would be a RecyclerView in a real app -->
+    <TextView
+        android:id="@+id/textSubcategoryExample"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Example: Eating Out: R110.00"
+        android:textSize="16sp"
+        android:padding="16dp"
+        android:background="@drawable/roundedcorners_background"
+        android:layout_marginBottom="16dp"/>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/buttonAddSubcategory"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="+ Add Subcategory"
+        android:layout_gravity="end"
+        android:layout_marginTop="16dp"
+        app:icon="@drawable/ic_add"
+        app:iconTint="@android:color/white"/>
+
+</LinearLayout>
