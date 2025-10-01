@@ -30,9 +30,9 @@ class LoginActivity : AppCompatActivity() {  // This class is like a Unity scrip
                 // Show an error message (like "Debug.Log()" or a popup in Unity)
                 Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show()
             } else {
-                // If fields are filled, go to MainActivity (like "SceneManager.LoadScene()" in Unity)
-                val intent = Intent(this, MainActivity::class.java)  // Like "SceneManager.LoadScene("MainScene")"
-                startActivity(intent)  // Load the new "scene" (MainActivity)
+                // If fields are filled, go to CategoryOverviewActivity (like "SceneManager.LoadScene()" in Unity)
+                val intent = Intent(this, CategoryOverviewActivity::class.java)  // Like "SceneManager.LoadScene("CategoryOverviewScene")"
+                startActivity(intent)  // Load the new "scene" (CategoryOverviewActivity)
                 finish()  // Close this "scene" (LoginActivity), like "Destroy(gameObject)"
             }
         }
