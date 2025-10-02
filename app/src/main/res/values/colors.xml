@@ -16,8 +16,8 @@
     <color name="MainTextColor">#FFFFFF</color>
     <color name="SubTextColor">#505359</color>
     <color name="HighlightTextColor">#BAE655</color>
-    <color name="PositiveBalanceColor">#77B950</color>
-    <color name="NegativeBalanceColor">#E94444</color>
+    <color name="PositiveBalanceColor">#4CAF50</color>
+    <color name="NegativeBalanceColor">#F44336</color>
 
     <!-- Buttons & Icons -->
     <color name="ButtonColor">#B9D5A1</color>

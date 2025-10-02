@@ -25,6 +25,35 @@
         <activity
             android:name=".MainActivity"
             android:exported="true" />
+        <activity
+            android:name=".OverviewActivity"
+            android:exported="false" />
+        <activity
+            android:name=".SettingsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".AccountsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".EditAccountActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ReportsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".CategoriesActivity"
+            android:exported="false" />
+        <activity
+            android:name=".WantsCategoryActivity"
+            android:exported="false" />
+        <activity
+            android:name=".EditCategoryActivity"
+            android:exported="false" />
+        <activity
+            android:name=".TransactionsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".EditTransactionActivity"
+            android:exported="false" />
     </application>
-
 </manifest>
