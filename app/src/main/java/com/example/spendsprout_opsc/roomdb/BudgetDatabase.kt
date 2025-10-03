@@ -1,0 +1,25 @@
+package com.example.spendsprout_opsc.roomdb
+import androidx.room.Database
+import androidx.room.RoomDatabase
+
+@Database(  entities = [Category_Entity::class,
+                        Subcategory_Entity::class,
+                        Payment_Entity::class,
+                        Contact_Entity::class,
+                        Account_Entity::class],
+            version = 0)
+abstract class BudgetDatabase : RoomDatabase()
+{
+    abstract fun categoryDao(): Category_DAO
+    abstract fun subcategoryDao(): Subcategory_DAO
+    abstract fun paymentDao(): Payment_DAO
+    abstract fun contactDao(): Contact_DAO
+    abstract fun accountDao(): Account_DAO
+}
+
+//Create an instance of this database:
+//  val db = Room.databaseBuilder(applicationContext, BudgetDatabase::class.java, "database-name").build()
+
+//Use the DAOs:
+//  val categoryDao = db.categoryDao()
+//  val categories: List<Category_Entity> = categoryDao.getAll()
