@@ -2,6 +2,8 @@ package com.example.spendsprout_opsc.overview
 
 import com.example.spendsprout_opsc.overview.model.Transaction
 import com.example.spendsprout_opsc.overview.model.ChartDataPoint
+import com.example.spendsprout_opsc.overview.model.CategorySummary
+import com.example.spendsprout_opsc.overview.model.AccountSummary
 
 /**
  * OverviewViewModel - Data Management Script
@@ -42,6 +44,10 @@ class OverviewViewModel {
         )
     }
     
+    fun getAccountBalances(): List<AccountSummary> {
+        return getAccountSummary()
+    }
+    
     fun getChartData(): List<ChartDataPoint> {
         return listOf(
             ChartDataPoint("2025-01", 15000.0, 12000.0),
@@ -54,16 +60,4 @@ class OverviewViewModel {
     }
 }
 
-data class CategorySummary(
-    val name: String,
-    val spent: String,
-    val allocated: String,
-    val color: String
-)
-
-data class AccountSummary(
-    val name: String,
-    val balance: String,
-    val limit: String
-)
 

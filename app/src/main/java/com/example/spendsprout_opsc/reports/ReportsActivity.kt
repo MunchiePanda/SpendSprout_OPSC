@@ -25,7 +25,7 @@ class ReportsActivity : AppCompatActivity(), NavigationView.OnNavigationItemSele
     private lateinit var drawerLayout: DrawerLayout
     private lateinit var navView: NavigationView
     private lateinit var reportsViewModel: ReportsViewModel
-    private lateinit var progressBarSpending: ProgressBar
+    private lateinit var circularProgressView: CircularProgressView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,7 +33,7 @@ class ReportsActivity : AppCompatActivity(), NavigationView.OnNavigationItemSele
 
         drawerLayout = findViewById(R.id.drawer_layout)
         navView = findViewById(R.id.nav_view)
-        progressBarSpending = findViewById(R.id.progressBar_Spending)
+        circularProgressView = findViewById(R.id.circularProgressView)
 
         // Set up the toolbar
         val toolbar: androidx.appcompat.widget.Toolbar = findViewById(R.id.toolbar)
@@ -60,25 +60,38 @@ class ReportsActivity : AppCompatActivity(), NavigationView.OnNavigationItemSele
     }
 
     private fun setupUI() {
-        setupMonthSpinner()
-        setupExportButton()
+        setupMonthFilter()
+        setupSegmentedControl()
+        setupCircularProgress()
         setupChart()
-        updateProgressBar()
+        setupFab()
     }
 
-    private fun setupMonthSpinner() {
-        val spinnerMonth = findViewById<Spinner>(R.id.spinner_Month)
-        val months = arrayOf("January 2025", "February 2025", "March 2025", "April 2025", "May 2025", "June 2025")
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, months)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinnerMonth.adapter = adapter
-    }
-
-    private fun setupExportButton() {
-        val btnExport = findViewById<Button>(R.id.btn_Export)
-        btnExport.setOnClickListener {
-            Toast.makeText(this, "Report exported", Toast.LENGTH_SHORT).show()
+    private fun setupMonthFilter() {
+        val btnMonthFilter = findViewById<android.widget.LinearLayout>(R.id.btn_MonthFilter)
+        btnMonthFilter.setOnClickListener {
+            // Show month selection dialog
+            Toast.makeText(this, "Month filter clicked", Toast.LENGTH_SHORT).show()
         }
+    }
+
+    private fun setupSegmentedControl() {
+        val btnLineChart = findViewById<android.widget.LinearLayout>(R.id.btn_LineChart)
+        val btnPieChart = findViewById<android.widget.LinearLayout>(R.id.btn_PieChart)
+        
+        btnLineChart.setOnClickListener {
+            // Switch to line chart view
+            Toast.makeText(this, "Line chart selected", Toast.LENGTH_SHORT).show()
+        }
+        
+        btnPieChart.setOnClickListener {
+            // Switch to pie chart view
+            Toast.makeText(this, "Pie chart selected", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun setupCircularProgress() {
+        circularProgressView.setProgress(0.8f) // 80% progress
     }
 
     private fun setupChart() {
@@ -86,9 +99,14 @@ class ReportsActivity : AppCompatActivity(), NavigationView.OnNavigationItemSele
         chartView.setData(reportsViewModel.getChartData())
     }
 
-    private fun updateProgressBar() {
-        progressBarSpending.progress = 75
+    private fun setupFab() {
+        val fabAddReport = findViewById<com.google.android.material.floatingactionbutton.FloatingActionButton>(R.id.fab_AddReport)
+        fabAddReport.setOnClickListener {
+            // Navigate to create new report or export data
+            android.widget.Toast.makeText(this, "Add Report clicked", android.widget.Toast.LENGTH_SHORT).show()
+        }
     }
+
 
     private fun observeData() {
         // Observe ViewModel data changes

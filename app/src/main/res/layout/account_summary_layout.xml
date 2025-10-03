@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="12dp"
+    android:background="@color/TransparentColor">
+
+    <!-- Account Info -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <!-- Account Name -->
+        <TextView
+            android:id="@+id/txt_AccountName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Cash"
+            android:textColor="@color/MainTextColor"
+            android:textSize="16sp" />
+    </LinearLayout>
+
+    <!-- Account Balances -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/txt_Balance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="R 160"
+            android:textColor="@color/MainTextColor"
+            android:textSize="14sp"
+            android:layout_marginEnd="16dp" />
+
+        <TextView
+            android:id="@+id/txt_Limit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="R 19,00"
+            android:textColor="@color/MainTextColor"
+            android:textSize="14sp" />
+    </LinearLayout>
+
+</LinearLayout>

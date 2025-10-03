@@ -67,10 +67,8 @@ class AccountsActivity : AppCompatActivity(), NavigationView.OnNavigationItemSel
 
         val accounts = accountsViewModel.getAllAccounts()
         accountAdapter = AccountAdapter(accounts) { account ->
-            // Handle account click - open edit screen
-            val intent = Intent(this, com.example.spendsprout_opsc.edit.EditAccountActivity::class.java)
-            intent.putExtra("accountId", account.id)
-            startActivity(intent)
+            // Account items are not clickable - they just display information
+            // Only the FAB should navigate to edit screen for adding new accounts
         }
         recyclerView.adapter = accountAdapter
     }

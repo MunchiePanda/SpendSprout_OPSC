@@ -74,7 +74,7 @@ class ChartView @JvmOverloads constructor(
         if (values.isEmpty()) return
 
         val maxValue = values.maxOrNull() ?: 1.0f
-        val stepX = chartWidth / (values.size - 1)
+        val stepX = chartWidth / (values.size - 1).toFloat()
 
         for (i in 0 until values.size - 1) {
             val x1 = padding + i * stepX

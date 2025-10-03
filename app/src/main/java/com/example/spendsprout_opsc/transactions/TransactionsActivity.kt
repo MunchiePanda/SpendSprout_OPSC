@@ -68,10 +68,8 @@ class TransactionsActivity : AppCompatActivity(), NavigationView.OnNavigationIte
 
         val transactions = transactionsViewModel.getAllTransactions()
         transactionAdapter = TransactionAdapter(transactions) { transaction ->
-            // Handle transaction click - open edit screen
-            val intent = Intent(this, com.example.spendsprout_opsc.edit.EditTransactionActivity::class.java)
-            intent.putExtra("transactionId", transaction.id)
-            startActivity(intent)
+            // Transaction items are not clickable - they just display information
+            // Only the FAB should navigate to edit screen
         }
         recyclerView.adapter = transactionAdapter
     }

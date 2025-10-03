@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="12dp"
+    android:paddingStart="32dp"
+    android:background="@color/TransparentColor">
+
+    <!-- Subcategory Color Circle -->
+    <View
+        android:id="@+id/color_indicator"
+        android:layout_width="12dp"
+        android:layout_height="12dp"
+        android:layout_marginEnd="12dp"
+        android:layout_gravity="center_vertical"
+        android:background="@drawable/circle_icon" />
+
+    <!-- Subcategory Info -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <!-- Subcategory Name -->
+        <TextView
+            android:id="@+id/txt_Name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Rent"
+            android:textColor="@color/MainTextColor"
+            android:textSize="16sp" />
+
+        <!-- Spent Amount -->
+        <TextView
+            android:id="@+id/txt_Spent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="R 3,500"
+            android:textColor="@color/PositiveBalanceColor"
+            android:textSize="14sp"
+            android:layout_marginTop="4dp" />
+    </LinearLayout>
+
+</LinearLayout>

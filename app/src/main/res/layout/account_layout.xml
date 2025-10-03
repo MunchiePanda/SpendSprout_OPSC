@@ -1,70 +1,171 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:padding="16dp"
-    android:background="@color/ItemBackgroundColor"
+    android:background="@drawable/roundedcorners_background"
     android:layout_margin="8dp">
 
+    <!-- Account Header -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_marginBottom="8dp">
+        android:layout_marginBottom="12dp">
 
+        <!-- Account Name -->
         <TextView
             android:id="@+id/txt_AccountName"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Account Name"
+            android:text="Cash"
             android:textColor="@color/MainTextColor"
             android:textSize="18sp"
             android:textStyle="bold" />
 
-        <TextView
-            android:id="@+id/txt_Balance"
+        <!-- Account Balances -->
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="R 1,720"
-            android:textColor="@color/PositiveBalanceColor"
-            android:textSize="16sp"
-            android:textStyle="bold" />
+            android:orientation="horizontal"
+            android:layout_gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/txt_Balance"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="R 160"
+                android:textColor="@color/MainTextColor"
+                android:textSize="16sp"
+                android:layout_marginEnd="8dp" />
+
+            <TextView
+                android:id="@+id/txt_Limit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="R 19,00"
+                android:textColor="@color/MainTextColor"
+                android:textSize="16sp" />
+
+            <ImageButton
+                android:id="@+id/btn_Edit"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginStart="8dp"
+                android:background="@drawable/circle_drawable"
+                android:src="@drawable/ic_edit"
+                android:tint="@color/MainTextColor"
+                android:padding="4dp" />
+        </LinearLayout>
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/txt_Limit"
-        android:layout_width="wrap_content"
+    <!-- Recent Transactions -->
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="R 15,000"
-        android:textColor="@color/SubTextColor"
-        android:textSize="14sp"
-        android:layout_marginBottom="8dp" />
+        android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/txt_Transaction1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Recent Transaction 1"
-        android:textColor="@color/SubTextColor"
-        android:textSize="12sp" />
+        <!-- Transaction 1 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="8dp">
 
-    <TextView
-        android:id="@+id/txt_Transaction2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Recent Transaction 2"
-        android:textColor="@color/SubTextColor"
-        android:textSize="12sp" />
+            <View
+                android:id="@+id/color_indicator_1"
+                android:layout_width="8dp"
+                android:layout_height="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_gravity="center_vertical"
+                android:background="@drawable/circle_icon" />
 
-    <TextView
-        android:id="@+id/txt_Transaction3"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Recent Transaction 3"
-        android:textColor="@color/SubTextColor"
-        android:textSize="12sp" />
+            <TextView
+                android:id="@+id/txt_Transaction1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Recent Transaction 1"
+                android:textColor="@color/MainTextColor"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/txt_Amount1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="- R 3,500"
+                android:textColor="@color/NegativeBalanceColor"
+                android:textSize="14sp" />
+        </LinearLayout>
+
+        <!-- Transaction 2 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="8dp">
+
+            <View
+                android:id="@+id/color_indicator_2"
+                android:layout_width="8dp"
+                android:layout_height="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_gravity="center_vertical"
+                android:background="@drawable/circle_icon" />
+
+            <TextView
+                android:id="@+id/txt_Transaction2"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Recent Transaction 2"
+                android:textColor="@color/MainTextColor"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/txt_Amount2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="- R 1,500"
+                android:textColor="@color/NegativeBalanceColor"
+                android:textSize="14sp" />
+        </LinearLayout>
+
+        <!-- Transaction 3 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <View
+                android:id="@+id/color_indicator_3"
+                android:layout_width="8dp"
+                android:layout_height="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_gravity="center_vertical"
+                android:background="@drawable/circle_icon" />
+
+            <TextView
+                android:id="@+id/txt_Transaction3"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Recent Transaction 3"
+                android:textColor="@color/MainTextColor"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/txt_Amount3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="+ R 360"
+                android:textColor="@color/PositiveBalanceColor"
+                android:textSize="14sp" />
+        </LinearLayout>
+    </LinearLayout>
 
 </LinearLayout>
 

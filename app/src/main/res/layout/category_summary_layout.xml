@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
@@ -30,8 +29,7 @@
             android:layout_height="wrap_content"
             android:text="Needs"
             android:textColor="@color/MainTextColor"
-            android:textSize="16sp"
-            android:textStyle="bold" />
+            android:textSize="16sp" />
 
         <!-- Spent and Allocated Amounts -->
         <LinearLayout
@@ -58,16 +56,5 @@
                 android:textSize="14sp" />
         </LinearLayout>
     </LinearLayout>
-
-    <!-- Edit Button -->
-    <ImageButton
-        android:id="@+id/btn_Edit"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:layout_marginStart="8dp"
-        android:background="@drawable/circle_drawable"
-        android:src="@drawable/ic_edit"
-        android:tint="@color/MainTextColor"
-        android:padding="4dp" />
 
 </LinearLayout>

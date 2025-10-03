@@ -3,8 +3,5 @@
     android:shape="rectangle">
     <solid android:color="@color/SubItemBackgroundColor" />
     <corners android:radius="8dp" />
-    <stroke
-        android:width="1dp"
-        android:color="@color/SubTextColor" />
+    <stroke android:width="1dp" android:color="@color/SubTextColor" />
 </shape>
-

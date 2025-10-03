@@ -1,11 +1,14 @@
 package com.example.spendsprout_opsc.transactions
 
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.spendsprout_opsc.R
+import com.example.spendsprout_opsc.edit.EditTransactionActivity
 import com.example.spendsprout_opsc.transactions.model.Transaction
 
 class TransactionAdapter(
@@ -18,6 +21,7 @@ class TransactionAdapter(
         val descriptionTextView: TextView = view.findViewById(R.id.txt_Description)
         val amountTextView: TextView = view.findViewById(R.id.txt_Amount)
         val colorIndicator: View = view.findViewById(R.id.color_indicator)
+        val editButton: ImageButton = view.findViewById(R.id.btn_Edit)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TransactionViewHolder {
@@ -42,7 +46,15 @@ class TransactionAdapter(
             holder.amountTextView.setTextColor(android.graphics.Color.parseColor("#E94444"))
         }
         
-        // Set click listener
+        // Set click listener for edit button
+        holder.editButton.setOnClickListener {
+            val intent = Intent(holder.view.context, EditTransactionActivity::class.java)
+            intent.putExtra("transactionId", transaction.id)
+            intent.putExtra("isEdit", true)
+            holder.view.context.startActivity(intent)
+        }
+        
+        // Set click listener for item
         holder.view.setOnClickListener { onItemClick(transaction) }
     }
 

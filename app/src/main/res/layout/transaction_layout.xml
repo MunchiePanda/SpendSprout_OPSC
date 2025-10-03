@@ -60,11 +60,22 @@
 
             <TextView
                 android:id="@+id/txt_Amount"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:text="- R 100 000"
                 android:textAlignment="textEnd"
                 android:textAppearance="@style/MainTextStyle" />
+
+            <ImageButton
+                android:id="@+id/btn_Edit"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginStart="8dp"
+                android:background="@drawable/circle_drawable"
+                android:src="@drawable/ic_edit"
+                android:tint="@color/MainTextColor"
+                android:padding="4dp" />
         </LinearLayout>
 
         <TextView

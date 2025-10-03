@@ -35,6 +35,9 @@ class OverviewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSel
     private lateinit var drawerLayout: DrawerLayout
     private lateinit var navView: NavigationView
     private lateinit var overviewViewModel: OverviewViewModel
+    private lateinit var transactionAdapter: TransactionAdapter
+    private lateinit var categoryAdapter: CategorySummaryAdapter
+    private lateinit var accountAdapter: AccountSummaryAdapter
 
     /**
      * onCreate() - Like Unity's Start() method
@@ -80,12 +83,15 @@ class OverviewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSel
     private fun setupUI() {
         setupBalanceText()
         setupTransactionRecyclerView()
+        setupCategoryRecyclerView()
+        setupAccountRecyclerView()
         setupChart()
+        setupFab()
     }
 
     private fun setupBalanceText() {
         val balanceTextView = findViewById<TextView>(R.id.txt_Balance)
-        balanceTextView.text = "Total Balance: R 12,780"
+        balanceTextView.text = "R 12,780"
     }
 
     private fun setupTransactionRecyclerView() {
@@ -93,13 +99,47 @@ class OverviewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSel
         recyclerView.layoutManager = LinearLayoutManager(this)
 
         val transactions = overviewViewModel.getRecentTransactions()
-        recyclerView.adapter = TransactionAdapter(transactions)
+        transactionAdapter = TransactionAdapter(transactions)
+        recyclerView.adapter = transactionAdapter
+    }
+
+    private fun setupCategoryRecyclerView() {
+        val recyclerView = findViewById<RecyclerView>(R.id.recyclerView_Categories)
+        recyclerView.layoutManager = LinearLayoutManager(this)
+
+        val categories = overviewViewModel.getCategorySummary()
+        categoryAdapter = CategorySummaryAdapter(categories) { category ->
+            // Handle category click - like Unity's UI interaction
+            android.widget.Toast.makeText(this, "Clicked ${category.name}", android.widget.Toast.LENGTH_SHORT).show()
+        }
+        recyclerView.adapter = categoryAdapter
+    }
+
+    private fun setupAccountRecyclerView() {
+        val recyclerView = findViewById<RecyclerView>(R.id.recyclerView_Accounts)
+        recyclerView.layoutManager = LinearLayoutManager(this)
+
+        val accounts = overviewViewModel.getAccountBalances()
+        accountAdapter = AccountSummaryAdapter(accounts) { account ->
+            // Handle account click - like Unity's UI interaction
+            android.widget.Toast.makeText(this, "Clicked ${account.name}", android.widget.Toast.LENGTH_SHORT).show()
+        }
+        recyclerView.adapter = accountAdapter
     }
 
     private fun setupChart() {
         // Chart setup will be handled by the custom view
         val chartView = findViewById<com.example.spendsprout_opsc.overview.ChartView>(R.id.chartView)
         chartView.setData(overviewViewModel.getChartData())
+    }
+
+    private fun setupFab() {
+        val fabAddTransaction = findViewById<com.google.android.material.floatingactionbutton.FloatingActionButton>(R.id.fab_AddTransaction)
+        fabAddTransaction.setOnClickListener {
+            // Navigate to add new transaction
+            val intent = Intent(this, com.example.spendsprout_opsc.edit.EditTransactionActivity::class.java)
+            startActivity(intent)
+        }
     }
 
     private fun observeData() {
