@@ -3,6 +3,18 @@ package com.example.spendsprout_opsc.overview
 import com.example.spendsprout_opsc.overview.model.Transaction
 import com.example.spendsprout_opsc.overview.model.ChartDataPoint
 
+/**
+ * OverviewViewModel - Data Management Script
+ * 
+ * This is like Unity's MonoBehaviour script that manages game state and data.
+ * Similar to Unity's GameManager or DataManager scripts.
+ * 
+ * Responsibilities:
+ * - Manage transaction data (like Unity's player inventory or score system)
+ * - Handle chart data for visualization (like Unity's analytics data)
+ * - Provide reactive data updates (like Unity's Events or UnityEvents)
+ * - Calculate total balance (like Unity's score calculation)
+ */
 class OverviewViewModel {
     
     fun getTotalBalance(): Double = 12780.0

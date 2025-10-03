@@ -18,23 +18,42 @@ import com.example.spendsprout_opsc.settings.SettingsActivity
 import com.example.spendsprout_opsc.transactions.TransactionsActivity
 import com.google.android.material.navigation.NavigationView
 
+/**
+ * OverviewActivity - Main Dashboard Scene
+ * 
+ * This is like Unity's Main Menu Scene - the first thing users see when they open the app.
+ * Similar to Unity's SceneManager.LoadScene("MainMenu") being the default scene.
+ * 
+ * Responsibilities:
+ * - Display total balance (like Unity's UI Text showing player score)
+ * - Show recent transactions (like Unity's UI List showing recent events)
+ * - Render income vs expenses chart (like Unity's custom UI component)
+ * - Handle navigation to other screens (like Unity's SceneManager.LoadScene())
+ */
 class OverviewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
     private lateinit var drawerLayout: DrawerLayout
     private lateinit var navView: NavigationView
     private lateinit var overviewViewModel: OverviewViewModel
 
+    /**
+     * onCreate() - Like Unity's Start() method
+     * This is called when the scene/activity is first created
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Load the scene layout - like Unity's SceneManager.LoadScene()
         setContentView(R.layout.activity_overview)
 
+        // Get references to UI components - like Unity's GameObject.Find()
         drawerLayout = findViewById(R.id.drawer_layout)
         navView = findViewById(R.id.nav_view)
 
-        // Set up the toolbar
+        // Set up the toolbar - like Unity's UI Canvas setup
         val toolbar: androidx.appcompat.widget.Toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
 
+        // Create navigation drawer toggle - like Unity's UI Button setup
         val toggle = ActionBarDrawerToggle(
             this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close
         )
@@ -46,12 +65,15 @@ class OverviewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSel
         supportActionBar?.setHomeButtonEnabled(true)
         supportActionBar?.title = "Overview"
 
+        // Set up navigation listener - like Unity's Button.onClick.AddListener()
         navView.setNavigationItemSelectedListener(this)
 
-        // Initialize ViewModel
+        // Initialize ViewModel - like Unity's GetComponent<Script>()
         overviewViewModel = OverviewViewModel()
 
+        // Initialize UI components - like Unity's UI setup in Start()
         setupUI()
+        // Start observing data changes - like Unity's coroutines or Update()
         observeData()
     }
 

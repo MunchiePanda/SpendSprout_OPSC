@@ -8,6 +8,18 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.spendsprout_opsc.R
 import com.example.spendsprout_opsc.overview.model.Transaction
 
+/**
+ * TransactionAdapter - UI List Management Script
+ * 
+ * This is like Unity's UI List management or custom prefab instantiation system.
+ * Similar to Unity's UI List with custom prefabs or object pooling.
+ * 
+ * Responsibilities:
+ * - Create transaction list items (like Unity's Instantiate() for UI elements)
+ * - Bind data to UI components (like Unity's UI Text updates)
+ * - Handle item clicks (like Unity's Button.onClick events)
+ * - Manage list scrolling (like Unity's ScrollView or UI List)
+ */
 class TransactionAdapter(private val transactions: List<Transaction>) :
     RecyclerView.Adapter<TransactionAdapter.TransactionViewHolder>() {
 

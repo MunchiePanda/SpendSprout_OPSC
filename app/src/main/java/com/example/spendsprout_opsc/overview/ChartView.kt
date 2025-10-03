@@ -8,6 +8,17 @@ import android.util.AttributeSet
 import android.view.View
 import com.example.spendsprout_opsc.overview.model.ChartDataPoint
 
+/**
+ * ChartView - Custom UI Component for Drawing Charts
+ * 
+ * This is like Unity's custom UI component or a custom MonoBehaviour that handles rendering.
+ * Similar to Unity's OnGUI() method or custom LineRenderer component.
+ * 
+ * Responsibilities:
+ * - Draw income vs expenses line chart (like Unity's Graphics.DrawLine())
+ * - Handle custom rendering with Canvas (like Unity's GL drawing)
+ * - Manage chart data and visualization (like Unity's data visualization scripts)
+ */
 class ChartView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
@@ -35,21 +46,26 @@ class ChartView @JvmOverloads constructor(
         invalidate()
     }
 
+    /**
+     * onDraw() - Like Unity's OnGUI() or custom rendering method
+     * This is called every frame to render the chart
+     */
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         if (chartData.isEmpty()) return
 
+        // Get view dimensions - like Unity's Screen.width/height or RectTransform
         val width = this.width.toFloat()
         val height = this.height.toFloat()
         val padding = 50f
         val chartWidth = width - 2 * padding
         val chartHeight = height - 2 * padding
 
-        // Draw axes
+        // Draw axes - like Unity's Graphics.DrawLine() or LineRenderer
         canvas.drawLine(padding, height - padding, width - padding, height - padding, axisPaint)
         canvas.drawLine(padding, padding, padding, height - padding, axisPaint)
 
-        // Draw lines
+        // Draw data lines - like Unity's custom line rendering
         drawLine(canvas, chartData.map { it.income.toFloat() }, incomePaint, padding, chartWidth, chartHeight)
         drawLine(canvas, chartData.map { it.expenses.toFloat() }, expensePaint, padding, chartWidth, chartHeight)
     }
