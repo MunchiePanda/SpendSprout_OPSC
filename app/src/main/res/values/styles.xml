@@ -44,4 +44,20 @@
     </style>
 
     <dimen name="NameDimension">180dp</dimen>
+
+    <!-- Sub header text style -->
+    <style name="SubHeaderTextStyle">
+        <item name="android:textColor">@color/MainTextColor</item>
+        <item name="android:textSize">24sp</item>
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:layout_gravity">center</item>
+    </style>
+
+    <!-- Edit text background -->
+    <style name="EditTextStyle">
+        <item name="android:textColor">@color/MainTextColor</item>
+        <item name="android:textColorHint">@color/SubTextColor</item>
+        <item name="android:background">@drawable/edit_text_background</item>
+        <item name="android:padding">12dp</item>
+    </style>
 </resources>

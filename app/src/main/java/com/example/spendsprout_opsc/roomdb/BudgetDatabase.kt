@@ -7,7 +7,8 @@ import androidx.room.RoomDatabase
                         Payment_Entity::class,
                         Contact_Entity::class,
                         Account_Entity::class],
-            version = 0)
+            version = 1,
+            exportSchema = false)
 abstract class BudgetDatabase : RoomDatabase()
 {
     abstract fun categoryDao(): Category_DAO

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="@color/ItemBackgroundColor"
+    android:layout_margin="8dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="8dp">
+
+        <TextView
+            android:id="@+id/txt_AccountName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Account Name"
+            android:textColor="@color/MainTextColor"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/txt_Balance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="R 1,720"
+            android:textColor="@color/PositiveBalanceColor"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/txt_Limit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="R 15,000"
+        android:textColor="@color/SubTextColor"
+        android:textSize="14sp"
+        android:layout_marginBottom="8dp" />
+
+    <TextView
+        android:id="@+id/txt_Transaction1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Recent Transaction 1"
+        android:textColor="@color/SubTextColor"
+        android:textSize="12sp" />
+
+    <TextView
+        android:id="@+id/txt_Transaction2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Recent Transaction 2"
+        android:textColor="@color/SubTextColor"
+        android:textSize="12sp" />
+
+    <TextView
+        android:id="@+id/txt_Transaction3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Recent Transaction 3"
+        android:textColor="@color/SubTextColor"
+        android:textSize="12sp" />
+
+</LinearLayout>
+

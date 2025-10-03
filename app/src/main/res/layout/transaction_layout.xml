@@ -15,6 +15,13 @@
         android:layout_marginRight="15dp"
         app:srcCompat="@drawable/circle_icon" />
 
+    <View
+        android:id="@+id/color_indicator"
+        android:layout_width="4dp"
+        android:layout_height="match_parent"
+        android:layout_marginRight="8dp"
+        android:background="@color/HighlightTextColor" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -37,6 +44,14 @@
 
             <TextView
                 android:id="@+id/txt_Name"
+                android:layout_width="190dp"
+                android:layout_height="match_parent"
+                android:text="PnP Party Food"
+                android:textAlignment="textStart"
+                android:textAppearance="@style/MainTextStyle" />
+
+            <TextView
+                android:id="@+id/txt_Description"
                 android:layout_width="190dp"
                 android:layout_height="match_parent"
                 android:text="PnP Party Food"

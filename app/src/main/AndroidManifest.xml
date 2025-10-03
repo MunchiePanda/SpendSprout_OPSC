@@ -11,18 +11,51 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.SpendSprout_OPSC">
+        <!-- Main Launcher Activity -->
         <activity
-            android:name=".CategoryOverviewActivity"
-            android:exported="false" />
-        <activity
-            android:name=".MainActivity"
+            android:name=".overview.OverviewActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Screen Activities -->
+        <activity
+            android:name=".categories.CategoriesActivity"
+            android:exported="false" />
+        <activity
+            android:name=".transactions.TransactionsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".accounts.AccountsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".reports.ReportsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".settings.SettingsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".wants.WantsCategoryActivity"
+            android:exported="false" />
+
+        <!-- Edit Activities -->
+        <activity
+            android:name=".edit.EditCategoryActivity"
+            android:exported="false" />
+        <activity
+            android:name=".edit.EditTransactionActivity"
+            android:exported="false" />
+        <activity
+            android:name=".edit.EditAccountActivity"
+            android:exported="false" />
+
+        <!-- Legacy Activity -->
+        <activity
+            android:name=".CategoryOverviewActivity"
+            android:exported="false" />
     </application>
 
 </manifest>
