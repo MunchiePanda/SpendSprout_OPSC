@@ -54,4 +54,7 @@ dependencies {
     val room_version = "2.7.2"
     implementation("androidx.room:room-runtime:$room_version")
     ksp("androidx.room:room-compiler:$room_version")
+
+    //for navigation menu
+    implementation("com.google.android.material:material:1.2.0-alpha04")
 }

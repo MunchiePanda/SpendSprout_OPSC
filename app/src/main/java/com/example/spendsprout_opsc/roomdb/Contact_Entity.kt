@@ -6,7 +6,7 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "Contact")
 data class Contact_Entity(
     @PrimaryKey val id: Int,
-    //ForeignKey for multiple payments (owed payments)
+    //ForeignKey for multiple expenses (owed expenses)
 
     @ColumnInfo(name= "contact_name") val contactName: String,          //the name of the contact
     @ColumnInfo(name= "contact_id") val contactId: Long?,               //the id of the contact in the contacts provider (system ContactsContract ID)

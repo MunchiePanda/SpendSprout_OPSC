@@ -27,7 +27,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-            tools:listitem="@layout/transaction_layout" />
+            tools:listitem="@layout/expense_layout" />
     </LinearLayout>
 
     <com.google.android.material.navigation.NavigationView

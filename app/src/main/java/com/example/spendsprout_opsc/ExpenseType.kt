@@ -1,6 +1,6 @@
 package com.example.spendsprout_opsc
 
-enum class TransactionType {
+enum class ExpenseType {
     Income,
     Expense
 }

@@ -4,7 +4,7 @@ import androidx.room.RoomDatabase
 
 @Database(  entities = [Category_Entity::class,
                         Subcategory_Entity::class,
-                        Payment_Entity::class,
+                        Expense_Entity::class,
                         Contact_Entity::class,
                         Account_Entity::class],
             version = 1,
@@ -13,7 +13,7 @@ abstract class BudgetDatabase : RoomDatabase()
 {
     abstract fun categoryDao(): Category_DAO
     abstract fun subcategoryDao(): Subcategory_DAO
-    abstract fun paymentDao(): Payment_DAO
+    abstract fun expenseDao(): Expense_DAO
     abstract fun contactDao(): Contact_DAO
     abstract fun accountDao(): Account_DAO
 }
