@@ -27,33 +27,32 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        //Drawer Layout/ Menu Code and connections
+        //MenuDrawer: Drawer Layout/ Menu Code and connections
         drawerLayout = findViewById(R.id.drawerLayout)
         navigationView = findViewById(R.id.navigationView)
         btnMenu = findViewById(R.id.btn_Menu)
-        
-        // Access the close button from the navigation view header
+
+        // MenuDrawer: Access the close button from the navigation view header
         val headerView = navigationView.getHeaderView(0)
         btnCloseMenu = headerView.findViewById(R.id.btn_CloseMenu)
-
+        //MenuDrawer: Drawer Layout/ Menu Code and connections
         toggle = ActionBarDrawerToggle(this, drawerLayout, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
         drawerLayout.addDrawerListener(toggle)
         toggle.syncState()  //tell toggle it is ready to be used
-
+        //MenuDrawer
         supportActionBar?.setDisplayHomeAsUpEnabled(true)   //able to open toggle, when it is opened the toggle button moves to back arrow
 
-        //Menu button click listener to open drawer
+        //MenuDrawer: Menu button click listener to open drawer
         btnMenu.setOnClickListener {
             drawerLayout.openDrawer(navigationView)
         }
 
-        //Close menu button click listener to close drawer
+        //MenuDrawer: Close menu button click listener to close drawer
         btnCloseMenu.setOnClickListener {
             drawerLayout.closeDrawer(navigationView)
         }
 
-
-        //respond to menu item clicks
+        //MenuDrawer: respond to menu item clicks
         navigationView.setNavigationItemSelectedListener {
             when(it.itemId){
                 R.id.nav_overview
@@ -65,7 +64,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    //Drawer Layout/ Menu Code
+    //MenuDrawer: Drawer Layout/ Menu Code
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if(toggle.onOptionsItemSelected(item)){
             return true

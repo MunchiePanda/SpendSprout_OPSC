@@ -19,41 +19,28 @@
         app:layout_constraintEnd_toEndOf="parent"
         tools:srcCompat="@android:drawable/ic_menu_add" />
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="60dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        android:layout_height="?attr/actionBarSize"
         android:background="@color/TopBarColor"
-        android:layout_marginBottom="20dp">
+        android:elevation="4dp"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        app:layout_constraintTop_toTopOf="parent"
+        app:title="Overview"
+        app:titleTextAppearance="@style/HeaderTextStyle">
 
+        <!-- Action button on the right side -->
         <ImageButton
             android:id="@+id/btn_Menu"
             style="@style/CircularImageButton"
-            android:layout_margin="5dp"
-            android:layout_marginStart="15dp"
-            android:layout_marginTop="15dp"
-            android:layout_weight="1"
-            android:contentDescription="Opens the main menu."
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:srcCompat="@android:drawable/ic_menu_sort_by_size" />
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_gravity="end"
+            android:layout_marginEnd="15dp"
+            android:contentDescription="For the menu action."
+            tools:srcCompat="@android:drawable/ic_menu_add" />
 
-        <TextView
-            android:id="@+id/txt_Title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_weight="1"
-            android:text="Categories"
-            android:textAlignment="center"
-            android:textAppearance="@style/HeaderTextStyle"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-
-            app:layout_constraintTop_toTopOf="parent" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.appcompat.widget.Toolbar>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

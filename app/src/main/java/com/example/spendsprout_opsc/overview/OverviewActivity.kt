@@ -3,7 +3,10 @@ package com.example.spendsprout_opsc.overview
 import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
+import android.view.View
+import android.widget.ImageButton
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
@@ -32,9 +35,16 @@ import com.google.android.material.navigation.NavigationView
  */
 class OverviewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
-    private lateinit var drawerLayout: DrawerLayout
-    private lateinit var navView: NavigationView
-    private lateinit var overviewViewModel: OverviewViewModel
+    // OLD VARIABLES - COMMENTED OUT AS LAYOUT STRUCTURE CHANGED
+    //private lateinit var drawerLayout: DrawerLayout  // OLD: was drawer_layout
+    //private lateinit var navView: NavigationView    // OLD: was nav_view
+    //private lateinit var overviewViewModel: OverviewViewModel  // NOT YET IMPLEMENTED
+
+    //Drawer Layout/ Menu variables
+    lateinit var toggle: ActionBarDrawerToggle
+    lateinit var drawerLayout: DrawerLayout
+    lateinit var navigationView: NavigationView
+    lateinit var btnCloseMenu: ImageButton
 
     /**
      * onCreate() - Like Unity's Start() method
@@ -45,31 +55,71 @@ class OverviewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSel
         // Load the scene layout - like Unity's SceneManager.LoadScene()
         setContentView(R.layout.activity_overview)
 
+        //MENU DRAWER SETUP
+            //MenuDrawer: Drawer Layout/ Menu Code and connections
+            drawerLayout = findViewById(R.id.drawerLayout)
+            navigationView = findViewById(R.id.navigationView)
+            
+            // Set up the toolbar from the included layout
+            val headerBar = findViewById<View>(R.id.header_bar)
+            val toolbar: androidx.appcompat.widget.Toolbar = headerBar.findViewById(R.id.toolbar)
+            setSupportActionBar(toolbar)
+
+            //MenuDrawer: Drawer Layout/ Menu Code and connections
+            toggle = ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
+            drawerLayout.addDrawerListener(toggle)
+            toggle.syncState()  //tell toggle it is ready to be used
+            //MenuDrawer
+            supportActionBar?.setDisplayHomeAsUpEnabled(true)   //able to open toggle, when it is opened the toggle button moves to back arrow
+
+            //MenuDrawer: Access the close button from the navigation view header
+            val headerView = navigationView.getHeaderView(0)
+            btnCloseMenu = headerView.findViewById(R.id.btn_CloseMenu)
+
+            //MenuDrawer: Close menu button click listener to close drawer
+            btnCloseMenu.setOnClickListener {
+                drawerLayout.closeDrawer(navigationView)
+            }
+
+            //MenuDrawer: respond to menu item clicks
+            navigationView.setNavigationItemSelectedListener {
+                when(it.itemId){
+                    R.id.nav_overview
+                        -> Toast.makeText(applicationContext, "Overview", Toast.LENGTH_SHORT).show()
+                    R.id.nav_reports
+                        -> Toast.makeText(applicationContext, "Overview", Toast.LENGTH_SHORT).show()
+                }
+                true
+            }
+
+        /*
+        // OLD CODE - COMMENTED OUT AS LAYOUT STRUCTURE CHANGED
         // Get references to UI components - like Unity's GameObject.Find()
-        drawerLayout = findViewById(R.id.drawer_layout)
-        navView = findViewById(R.id.nav_view)
+        // drawerLayout = findViewById(R.id.drawer_layout)  // OLD: was drawer_layout
+        // navView = findViewById(R.id.nav_view)            // OLD: was nav_view
 
         // Set up the toolbar - like Unity's UI Canvas setup
-        val toolbar: androidx.appcompat.widget.Toolbar = findViewById(R.id.toolbar)
-        setSupportActionBar(toolbar)
+        // val toolbar: androidx.appcompat.widget.Toolbar = findViewById(R.id.toolbar)  // OLD: direct findViewById
+        // setSupportActionBar(toolbar)
 
         // Create navigation drawer toggle - like Unity's UI Button setup
-        val toggle = ActionBarDrawerToggle(
-            this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close
-        )
-        drawerLayout.addDrawerListener(toggle)
-        toggle.syncState()
+        // val toggle = ActionBarDrawerToggle(
+        //     this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close
+        // )
+        // drawerLayout.addDrawerListener(toggle)
+        // toggle.syncState()
 
         // Enable the drawer indicator in the action bar
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        supportActionBar?.setHomeButtonEnabled(true)
-        supportActionBar?.title = "Overview"
+        // supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        // supportActionBar?.setHomeButtonEnabled(true)
+        // supportActionBar?.title = "Overview"
 
         // Set up navigation listener - like Unity's Button.onClick.AddListener()
-        navView.setNavigationItemSelectedListener(this)
+        // navView.setNavigationItemSelectedListener(this)
 
         // Initialize ViewModel - like Unity's GetComponent<Script>()
-        overviewViewModel = OverviewViewModel()
+        // overviewViewModel = OverviewViewModel()
+        */
 
         // Initialize UI components - like Unity's UI setup in Start()
         setupUI()
@@ -78,28 +128,48 @@ class OverviewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSel
     }
 
     private fun setupUI() {
-        setupBalanceText()
+        setupBudgetInfo()
         setupTransactionRecyclerView()
+        setupCategoriesRecyclerView()
         setupChart()
     }
 
-    private fun setupBalanceText() {
-        val balanceTextView = findViewById<TextView>(R.id.txt_Balance)
-        balanceTextView.text = "Total Balance: R 12,780"
+    private fun setupBudgetInfo() {
+        // Update the budget balance display
+        val budgetBalanceTextView = findViewById<TextView>(R.id.txt_BudgetBalance)
+        budgetBalanceTextView.text = "R 12,780"
+        
+        // Update other budget fields
+        val budgetAllocationTextView = findViewById<TextView>(R.id.txt_BudgetAllocation)
+        budgetAllocationTextView.text = "R 100,000"
+        
+        val minTextView = findViewById<TextView>(R.id.txt_Min)
+        minTextView.text = "R 200"
+        
+        val maxTextView = findViewById<TextView>(R.id.txt_Max)
+        maxTextView.text = "R 1,000"
     }
 
     private fun setupTransactionRecyclerView() {
         val recyclerView = findViewById<RecyclerView>(R.id.recyclerView_Transactions)
         recyclerView.layoutManager = LinearLayoutManager(this)
 
-        val transactions = overviewViewModel.getRecentTransactions()
-        recyclerView.adapter = TransactionAdapter(transactions)
+        //val transactions = overviewViewModel.getRecentTransactions()
+        //recyclerView.adapter = TransactionAdapter(transactions)
+    }
+    
+    private fun setupCategoriesRecyclerView() {
+        val recyclerView = findViewById<RecyclerView>(R.id.recyclerView_Categories)
+        recyclerView.layoutManager = LinearLayoutManager(this)
+
+        //val categories = overviewViewModel.getCategories()
+        //recyclerView.adapter = CategoryAdapter(categories)
     }
 
     private fun setupChart() {
         // Chart setup will be handled by the custom view
         val chartView = findViewById<com.example.spendsprout_opsc.overview.ChartView>(R.id.chartView)
-        chartView.setData(overviewViewModel.getChartData())
+        //chartView.setData(overviewViewModel.getChartData())
     }
 
     private fun observeData() {
@@ -135,12 +205,23 @@ class OverviewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSel
         return true
     }
 
+    /*
+    // OLD onBackPressed - COMMENTED OUT AS NOT CURRENTLY USED
     override fun onBackPressed() {
         if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
             drawerLayout.closeDrawer(GravityCompat.START)
         } else {
             onBackPressedDispatcher.onBackPressed()
         }
+    }
+    */
+
+    //MenuDrawer: Drawer Layout/ Menu Code
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if(toggle.onOptionsItemSelected(item)){
+            return true
+        }
+        return super.onOptionsItemSelected(item)
     }
 }
 
