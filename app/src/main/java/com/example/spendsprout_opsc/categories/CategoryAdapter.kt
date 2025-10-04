@@ -16,8 +16,8 @@ class CategoryAdapter(
     class CategoryViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
         val nameTextView: TextView = view.findViewById(R.id.txt_Name)
         val spentTextView: TextView = view.findViewById(R.id.txt_Spent)
-        val allocatedTextView: TextView = view.findViewById(R.id.txt_Allocated)
-        val colorIndicator: View = view.findViewById(R.id.color_indicator)
+        //val allocatedTextView: TextView = view.findViewById(R.id.txt_Allocated)
+        //val colorIndicator: View = view.findViewById(R.id.color_indicator)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CategoryViewHolder {
@@ -29,11 +29,11 @@ class CategoryAdapter(
     override fun onBindViewHolder(holder: CategoryViewHolder, position: Int) {
         val category = categories[position]
         holder.nameTextView.text = category.name
-        holder.spentTextView.text = "R ${String.format("%.0f", category.balance)}"
-        holder.allocatedTextView.text = "R ${String.format("%.0f", category.allocation)}"
+        holder.spentTextView.text = category.spent
+        //holder.allocatedTextView.text = category.allocated
         
         // Set color indicator
-        holder.colorIndicator.setBackgroundColor(category.color)
+        //holder.colorIndicator.setBackgroundColor(android.graphics.Color.parseColor(category.color))
         
         // Set click listener
         holder.view.setOnClickListener { onItemClick(category) }

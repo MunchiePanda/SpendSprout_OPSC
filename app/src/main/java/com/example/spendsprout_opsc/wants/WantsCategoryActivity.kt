@@ -87,8 +87,8 @@ class WantsCategoryActivity : AppCompatActivity(), NavigationView.OnNavigationIt
     }
 
     private fun setupSummary() {
-        val summaryTextView = findViewById<android.widget.TextView>(R.id.txt_Summary)
-        summaryTextView.text = "- R 120"
+        //val summaryTextView = findViewById<android.widget.TextView>(R.id.txt_Summary)
+        //summaryTextView.text = "- R 120"
     }
 
     private fun observeData() {

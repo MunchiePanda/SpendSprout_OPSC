@@ -16,8 +16,8 @@ class SubcategoryAdapter(
     class SubcategoryViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
         val nameTextView: TextView = view.findViewById(R.id.txt_Name)
         val spentTextView: TextView = view.findViewById(R.id.txt_Spent)
-        val allocatedTextView: TextView = view.findViewById(R.id.txt_Allocated)
-        val colorIndicator: View = view.findViewById(R.id.color_indicator)
+        //val allocatedTextView: TextView = view.findViewById(R.id.txt_Allocated)
+        //val colorIndicator: View = view.findViewById(R.id.color_indicator)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SubcategoryViewHolder {
@@ -29,14 +29,14 @@ class SubcategoryAdapter(
     override fun onBindViewHolder(holder: SubcategoryViewHolder, position: Int) {
         val subcategory = subcategories[position]
         holder.nameTextView.text = subcategory.name
-        holder.spentTextView.text = "R ${String.format("%.0f", subcategory.balance)}"
-        holder.allocatedTextView.text = "R ${String.format("%.0f", subcategory.allocation)}"
+        holder.spentTextView.text = subcategory.spent
+        //holder.allocatedTextView.text = subcategory.allocated
         
         // Set color indicator
-        holder.colorIndicator.setBackgroundColor(subcategory.color)
+        //holder.colorIndicator.setBackgroundColor(android.graphics.Color.parseColor(subcategory.color))
         
         // Set spent amount color based on overspending
-        if (subcategory.balance > subcategory.allocation) {
+        if (subcategory.spent.startsWith("-") || subcategory.spent.toDoubleOrNull() ?: 0.0 > subcategory.allocated.toDoubleOrNull() ?: 0.0) {
             holder.spentTextView.setTextColor(android.graphics.Color.parseColor("#E94444"))
         } else {
             holder.spentTextView.setTextColor(android.graphics.Color.parseColor("#77B950"))
