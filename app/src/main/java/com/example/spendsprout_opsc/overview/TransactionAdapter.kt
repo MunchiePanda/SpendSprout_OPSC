@@ -25,9 +25,9 @@ class TransactionAdapter(private val transactions: List<Transaction>) :
 
     class TransactionViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
         val dateTextView: TextView = view.findViewById(R.id.txt_Date)
-        val descriptionTextView: TextView = view.findViewById(R.id.txt_Description)
+        //val descriptionTextView: TextView = view.findViewById(R.id.txt_Description)
         val amountTextView: TextView = view.findViewById(R.id.txt_Amount)
-        val colorIndicator: View = view.findViewById(R.id.color_indicator)
+        //val colorIndicator: View = view.findViewById(R.id.color_indicator)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TransactionViewHolder {
@@ -39,11 +39,11 @@ class TransactionAdapter(private val transactions: List<Transaction>) :
     override fun onBindViewHolder(holder: TransactionViewHolder, position: Int) {
         val transaction = transactions[position]
         holder.dateTextView.text = transaction.date
-        holder.descriptionTextView.text = transaction.description
+        //holder.descriptionTextView.text = transaction.description
         holder.amountTextView.text = transaction.amount
         
         // Set color indicator
-        holder.colorIndicator.setBackgroundColor(android.graphics.Color.parseColor(transaction.color))
+        //holder.colorIndicator.setBackgroundColor(android.graphics.Color.parseColor(transaction.color))
     }
 
     override fun getItemCount(): Int = transactions.size
