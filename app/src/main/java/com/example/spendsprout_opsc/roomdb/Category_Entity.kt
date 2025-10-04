@@ -6,6 +6,7 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "Category")
 data class Category_Entity(
     @PrimaryKey val id: Int,
+    //Foreign key for Budget
     //ForeignKey for multiple sub-categories
 
     @ColumnInfo(name= "category_name") val categoryName: String,                //the name of the category

@@ -6,12 +6,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    android:background="@color/BackgroundColor">
+    tools:openDrawer="start">
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:background="@color/BackgroundColor">
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
@@ -19,149 +19,70 @@
             android:layout_height="?attr/actionBarSize"
             android:background="@color/TopBarColor"
             android:elevation="4dp"
-            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
+            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-        <ScrollView
+        <include
+            android:id="@+id/header_bar"
+            layout="@layout/header_bar_layout"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:fillViewport="true">
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/toolbar" />
 
-            <LinearLayout
+        <TextView
+            android:id="@+id/txt_Balance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Total Balance: R 12,780"
+            android:textAppearance="@style/HeaderTextStyle"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/header_bar" />
+
+        <FrameLayout
+            android:id="@+id/chart_Placeholder"
+            android:layout_width="0dp"
+            android:layout_height="200dp"
+            android:layout_marginTop="16dp"
+            android:background="@color/ItemBackgroundColor"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/txt_Balance">
+
+            <com.example.spendsprout_opsc.overview.ChartView
+                android:id="@+id/chartView"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
+                android:layout_height="match_parent" />
+        </FrameLayout>
 
-            <!-- Current Balance Card -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:background="@drawable/roundedcorners_background"
-                android:padding="20dp"
-                android:layout_marginBottom="16dp"
-                android:gravity="center">
+        <TextView
+            android:id="@+id/txt_RecentTransactions"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Recent Transactions"
+            android:textAppearance="@style/SubHeaderTextStyle"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/chart_Placeholder" />
 
-                <TextView
-                    android:id="@+id/txt_Balance"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="R 12,780"
-                    android:textColor="@color/PositiveBalanceColor"
-                    android:textSize="32sp"
-                    android:textStyle="bold" />
-            </LinearLayout>
-
-            <!-- Recent Transactions Card -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:background="@drawable/roundedcorners_background"
-                android:padding="16dp"
-                android:layout_marginBottom="16dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Recent Transactions"
-                    android:textColor="@color/MainTextColor"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    android:layout_marginBottom="12dp" />
-
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/recyclerView_Transactions"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                    tools:listitem="@layout/transaction_layout" />
-            </LinearLayout>
-
-            <!-- Budget Categories Card -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:background="@drawable/roundedcorners_background"
-                android:padding="16dp"
-                android:layout_marginBottom="16dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Budget Categories"
-                    android:textColor="@color/MainTextColor"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    android:layout_marginBottom="12dp" />
-
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/recyclerView_Categories"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                    tools:listitem="@layout/category_layout" />
-            </LinearLayout>
-
-            <!-- Account Balances Card -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:background="@drawable/roundedcorners_background"
-                android:padding="16dp"
-                android:layout_marginBottom="16dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Account Balances"
-                    android:textColor="@color/MainTextColor"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    android:layout_marginBottom="12dp" />
-
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/recyclerView_Accounts"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                    tools:listitem="@layout/account_layout" />
-            </LinearLayout>
-
-            <!-- Revenue vs Target Chart Card -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:background="@drawable/roundedcorners_background"
-                android:padding="16dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Revenue vs. Target by Month"
-                    android:textColor="@color/MainTextColor"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    android:layout_marginBottom="12dp" />
-
-                <FrameLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="300dp">
-
-                    <com.example.spendsprout_opsc.overview.ChartView
-                        android:id="@+id/chartView"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent" />
-                </FrameLayout>
-            </LinearLayout>
-
-            </LinearLayout>
-
-        </ScrollView>
-    </LinearLayout>
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerView_Transactions"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="8dp"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/txt_RecentTransactions"
+            tools:listitem="@layout/expense_layout" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/nav_view"
@@ -171,15 +92,6 @@
         android:fitsSystemWindows="true"
         app:headerLayout="@layout/header_bar_layout"
         app:menu="@menu/drawer_menu" />
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab_AddTransaction"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="16dp"
-        android:src="@drawable/ic_add"
-        app:tint="@android:color/white" />
 
 </androidx.drawerlayout.widget.DrawerLayout>
 

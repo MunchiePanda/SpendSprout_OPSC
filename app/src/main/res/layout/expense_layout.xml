@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="380dp"
+    android:layout_width="370dp"
     android:layout_height="wrap_content"
     android:background="@color/TransparentColor"
-    android:paddingHorizontal="10dp"
+    android:paddingHorizontal="15dp"
     android:paddingVertical="1dp"
     android:layout_gravity="center">
 
@@ -23,10 +23,10 @@
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/txt_Spent"
+            android:id="@+id/txt_Date"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/blank_string"
+            android:text="25 December 2025"
             android:textAlignment="textStart"
             android:textAppearance="@style/SubTextStyle" />
 
@@ -39,12 +39,12 @@
                 android:id="@+id/txt_Name"
                 android:layout_width="190dp"
                 android:layout_height="match_parent"
-                android:text="Needs"
+                android:text="PnP Party Food"
                 android:textAlignment="textStart"
                 android:textAppearance="@style/MainTextStyle" />
 
             <TextView
-                android:id="@+id/txt_Balance"
+                android:id="@+id/txt_Amount"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="- R 100 000"
@@ -53,10 +53,10 @@
         </LinearLayout>
 
         <TextView
-            android:id="@+id/txt_Allocation"
+            android:id="@+id/txt_Spent"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="R 100 000"
+            android:text="@string/blank_string"
             android:textAlignment="textEnd"
             android:textAppearance="@style/SubTextStyle" />
 
