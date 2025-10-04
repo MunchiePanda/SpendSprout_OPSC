@@ -98,7 +98,13 @@ class EditCategoryActivity : AppCompatActivity() {
         }
 
         // Save category using ViewModel
-        editCategoryViewModel.saveCategory(categoryName, type, budgetVal, color, notes)
+        try {
+            editCategoryViewModel.saveCategory(categoryName, type, budgetVal, color, notes, this)
+            Toast.makeText(this, "Subcategory saved successfully!", Toast.LENGTH_SHORT).show()
+        } catch (e: Exception) {
+            Toast.makeText(this, "Error saving subcategory: ${e.message}", Toast.LENGTH_LONG).show()
+            return
+        }
 
         // Return data
         val resultIntent = Intent().apply {

@@ -31,16 +31,12 @@ class HierarchicalCategoryAdapter(
         // Like Unity's flattening hierarchical data for UI display
         categories.forEach { category ->
             flatItems.add(category) // Add main category
-            flatItems.addAll(category.subcategories) // Add all subcategories
+            // Note: subcategories are now separate entities, not nested in Category
         }
     }
 
     override fun getItemViewType(position: Int): Int {
-        return if (flatItems[position] is Category && (flatItems[position] as Category).subcategories.isEmpty()) {
-            TYPE_SUBCATEGORY
-        } else {
-            TYPE_MAIN_CATEGORY
-        }
+        return TYPE_MAIN_CATEGORY // All items are main categories now
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
@@ -66,31 +62,20 @@ class HierarchicalCategoryAdapter(
             is MainCategoryViewHolder -> {
                 // Like Unity's UI Text updates for main categories
                 holder.nameTextView.text = item.name
-                holder.spentTextView.text = item.spent
-                holder.allocatedTextView.text = item.allocated
+                holder.spentTextView.text = "R ${String.format("%.0f", item.balance)}"
+                holder.allocatedTextView.text = "R ${String.format("%.0f", item.allocation)}"
                 
                 // Set color indicator - like Unity's color changes
-                holder.colorIndicator.setBackgroundColor(android.graphics.Color.parseColor(item.color))
+                holder.colorIndicator.setBackgroundColor(item.color)
                 
-                // Set spent amount color based on positive/negative
-                if (item.spent.startsWith("-")) {
+                // Set spent amount color based on overspending
+                if (item.balance > item.allocation) {
                     holder.spentTextView.setTextColor(android.graphics.Color.parseColor("#E94444"))
                 } else {
                     holder.spentTextView.setTextColor(android.graphics.Color.parseColor("#77B950"))
                 }
                 
                 // Set click listener - like Unity's Button.onClick
-                holder.itemView.setOnClickListener { onItemClick(item) }
-            }
-            is SubcategoryViewHolder -> {
-                // Like Unity's UI Text updates for subcategories
-                holder.nameTextView.text = item.name
-                holder.spentTextView.text = item.spent
-                
-                // Set color indicator
-                holder.colorIndicator.setBackgroundColor(android.graphics.Color.parseColor(item.color))
-                
-                // Set click listener
                 holder.itemView.setOnClickListener { onItemClick(item) }
             }
         }

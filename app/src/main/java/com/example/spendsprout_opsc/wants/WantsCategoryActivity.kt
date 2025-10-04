@@ -123,6 +123,7 @@ class WantsCategoryActivity : AppCompatActivity(), NavigationView.OnNavigationIt
         return true
     }
 
+    @Deprecated("Use onBackPressedDispatcher instead")
     override fun onBackPressed() {
         if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
             drawerLayout.closeDrawer(GravityCompat.START)

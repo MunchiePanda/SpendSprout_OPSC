@@ -29,11 +29,11 @@ class CategoryAdapter(
     override fun onBindViewHolder(holder: CategoryViewHolder, position: Int) {
         val category = categories[position]
         holder.nameTextView.text = category.name
-        holder.spentTextView.text = category.spent
-        holder.allocatedTextView.text = category.allocated
+        holder.spentTextView.text = "R ${String.format("%.0f", category.balance)}"
+        holder.allocatedTextView.text = "R ${String.format("%.0f", category.allocation)}"
         
         // Set color indicator
-        holder.colorIndicator.setBackgroundColor(android.graphics.Color.parseColor(category.color))
+        holder.colorIndicator.setBackgroundColor(category.color)
         
         // Set click listener
         holder.view.setOnClickListener { onItemClick(category) }

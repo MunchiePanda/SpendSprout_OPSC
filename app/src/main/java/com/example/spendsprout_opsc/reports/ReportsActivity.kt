@@ -95,7 +95,7 @@ class ReportsActivity : AppCompatActivity(), NavigationView.OnNavigationItemSele
     }
 
     private fun setupChart() {
-        val chartView = findViewById<com.example.spendsprout_opsc.reports.ChartView>(R.id.chartView)
+        val chartView = findViewById<com.example.spendsprout_opsc.overview.ChartView>(R.id.chartView)
         chartView.setData(reportsViewModel.getChartData())
     }
 
@@ -140,6 +140,7 @@ class ReportsActivity : AppCompatActivity(), NavigationView.OnNavigationItemSele
         return true
     }
 
+    @Deprecated("Use onBackPressedDispatcher instead")
     override fun onBackPressed() {
         if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
             drawerLayout.closeDrawer(GravityCompat.START)

@@ -113,6 +113,7 @@ class AccountsActivity : AppCompatActivity(), NavigationView.OnNavigationItemSel
         return true
     }
 
+    @Deprecated("Use onBackPressedDispatcher instead")
     override fun onBackPressed() {
         if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
             drawerLayout.closeDrawer(GravityCompat.START)

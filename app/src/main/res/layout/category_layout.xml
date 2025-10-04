@@ -1,29 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:padding="12dp"
-    android:background="@color/TransparentColor">
+    android:background="@color/ItemBackgroundColor">
 
-    <!-- Category Color Circle -->
     <View
         android:id="@+id/color_indicator"
-        android:layout_width="12dp"
-        android:layout_height="12dp"
+        android:layout_width="4dp"
+        android:layout_height="match_parent"
         android:layout_marginEnd="12dp"
-        android:layout_gravity="center_vertical"
-        android:background="@drawable/circle_icon" />
+        android:background="#BD804A" />
 
-    <!-- Category Info -->
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:orientation="vertical">
 
-        <!-- Category Name -->
         <TextView
             android:id="@+id/txt_Name"
             android:layout_width="wrap_content"
@@ -33,9 +28,8 @@
             android:textSize="16sp"
             android:textStyle="bold" />
 
-        <!-- Spent and Allocated Amounts -->
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:layout_marginTop="4dp">
@@ -45,9 +39,15 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="R 8,900"
-                android:textColor="@color/PositiveBalanceColor"
-                android:textSize="14sp"
-                android:layout_marginEnd="8dp" />
+                android:textColor="@color/SubTextColor"
+                android:textSize="14sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=" / "
+                android:textColor="@color/SubTextColor"
+                android:textSize="14sp" />
 
             <TextView
                 android:id="@+id/txt_Allocated"
@@ -56,18 +56,9 @@
                 android:text="R 10,000"
                 android:textColor="@color/SubTextColor"
                 android:textSize="14sp" />
-        </LinearLayout>
-    </LinearLayout>
 
-    <!-- Edit Button -->
-    <ImageButton
-        android:id="@+id/btn_Edit"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:layout_marginStart="8dp"
-        android:background="@drawable/circle_drawable"
-        android:src="@drawable/ic_edit"
-        android:tint="@color/MainTextColor"
-        android:padding="4dp" />
+        </LinearLayout>
+
+    </LinearLayout>
 
 </LinearLayout>

@@ -1,6 +1,6 @@
 package com.example.spendsprout_opsc.reports
 
-import com.example.spendsprout_opsc.reports.model.ChartDataPoint
+import com.example.spendsprout_opsc.overview.model.ChartDataPoint
 
 class ReportsViewModel {
     

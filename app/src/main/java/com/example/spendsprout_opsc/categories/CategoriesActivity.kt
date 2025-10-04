@@ -130,13 +130,10 @@ class CategoriesActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
         
         // Create new adapter with filtered data
         categoryAdapter = HierarchicalCategoryAdapter(filteredCategories) { category ->
-            if (category.subcategories.isNotEmpty()) {
-                android.widget.Toast.makeText(this, "Clicked ${category.name}", android.widget.Toast.LENGTH_SHORT).show()
-            } else {
-                val intent = Intent(this, com.example.spendsprout_opsc.edit.EditCategoryActivity::class.java)
-                intent.putExtra("categoryName", category.name)
-                startActivity(intent)
-            }
+            // Handle category click - subcategories are now separate entities
+            val intent = Intent(this, com.example.spendsprout_opsc.edit.EditCategoryActivity::class.java)
+            intent.putExtra("categoryName", category.name)
+            startActivity(intent)
         }
         findViewById<RecyclerView>(R.id.recyclerView_Categories).adapter = categoryAdapter
     }
@@ -169,6 +166,7 @@ class CategoriesActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
         return true
     }
 
+    @Deprecated("Use onBackPressedDispatcher instead")
     override fun onBackPressed() {
         if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
             drawerLayout.closeDrawer(GravityCompat.START)

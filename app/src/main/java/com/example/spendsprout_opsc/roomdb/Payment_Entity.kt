@@ -1,16 +1,44 @@
 package com.example.spendsprout_opsc.roomdb
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
 import com.example.spendsprout_opsc.RepeatType
 import com.example.spendsprout_opsc.TransactionType
 
-@Entity(tableName = "Payment")
+@Entity(
+    tableName = "Payment",
+    foreignKeys = [
+        ForeignKey(
+            entity = Subcategory_Entity::class,
+            parentColumns = ["id"],
+            childColumns = ["subcategory_id"],
+            onDelete = ForeignKey.CASCADE
+        ),
+        ForeignKey(
+            entity = Account_Entity::class,
+            parentColumns = ["id"],
+            childColumns = ["account_id"],
+            onDelete = ForeignKey.CASCADE
+        ),
+        ForeignKey(
+            entity = Contact_Entity::class,
+            parentColumns = ["id"],
+            childColumns = ["contact_id"],
+            onDelete = ForeignKey.SET_NULL
+        )
+    ],
+    indices = [
+        androidx.room.Index(value = ["subcategory_id"]),
+        androidx.room.Index(value = ["account_id"]),
+        androidx.room.Index(value = ["contact_id"])
+    ]
+)
 data class Payment_Entity(
     @PrimaryKey val id: Int,
-    //ForeignKey for single subcategory
-    //ForeignKey for single account
-    //ForeignKey for Contact (opt. if isOwed = true)
+    @ColumnInfo(name = "subcategory_id") val subcategoryId: Int, // Foreign key to Subcategory
+    @ColumnInfo(name = "account_id") val accountId: Int, // Foreign key to Account
+    @ColumnInfo(name = "contact_id") val contactId: Int? = null, // Foreign key to Contact (optional)
 
     @ColumnInfo(name= "payment_name") val paymentName: String,                  //the name/description of the payment
     @ColumnInfo(name= "payment_date") val paymentDate: Long,                    //the date of the payment

@@ -29,14 +29,14 @@ class SubcategoryAdapter(
     override fun onBindViewHolder(holder: SubcategoryViewHolder, position: Int) {
         val subcategory = subcategories[position]
         holder.nameTextView.text = subcategory.name
-        holder.spentTextView.text = subcategory.spent
-        holder.allocatedTextView.text = subcategory.allocated
+        holder.spentTextView.text = "R ${String.format("%.0f", subcategory.balance)}"
+        holder.allocatedTextView.text = "R ${String.format("%.0f", subcategory.allocation)}"
         
         // Set color indicator
-        holder.colorIndicator.setBackgroundColor(android.graphics.Color.parseColor(subcategory.color))
+        holder.colorIndicator.setBackgroundColor(subcategory.color)
         
         // Set spent amount color based on overspending
-        if (subcategory.spent.startsWith("-") || subcategory.spent.toDoubleOrNull() ?: 0.0 > subcategory.allocated.toDoubleOrNull() ?: 0.0) {
+        if (subcategory.balance > subcategory.allocation) {
             holder.spentTextView.setTextColor(android.graphics.Color.parseColor("#E94444"))
         } else {
             holder.spentTextView.setTextColor(android.graphics.Color.parseColor("#77B950"))

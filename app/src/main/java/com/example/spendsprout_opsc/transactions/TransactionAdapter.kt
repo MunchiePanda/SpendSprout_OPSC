@@ -32,15 +32,28 @@ class TransactionAdapter(
 
     override fun onBindViewHolder(holder: TransactionViewHolder, position: Int) {
         val transaction = transactions[position]
-        holder.dateTextView.text = transaction.date
-        holder.descriptionTextView.text = transaction.description
-        holder.amountTextView.text = transaction.amount
         
-        // Set color indicator
-        holder.colorIndicator.setBackgroundColor(android.graphics.Color.parseColor(transaction.color))
+        // Format date
+        val date = java.util.Date(transaction.date)
+        val formatter = java.text.SimpleDateFormat("dd MMMM yyyy", java.util.Locale.getDefault())
+        holder.dateTextView.text = formatter.format(date)
+        
+        holder.descriptionTextView.text = transaction.name
+        
+        // Format amount with sign
+        val sign = if (transaction.type.name == "Income") "+" else "-"
+        holder.amountTextView.text = "$sign R ${String.format("%.0f", transaction.amount)}"
+        
+        // Set color indicator (mock color based on subcategory ID)
+        val colors = listOf(android.graphics.Color.parseColor("#FF6B6B"), 
+                           android.graphics.Color.parseColor("#FFB6C1"), 
+                           android.graphics.Color.parseColor("#9370DB"), 
+                           android.graphics.Color.parseColor("#4ECDC4"), 
+                           android.graphics.Color.parseColor("#45B7D1"))
+        holder.colorIndicator.setBackgroundColor(colors[transaction.subcategoryId % colors.size])
         
         // Set amount color based on positive/negative
-        if (transaction.amount.startsWith("+")) {
+        if (transaction.type.name == "Income") {
             holder.amountTextView.setTextColor(android.graphics.Color.parseColor("#77B950"))
         } else {
             holder.amountTextView.setTextColor(android.graphics.Color.parseColor("#E94444"))

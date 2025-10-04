@@ -41,32 +41,16 @@ class AccountAdapter(
     override fun onBindViewHolder(holder: AccountViewHolder, position: Int) {
         val account = accounts[position]
         holder.nameTextView.text = account.name
-        holder.balanceTextView.text = account.balance
-        holder.limitTextView.text = account.limit
+        holder.balanceTextView.text = "R ${String.format("%.0f", account.balance)}"
+        holder.limitTextView.text = "R ${String.format("%.0f", account.balance * 1.5)}" // Mock limit
         
-        // Set recent transactions with proper formatting
-        account.recentTransactions.forEachIndexed { index, transaction ->
-            when (index) {
-                0 -> {
-                    holder.transaction1TextView.text = transaction.description
-                    holder.amount1TextView.text = transaction.amount
-                    holder.amount1TextView.setTextColor(android.graphics.Color.parseColor(transaction.color))
-                    holder.colorIndicator1.setBackgroundColor(android.graphics.Color.parseColor(transaction.color))
-                }
-                1 -> {
-                    holder.transaction2TextView.text = transaction.description
-                    holder.amount2TextView.text = transaction.amount
-                    holder.amount2TextView.setTextColor(android.graphics.Color.parseColor(transaction.color))
-                    holder.colorIndicator2.setBackgroundColor(android.graphics.Color.parseColor(transaction.color))
-                }
-                2 -> {
-                    holder.transaction3TextView.text = transaction.description
-                    holder.amount3TextView.text = transaction.amount
-                    holder.amount3TextView.setTextColor(android.graphics.Color.parseColor(transaction.color))
-                    holder.colorIndicator3.setBackgroundColor(android.graphics.Color.parseColor(transaction.color))
-                }
-            }
-        }
+        // Clear transaction fields since we don't have recent transactions in the Account model
+        holder.transaction1TextView.text = ""
+        holder.transaction2TextView.text = ""
+        holder.transaction3TextView.text = ""
+        holder.amount1TextView.text = ""
+        holder.amount2TextView.text = ""
+        holder.amount3TextView.text = ""
         
         // Set click listener for edit button
         holder.editButton.setOnClickListener {

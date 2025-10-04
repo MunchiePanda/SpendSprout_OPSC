@@ -158,7 +158,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="300dp">
 
-                    <com.example.spendsprout_opsc.reports.ChartView
+                    <com.example.spendsprout_opsc.overview.ChartView
                         android:id="@+id/chartView"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent" />

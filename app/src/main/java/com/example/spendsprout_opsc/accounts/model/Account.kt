@@ -1,16 +1,12 @@
 package com.example.spendsprout_opsc.accounts.model
 
-data class Account(
-    val id: String,
-    val name: String,
-    val balance: String,
-    val limit: String,
-    val recentTransactions: List<Transaction>
-)
+import com.example.spendsprout_opsc.AccountType
 
-data class Transaction(
-    val description: String,
-    val amount: String,
-    val color: String
+data class Account(
+    val id: Int,
+    val name: String,
+    val type: AccountType,
+    val balance: Double,
+    val notes: String?
 )
 

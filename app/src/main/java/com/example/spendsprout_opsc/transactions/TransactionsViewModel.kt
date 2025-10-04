@@ -1,29 +1,79 @@
 package com.example.spendsprout_opsc.transactions
 
 import com.example.spendsprout_opsc.transactions.model.Transaction
+import com.example.spendsprout_opsc.TransactionType
+import com.example.spendsprout_opsc.RepeatType
 
 class TransactionsViewModel {
     
     fun getAllTransactions(): List<Transaction> {
         return listOf(
-            Transaction("1", "10 August 2025", "Petrol", "- R 1,500", "#87CEEB"),
-            Transaction("2", "08 August 2025", "PnP Groceries", "- R 360", "#4169E1"),
-            Transaction("3", "25 July 2025", "Salary", "+ R 20,000", "#32CD32"),
-            Transaction("4", "DD Month YYYY", "Description", "+ R 300,000", "#D3D3D3"),
-            Transaction("5", "DD Month YYYY", "Description", "- R 300,000", "#9370DB"),
-            Transaction("6", "DD Month YYYY", "Description", "- R 10", "#FFA500"),
-            Transaction("7", "DD Month YYYY", "Description", "- R 300,000", "#FFB6C1"),
-            Transaction("8", "DD Month YYYY", "Description", "- R 100", "#87CEEB")
+            Transaction(
+                id = 1,
+                subcategoryId = 1,
+                accountId = 2,
+                contactId = null,
+                name = "Petrol",
+                date = System.currentTimeMillis() - 86400000 * 2,
+                amount = 1500.0,
+                type = TransactionType.Expense,
+                isOwed = false,
+                repeat = RepeatType.None,
+                notes = "Fuel for car",
+                image = null
+            ),
+            Transaction(
+                id = 2,
+                subcategoryId = 3,
+                accountId = 2,
+                contactId = null,
+                name = "Mug 'n Bean",
+                date = System.currentTimeMillis() - 86400000 * 4,
+                amount = 360.0,
+                type = TransactionType.Expense,
+                isOwed = false,
+                repeat = RepeatType.None,
+                notes = "Lunch with friends",
+                image = null
+            ),
+            Transaction(
+                id = 3,
+                subcategoryId = 1,
+                accountId = 2,
+                contactId = null,
+                name = "Salary",
+                date = System.currentTimeMillis() - 86400000 * 10,
+                amount = 20000.0,
+                type = TransactionType.Income,
+                isOwed = false,
+                repeat = RepeatType.None,
+                notes = "Monthly salary",
+                image = null
+            )
         )
     }
     
     fun getFilteredTransactions(filter: String): List<Transaction> {
         val allTransactions = getAllTransactions()
         return when (filter) {
-            "Income" -> allTransactions.filter { it.amount.startsWith("+") }
-            "Expenses" -> allTransactions.filter { it.amount.startsWith("-") }
-            "This Month" -> allTransactions.filter { it.date.contains("August 2025") }
-            "Last Month" -> allTransactions.filter { it.date.contains("July 2025") }
+            "Income" -> allTransactions.filter { it.type == TransactionType.Income }
+            "Expenses" -> allTransactions.filter { it.type == TransactionType.Expense }
+            "This Month" -> allTransactions.filter { 
+                val currentMonth = java.util.Calendar.getInstance().get(java.util.Calendar.MONTH)
+                val transactionMonth = java.util.Calendar.getInstance().apply { 
+                    timeInMillis = it.date 
+                }.get(java.util.Calendar.MONTH)
+                currentMonth == transactionMonth
+            }
+            "Last Month" -> allTransactions.filter { 
+                val lastMonth = java.util.Calendar.getInstance().apply { 
+                    add(java.util.Calendar.MONTH, -1) 
+                }.get(java.util.Calendar.MONTH)
+                val transactionMonth = java.util.Calendar.getInstance().apply { 
+                    timeInMillis = it.date 
+                }.get(java.util.Calendar.MONTH)
+                lastMonth == transactionMonth
+            }
             else -> allTransactions
         }
     }
