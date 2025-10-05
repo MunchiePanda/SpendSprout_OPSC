@@ -7,22 +7,18 @@ class WantsViewModel {
     fun getSubcategories(): List<Subcategory> {
         return listOf(
             Subcategory(
-                id = 1,
-                categoryId = 2,
+                id = "1",
                 name = "Eating Out",
-                color = 0xFF88618E.toInt(),
-                balance = 120.0,
-                allocation = 1000.0,
-                notes = "Restaurant and takeout"
+                spent = "R 120",
+                allocation = "R 1,000",
+                color = "#88618E"
             ),
             Subcategory(
-                id = 2,
-                categoryId = 2,
+                id = "2",
                 name = "Entertainment",
-                color = 0xFF88618E.toInt(),
-                balance = 0.0,
-                allocation = 2000.0,
-                notes = "Movies, concerts, etc."
+                spent = "R 0",
+                allocation = "R 2,000",
+                color = "#88618E"
             )
         )
     }

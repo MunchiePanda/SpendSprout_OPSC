@@ -1,12 +1,10 @@
 package com.example.spendsprout_opsc.wants.model
 
 data class Subcategory(
-    val id: Int,
-    val categoryId: Int,
+    val id: String,
     val name: String,
-    val color: Int,
-    val balance: Double,
-    val allocation: Double,
-    val notes: String?
+    val spent: String,
+    val allocation: String,
+    val color: String
 )
 

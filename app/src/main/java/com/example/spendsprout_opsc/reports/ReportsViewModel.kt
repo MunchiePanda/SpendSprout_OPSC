@@ -1,7 +1,7 @@
 package com.example.spendsprout_opsc.reports
 
 import com.example.spendsprout_opsc.BudgetApp
-import com.example.spendsprout_opsc.reports.model.ChartDataPoint
+import com.example.spendsprout_opsc.overview.model.ChartDataPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

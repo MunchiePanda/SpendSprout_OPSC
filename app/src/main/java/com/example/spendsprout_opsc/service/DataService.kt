@@ -143,32 +143,32 @@ class DataService @Inject constructor(
     
     fun getAllTransactions(): Flow<List<Transaction>> {
         return transactionRepository.getAllTransactions().map { entities ->
-            entities.map { it.toTransactionModel() }
+            entities.map { it.toUiTransaction() }
         }
     }
 
     fun getTransactionById(id: Int): Flow<Transaction?> {
         return transactionRepository.getAllTransactions().map { entities ->
-            entities.find { it.id == id }?.toTransactionModel()
+            entities.find { it.id.toString() == id.toString() }?.toUiTransaction()
         }
     }
 
     fun getRecentTransactions(limit: Int): Flow<List<OverviewTransaction>> {
         return transactionRepository.getRecentTransactions(limit).map { entities ->
-            entities.map { it.toTransaction() }
+            entities.map { it.toOverviewTransaction() }
         }
     }
 
     suspend fun insertTransaction(transaction: Transaction) {
-        transactionRepository.insertTransaction(transaction.toPaymentEntity())
+        transactionRepository.insertTransaction(transaction.toExpenseEntity())
     }
 
     suspend fun updateTransaction(transaction: Transaction) {
-        transactionRepository.updateTransaction(transaction.toPaymentEntity())
+        transactionRepository.updateTransaction(transaction.toExpenseEntity())
     }
 
     suspend fun deleteTransaction(transaction: Transaction) {
-        transactionRepository.deleteTransaction(transaction.toPaymentEntity())
+        transactionRepository.deleteTransaction(transaction.toExpenseEntity())
     }
 
     suspend fun getTotalIncome(): Double {

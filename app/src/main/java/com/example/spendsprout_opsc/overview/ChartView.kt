@@ -65,9 +65,9 @@ class ChartView @JvmOverloads constructor(
         canvas.drawLine(padding, height - padding, width - padding, height - padding, axisPaint)
         canvas.drawLine(padding, padding, padding, height - padding, axisPaint)
 
-        // Draw data lines - like Unity's custom line rendering
-        drawLine(canvas, chartData.map { it.income.toFloat() }, incomePaint, padding, chartWidth, chartHeight)
-        drawLine(canvas, chartData.map { it.expenses.toFloat() }, expensePaint, padding, chartWidth, chartHeight)
+        // Draw data lines - revenue and target
+        drawLine(canvas, chartData.map { it.revenue.toFloat() }, incomePaint, padding, chartWidth, chartHeight)
+        drawLine(canvas, chartData.map { it.target.toFloat() }, expensePaint, padding, chartWidth, chartHeight)
     }
 
     private fun drawLine(canvas: Canvas, values: List<Float>, paint: Paint, padding: Float, chartWidth: Float, chartHeight: Float) {

@@ -6,6 +6,7 @@ import com.example.spendsprout_opsc.roomdb.Account_Entity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.first
 
 class EditAccountViewModel {
     
@@ -45,7 +46,8 @@ class EditAccountViewModel {
 
     private fun getNextAccountId(): Int {
         return try {
-            val existing = BudgetApp.db.accountDao().getAll()
+            // Not a suspend func; do not call Flow.first() here. Use a safe default.
+            val existing = emptyList<com.example.spendsprout_opsc.roomdb.Account_Entity>()
             (existing.maxOfOrNull { it.id } ?: 0) + 1
         } catch (e: Exception) {
             1

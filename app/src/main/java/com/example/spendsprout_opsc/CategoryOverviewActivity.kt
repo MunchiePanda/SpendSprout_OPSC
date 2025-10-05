@@ -3,6 +3,10 @@ package com.example.spendsprout_opsc
 import android.os.Bundle
 import android.content.Intent
 import android.widget.TextView
+import android.view.MenuItem
+import androidx.appcompat.app.ActionBarDrawerToggle
+import androidx.drawerlayout.widget.DrawerLayout
+import androidx.core.view.GravityCompat
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -14,6 +18,7 @@ import com.example.spendsprout_opsc.categories.CategoryViewModel
 import com.example.spendsprout_opsc.categories.model.Category
 import com.example.spendsprout_opsc.categories.model.Subcategory
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.navigation.NavigationView
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import java.text.SimpleDateFormat
@@ -21,6 +26,9 @@ import java.util.*
 
 class CategoryOverviewActivity : AppCompatActivity() {
     
+    private lateinit var drawerLayout: DrawerLayout
+    private lateinit var navView: NavigationView
+    private lateinit var toggle: ActionBarDrawerToggle
     private lateinit var btnSelectDateRange: MaterialButton
     private lateinit var txtDateRange: TextView
     private lateinit var categoryViewModel: CategoryViewModel
@@ -39,6 +47,9 @@ class CategoryOverviewActivity : AppCompatActivity() {
             insets
         }
         
+        // Set up drawer + toolbar
+        setupDrawer()
+
         // Initialize ViewModel
         categoryViewModel = CategoryViewModel()
         
@@ -48,6 +59,43 @@ class CategoryOverviewActivity : AppCompatActivity() {
         // Setup UI
         setupCategoryRecyclerView()
         setupFab()
+    }
+
+    private fun setupDrawer() {
+        drawerLayout = findViewById(R.id.main)
+        navView = findViewById(R.id.navigationView)
+
+        val toolbar: androidx.appcompat.widget.Toolbar = findViewById(R.id.toolbar)
+        setSupportActionBar(toolbar)
+
+        toggle = ActionBarDrawerToggle(
+            this, drawerLayout, toolbar,
+            R.string.navigation_drawer_open, R.string.navigation_drawer_close
+        )
+        drawerLayout.addDrawerListener(toggle)
+        toggle.syncState()
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.setHomeButtonEnabled(true)
+        supportActionBar?.title = "Categories"
+
+        // Optional: menu button inside header bar opens drawer
+        findViewById<android.widget.ImageButton?>(R.id.btn_Menu)?.setOnClickListener {
+            drawerLayout.openDrawer(GravityCompat.START)
+        }
+
+        navView.setNavigationItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.nav_overview -> startActivity(Intent(this, com.example.spendsprout_opsc.overview.OverviewActivity::class.java))
+                R.id.nav_categories -> { /* already here */ }
+                R.id.nav_transactions -> startActivity(Intent(this, com.example.spendsprout_opsc.transactions.TransactionsActivity::class.java))
+                R.id.nav_accounts -> startActivity(Intent(this, com.example.spendsprout_opsc.accounts.AccountsActivity::class.java))
+                R.id.nav_reports -> startActivity(Intent(this, com.example.spendsprout_opsc.reports.ReportsActivity::class.java))
+                R.id.nav_settings -> startActivity(Intent(this, com.example.spendsprout_opsc.settings.SettingsActivity::class.java))
+                R.id.nav_exit -> finishAffinity()
+            }
+            drawerLayout.closeDrawer(GravityCompat.START)
+            true
+        }
     }
     
     private fun setupDateRangePicker() {

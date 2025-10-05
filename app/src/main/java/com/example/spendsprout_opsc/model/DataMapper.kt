@@ -2,7 +2,7 @@ package com.example.spendsprout_opsc.model
 
 import com.example.spendsprout_opsc.roomdb.Account_Entity
 import com.example.spendsprout_opsc.roomdb.Category_Entity
-import com.example.spendsprout_opsc.roomdb.Payment_Entity
+import com.example.spendsprout_opsc.roomdb.Expense_Entity
 import com.example.spendsprout_opsc.roomdb.Subcategory_Entity
 import com.example.spendsprout_opsc.roomdb.Contact_Entity
 import com.example.spendsprout_opsc.overview.model.AccountSummary
@@ -11,7 +11,7 @@ import com.example.spendsprout_opsc.overview.model.Transaction
 import com.example.spendsprout_opsc.accounts.model.Account
 import com.example.spendsprout_opsc.categories.model.Category
 import com.example.spendsprout_opsc.wants.model.Subcategory
-import com.example.spendsprout_opsc.transactions.model.Transaction as TransactionModel
+import com.example.spendsprout_opsc.transactions.model.Transaction as UiTransaction
 
 /**
  * DataMapper - Essential Data Flow Connection
@@ -46,7 +46,7 @@ fun Account_Entity.toAccountSummary(): AccountSummary {
     return AccountSummary(
         name = this.accountName,
         balance = "R ${String.format("%.0f", this.accountBalance)}",
-        limit = "R ${String.format("%.0f", this.accountBalance * 1.5)}" // Mock limit
+        limit = "R ${String.format("%.0f", this.accountBalance * 1.5)}"
     )
 }
 
@@ -54,23 +54,22 @@ fun Account_Entity.toAccountSummary(): AccountSummary {
 
 fun Category_Entity.toCategory(): Category {
     return Category(
-        id = this.id,
+        id = this.id.toString(),
         name = this.categoryName,
-        color = this.categoryColor,
-        balance = this.categoryBalance,
-        allocation = this.categoryAllocation,
-        notes = this.categoryNotes
+        spent = "R ${String.format("%.0f", this.categoryBalance)}",
+        allocation = "R ${String.format("%.0f", this.categoryAllocation)}",
+        color = getColorFromInt(this.categoryColor)
     )
 }
 
 fun Category.toCategoryEntity(): Category_Entity {
     return Category_Entity(
-        id = this.id,
+        id = this.id.toIntOrNull() ?: 0,
         categoryName = this.name,
-        categoryColor = this.color,
-        categoryBalance = this.balance,
-        categoryAllocation = this.allocation,
-        categoryNotes = this.notes
+        categoryColor = parseColorToInt(this.color),
+        categoryBalance = parseMoneyToDouble(this.spent),
+        categoryAllocation = parseMoneyToDouble(this.allocation),
+        categoryNotes = null
     )
 }
 
@@ -87,70 +86,65 @@ fun Category_Entity.toCategorySummary(): CategorySummary {
 
 fun Subcategory_Entity.toSubcategory(): Subcategory {
     return Subcategory(
-        id = this.id,
-        categoryId = this.categoryId,
+        id = this.id.toString(),
         name = this.subcategoryName,
-        color = this.subcategoryColor,
-        balance = this.subcategoryBalance,
-        allocation = this.subcategoryAllocation,
-        notes = this.subcategoryNotes
+        spent = "R ${String.format("%.0f", this.subcategoryBalance)}",
+        allocation = "R ${String.format("%.0f", this.subcategoryAllocation)}",
+        color = getColorFromInt(this.subcategoryColor)
     )
 }
 
 fun Subcategory.toSubcategoryEntity(): Subcategory_Entity {
     return Subcategory_Entity(
-        id = this.id,
-        categoryId = this.categoryId,
+        id = this.id.toIntOrNull() ?: 0,
+        categoryId = 0,
         subcategoryName = this.name,
-        subcategoryColor = this.color,
-        subcategoryBalance = this.balance,
-        subcategoryAllocation = this.allocation,
-        subcategoryNotes = this.notes
+        subcategoryColor = parseColorToInt(this.color),
+        subcategoryBalance = parseMoneyToDouble(this.spent),
+        subcategoryAllocation = parseMoneyToDouble(this.allocation),
+        subcategoryNotes = null
     )
 }
 
 // ==================== TRANSACTION MAPPINGS ====================
 
-fun Payment_Entity.toTransaction(): Transaction {
+fun Expense_Entity.toOverviewTransaction(): Transaction {
     return Transaction(
-        date = formatDate(this.paymentDate),
-        description = this.paymentName,
-        amount = formatAmount(this.paymentAmount, this.paymentType.name),
-        color = getCategoryColor(this.subcategoryId)
+        date = formatDate(this.expenseDate),
+        description = this.expenseName,
+        amount = formatAmount(this.expenseAmount, this.expenseType.name),
+        color = getCategoryColorFromName(this.expenseCategory)
     )
 }
 
-fun Payment_Entity.toTransactionModel(): TransactionModel {
-    return TransactionModel(
-        id = this.id,
-        subcategoryId = this.subcategoryId,
-        accountId = this.accountId,
-        contactId = this.contactId,
-        name = this.paymentName,
-        date = this.paymentDate,
-        amount = this.paymentAmount,
-        type = this.paymentType,
-        isOwed = this.paymentIsOwed,
-        repeat = this.paymentRepeat,
-        notes = this.paymentNotes,
-        image = this.paymentImage
+fun Expense_Entity.toUiTransaction(): UiTransaction {
+    return UiTransaction(
+        id = this.id.toString(),
+        date = formatDate(this.expenseDate),
+        description = this.expenseName,
+        amount = formatAmount(this.expenseAmount, this.expenseType.name),
+        color = getCategoryColorFromName(this.expenseCategory),
+        imagePath = this.expenseImage
     )
 }
 
-fun TransactionModel.toPaymentEntity(): Payment_Entity {
-    return Payment_Entity(
-        id = this.id,
-        subcategoryId = this.subcategoryId,
-        accountId = this.accountId,
-        contactId = this.contactId,
-        paymentName = this.name,
-        paymentDate = this.date,
-        paymentAmount = this.amount,
-        paymentType = this.type,
-        paymentIsOwed = this.isOwed,
-        paymentRepeat = this.repeat,
-        paymentNotes = this.notes,
-        paymentImage = this.image
+fun UiTransaction.toExpenseEntity(): Expense_Entity {
+    val parsedAmount = this.amount.replace("R", "").replace("+", "").replace("-", "").replace(",", "").trim().toDoubleOrNull() ?: 0.0
+    val isIncome = this.amount.trim().startsWith("+")
+    val type = if (isIncome) com.example.spendsprout_opsc.ExpenseType.Income else com.example.spendsprout_opsc.ExpenseType.Expense
+    // Note: category, start/end are not provided by UI model; using placeholders
+    return Expense_Entity(
+        expenseName = this.description,
+        expenseDate = java.util.Date().time,
+        expenseAmount = parsedAmount,
+        expenseType = type,
+        expenseIsOwed = false,
+        expenseRepeat = com.example.spendsprout_opsc.RepeatType.None,
+        expenseNotes = null,
+        expenseImage = this.imagePath,
+        expenseCategory = "Misc",
+        expenseStart = null,
+        expenseEnd = null
     )
 }
 
@@ -167,10 +161,22 @@ private fun formatAmount(amount: Double, type: String): String {
     return "$sign R ${String.format("%.0f", amount)}"
 }
 
-private fun getCategoryColor(subcategoryId: Int): String {
-    // Mock color based on subcategory ID
-    val colors = listOf("#FF6B6B", "#FFB6C1", "#9370DB", "#4ECDC4", "#45B7D1")
-    return colors[subcategoryId % colors.size]
+private fun getCategoryColorFromName(categoryName: String): String {
+    return when (categoryName.lowercase()) {
+        "groceries" -> "#87CEEB"
+        "needs" -> "#4169E1"
+        "wants" -> "#9370DB"
+        "savings" -> "#32CD32"
+        else -> "#D3D3D3"
+    }
+}
+
+private fun parseColorToInt(color: String): Int {
+    return try { android.graphics.Color.parseColor(color) } catch (_: Throwable) { 0xFFCCCCCC.toInt() }
+}
+
+private fun parseMoneyToDouble(text: String): Double {
+    return text.replace("R", "").replace(",", "").trim().toDoubleOrNull() ?: 0.0
 }
 
 private fun getColorFromInt(colorInt: Int): String {

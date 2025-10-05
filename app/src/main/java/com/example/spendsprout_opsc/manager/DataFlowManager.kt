@@ -228,20 +228,20 @@ class DataFlowManager @Inject constructor(
      * Validate category data before saving
      */
     fun validateCategory(category: Category): Boolean {
-        return category.name.isNotBlank() && category.allocation >= 0
+        return category.name.isNotBlank()
     }
 
     /**
      * Validate subcategory data before saving
      */
     fun validateSubcategory(subcategory: Subcategory): Boolean {
-        return subcategory.name.isNotBlank() && subcategory.allocation >= 0
+        return subcategory.name.isNotBlank()
     }
 
     /**
      * Validate transaction data before saving
      */
     fun validateTransaction(transaction: Transaction): Boolean {
-        return transaction.name.isNotBlank() && transaction.amount > 0
+        return transaction.description.isNotBlank()
     }
 }

@@ -91,7 +91,7 @@ class ReportsActivity : AppCompatActivity(), NavigationView.OnNavigationItemSele
     }
 
     private fun setupChart() {
-        val chartView = findViewById<com.example.spendsprout_opsc.reports.ChartView>(R.id.chartView)
+        val chartView = findViewById<com.example.spendsprout_opsc.overview.ChartView>(R.id.chartView)
         // Load daily spend for current month and use max goal as target
         val prefs = getSharedPreferences("Settings", MODE_PRIVATE)
         val monthlyTarget = prefs.getFloat("MaxMonthlyGoal", 0f).toDouble()

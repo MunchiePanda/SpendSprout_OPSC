@@ -2,10 +2,9 @@ package com.example.spendsprout_opsc.database
 
 import com.example.spendsprout_opsc.AccountType
 import com.example.spendsprout_opsc.RepeatType
-import com.example.spendsprout_opsc.TransactionType
 import com.example.spendsprout_opsc.roomdb.Account_Entity
 import com.example.spendsprout_opsc.roomdb.Category_Entity
-import com.example.spendsprout_opsc.roomdb.Payment_Entity
+import com.example.spendsprout_opsc.roomdb.Expense_Entity
 import com.example.spendsprout_opsc.roomdb.Subcategory_Entity
 import com.example.spendsprout_opsc.repository.AccountRepository
 import com.example.spendsprout_opsc.repository.CategoryRepository
@@ -38,7 +37,7 @@ class DatabaseInitializer @Inject constructor(
                 // Initialize accounts
                 initializeAccounts()
                 
-                // Initialize transactions
+                // Initialize transactions (expenses)
                 initializeTransactions()
             }
         )
@@ -91,11 +90,71 @@ class DatabaseInitializer @Inject constructor(
         val oneDay = 24 * 60 * 60 * 1000L
         
         val transactions = listOf(
-            Payment_Entity(1, 1, 2, null, "Petrol", currentTime - oneDay, 1500.0, TransactionType.Expense, false, RepeatType.None, "Fuel for car", null),
-            Payment_Entity(2, 6, 2, null, "Mug 'n Bean", currentTime - (3 * oneDay), 360.0, TransactionType.Expense, false, RepeatType.None, "Coffee and lunch", null),
-            Payment_Entity(3, 8, 1, null, "Salary", currentTime - (7 * oneDay), 20000.0, TransactionType.Income, false, RepeatType.Monthly, "Monthly salary", null),
-            Payment_Entity(4, 1, 2, null, "Groceries", currentTime - (2 * oneDay), 800.0, TransactionType.Expense, false, RepeatType.None, "Weekly groceries", null),
-            Payment_Entity(5, 5, 2, null, "Movie Tickets", currentTime - (5 * oneDay), 120.0, TransactionType.Expense, false, RepeatType.None, "Cinema tickets", null)
+            Expense_Entity(
+                expenseName = "Petrol",
+                expenseDate = currentTime - oneDay,
+                expenseAmount = 1500.0,
+                expenseType = com.example.spendsprout_opsc.ExpenseType.Expense,
+                expenseIsOwed = false,
+                expenseRepeat = RepeatType.None,
+                expenseNotes = "Fuel for car",
+                expenseImage = null,
+                expenseCategory = "Transport",
+                expenseStart = null,
+                expenseEnd = null
+            ),
+            Expense_Entity(
+                expenseName = "Mug 'n Bean",
+                expenseDate = currentTime - (3 * oneDay),
+                expenseAmount = 360.0,
+                expenseType = com.example.spendsprout_opsc.ExpenseType.Expense,
+                expenseIsOwed = false,
+                expenseRepeat = RepeatType.None,
+                expenseNotes = "Coffee and lunch",
+                expenseImage = null,
+                expenseCategory = "Dining Out",
+                expenseStart = null,
+                expenseEnd = null
+            ),
+            Expense_Entity(
+                expenseName = "Salary",
+                expenseDate = currentTime - (7 * oneDay),
+                expenseAmount = 20000.0,
+                expenseType = com.example.spendsprout_opsc.ExpenseType.Income,
+                expenseIsOwed = false,
+                expenseRepeat = RepeatType.Monthly,
+                expenseNotes = "Monthly salary",
+                expenseImage = null,
+                expenseCategory = "Income",
+                expenseStart = null,
+                expenseEnd = null
+            ),
+            Expense_Entity(
+                expenseName = "Groceries",
+                expenseDate = currentTime - (2 * oneDay),
+                expenseAmount = 800.0,
+                expenseType = com.example.spendsprout_opsc.ExpenseType.Expense,
+                expenseIsOwed = false,
+                expenseRepeat = RepeatType.None,
+                expenseNotes = "Weekly groceries",
+                expenseImage = null,
+                expenseCategory = "Groceries",
+                expenseStart = null,
+                expenseEnd = null
+            ),
+            Expense_Entity(
+                expenseName = "Movie Tickets",
+                expenseDate = currentTime - (5 * oneDay),
+                expenseAmount = 120.0,
+                expenseType = com.example.spendsprout_opsc.ExpenseType.Expense,
+                expenseIsOwed = false,
+                expenseRepeat = RepeatType.None,
+                expenseNotes = "Cinema tickets",
+                expenseImage = null,
+                expenseCategory = "Entertainment",
+                expenseStart = null,
+                expenseEnd = null
+            )
         )
         
         transactions.forEach { transaction ->

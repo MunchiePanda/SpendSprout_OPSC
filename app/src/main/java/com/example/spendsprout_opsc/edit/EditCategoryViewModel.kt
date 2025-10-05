@@ -7,6 +7,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import android.graphics.Color
+import kotlinx.coroutines.flow.first
 
 class EditCategoryViewModel {
     
@@ -60,7 +61,7 @@ class EditCategoryViewModel {
     }
 
     private suspend fun getNextCategoryId(): Int {
-        val existing = BudgetApp.db.categoryDao().getAll()
+        val existing = BudgetApp.db.categoryDao().getAll().first()
         return (existing.maxOfOrNull { it.id } ?: 0) + 1
     }
 

@@ -36,7 +36,9 @@ class SubcategoryAdapter(
         //holder.colorIndicator.setBackgroundColor(android.graphics.Color.parseColor(subcategory.color))
         
         // Set spent amount color based on overspending
-        if (subcategory.spent.startsWith("-") || subcategory.spent.toDoubleOrNull() ?: 0.0 > subcategory.allocated.toDoubleOrNull() ?: 0.0) {
+        val spentValue = parseMoney(subcategory.spent)
+        val allocationValue = parseMoney(subcategory.allocation)
+        if (subcategory.spent.trim().startsWith("-") || spentValue > allocationValue) {
             holder.spentTextView.setTextColor(android.graphics.Color.parseColor("#E94444"))
         } else {
             holder.spentTextView.setTextColor(android.graphics.Color.parseColor("#77B950"))
@@ -47,5 +49,9 @@ class SubcategoryAdapter(
     }
 
     override fun getItemCount(): Int = subcategories.size
+
+    private fun parseMoney(text: String): Double {
+        return text.replace("R", "").replace(",", "").trim().toDoubleOrNull() ?: 0.0
+    }
 }
 

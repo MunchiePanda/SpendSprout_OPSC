@@ -7,7 +7,7 @@ import com.example.spendsprout_opsc.roomdb.Account_DAO
 import com.example.spendsprout_opsc.roomdb.BudgetDatabase
 import com.example.spendsprout_opsc.roomdb.Category_DAO
 import com.example.spendsprout_opsc.roomdb.Contact_DAO
-import com.example.spendsprout_opsc.roomdb.Payment_DAO
+import com.example.spendsprout_opsc.roomdb.Expense_DAO
 import com.example.spendsprout_opsc.roomdb.Subcategory_DAO
 import dagger.Module
 import dagger.Provides
@@ -43,7 +43,7 @@ object DatabaseModule {
     fun provideSubcategoryDao(database: BudgetDatabase): Subcategory_DAO = database.subcategoryDao()
 
     @Provides
-    fun providePaymentDao(database: BudgetDatabase): Payment_DAO = database.paymentDao()
+    fun provideExpenseDao(database: BudgetDatabase): Expense_DAO = database.expenseDao()
 
     @Provides
     fun provideContactDao(database: BudgetDatabase): Contact_DAO = database.contactDao()

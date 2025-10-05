@@ -6,8 +6,7 @@ import com.example.spendsprout_opsc.categories.model.Subcategory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.util.*
+import kotlinx.coroutines.flow.first
 
 class CategoryViewModel {
     
@@ -23,7 +22,7 @@ class CategoryViewModel {
                 // Ensure main categories exist (Needs, Wants, Savings)
                 ensureMainCategoriesExist()
                 
-                val categories = BudgetApp.db.categoryDao().getAll()
+                val categories = BudgetApp.db.categoryDao().getAll().first()
                 val categoryList = categories.map { category ->
                     val subcategories = getSubcategoriesForCategory(category.id.toLong())
                     val totalSpent = calculateTotalSpent(subcategories)
@@ -52,7 +51,7 @@ class CategoryViewModel {
     fun loadCategoriesFromDatabase(callback: (List<Category>) -> Unit) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val categories = BudgetApp.db.categoryDao().getAll()
+                val categories = BudgetApp.db.categoryDao().getAll().first()
                 val categoryList = categories.map { category ->
                     Category(
                         id = category.id.toString(),
@@ -77,7 +76,7 @@ class CategoryViewModel {
     fun loadCategoriesForDateRange(startDate: Long, endDate: Long, callback: (List<Category>) -> Unit) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val categories = BudgetApp.db.categoryDao().getAll()
+                val categories = BudgetApp.db.categoryDao().getAll().first()
                 val categoryList = categories.map { category ->
                     Category(
                         id = category.id.toString(),
@@ -138,7 +137,7 @@ class CategoryViewModel {
     
     private suspend fun ensureMainCategoriesExist() {
         try {
-            val existingCategories = BudgetApp.db.categoryDao().getAll()
+            val existingCategories = BudgetApp.db.categoryDao().getAll().first()
             val existingNames = existingCategories.map { it.categoryName.lowercase() }.toSet()
 
             val toInsert = mutableListOf<com.example.spendsprout_opsc.roomdb.Category_Entity>()

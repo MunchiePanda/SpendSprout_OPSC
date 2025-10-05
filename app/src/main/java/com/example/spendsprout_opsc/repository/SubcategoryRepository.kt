@@ -3,6 +3,7 @@ package com.example.spendsprout_opsc.repository
 import com.example.spendsprout_opsc.roomdb.Subcategory_DAO
 import com.example.spendsprout_opsc.roomdb.Subcategory_Entity
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -10,7 +11,7 @@ import javax.inject.Singleton
 class SubcategoryRepository @Inject constructor(
     private val subcategoryDao: Subcategory_DAO
 ) {
-    fun getAllSubcategories(): Flow<List<Subcategory_Entity>> = subcategoryDao.getAll()
+    fun getAllSubcategories(): Flow<List<Subcategory_Entity>> = flow { emit(subcategoryDao.getAll()) }
     
     suspend fun insertSubcategory(subcategory: Subcategory_Entity) = subcategoryDao.insert(subcategory)
     

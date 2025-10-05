@@ -4,6 +4,8 @@ plugins {
 
     //room implementation
     id("com.google.devtools.ksp")
+    // Hilt DI (using KSP for annotation processing)
+    id("com.google.dagger.hilt.android")
 }
 
 android {
@@ -54,6 +56,15 @@ dependencies {
     val room_version = "2.7.2"
     implementation("androidx.room:room-runtime:$room_version")
     ksp("androidx.room:room-compiler:$room_version")
+
+    // Coroutines and Lifecycle
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.4")
+
+    // Hilt (use KSP)
+    implementation("com.google.dagger:hilt-android:2.52")
+    ksp("com.google.dagger:hilt-compiler:2.52")
 
     //for navigation menu
     implementation("com.google.android.material:material:1.2.0-alpha04")
