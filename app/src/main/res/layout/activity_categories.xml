@@ -26,7 +26,10 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-            tools:listitem="@layout/category_layout" />
+            tools:listitem="@layout/category_layout"
+            android:background="@drawable/roundedcorners_background"
+            android:foregroundTint="@color/ItemBackgroundColor"
+            android:layout_margin="15dp"/>
     </LinearLayout>
 
     <com.google.android.material.navigation.NavigationView

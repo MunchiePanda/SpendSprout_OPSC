@@ -9,17 +9,33 @@
     android:fitsSystemWindows="true"
     android:background="@color/BackgroundColor">
 
-    <LinearLayout
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_height="match_parent">
 
-        <!-- Header Bar -->
-        <include
-            android:id="@+id/header_bar"
-            layout="@layout/header_bar_layout"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <!-- Header Bar -->
+            <include
+                android:id="@+id/header_bar"
+                layout="@layout/header_bar_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerView_Transactions"
+                android:layout_width="match_parent"
+                android:layout_height="961dp"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:listitem="@layout/expense_layout"
+                android:layout_margin="15dp"
+                android:background="@drawable/roundedcorners_background"
+                android:backgroundTint="@color/ItemBackgroundColor"/>
+
+        </LinearLayout>
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab_AddTransaction"
@@ -31,28 +47,20 @@
             android:src="@android:drawable/ic_input_add"
             app:backgroundTint="@color/HighlightTextColor"
             app:tint="@android:color/black" />
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerView_Transactions"
-            android:layout_width="match_parent"
-            android:layout_height="961dp"
-            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-            tools:listitem="@layout/expense_layout" />
-
-    </LinearLayout>
+    </FrameLayout>
 
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/nav_view"
         android:layout_width="280dp"
         android:layout_height="match_parent"
         android:layout_gravity="start"
+        android:backgroundTint="@color/MenuBackgroundColor"
         android:fitsSystemWindows="true"
         app:headerLayout="@layout/menu_header_layout"
-        app:menu="@menu/drawer_menu"
-        android:backgroundTint="@color/MenuBackgroundColor"
+        app:itemIconTint="@color/IconColor"
         app:itemTextColor="@color/black"
-        app:subheaderColor="@color/black"
-        app:itemIconTint="@color/IconColor" >
+        app:menu="@menu/drawer_menu"
+        app:subheaderColor="@color/black">
 
     </com.google.android.material.navigation.NavigationView>
 

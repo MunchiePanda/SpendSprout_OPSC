@@ -9,20 +9,34 @@
     android:fitsSystemWindows="true"
     android:background="@color/BackgroundColor">
 
-    <LinearLayout
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_height="match_parent">
 
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar"
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fab_AddSubcategory"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="16dp"
+            android:src="@drawable/ic_launcher_foreground"
+            app:tint="@android:color/black"
+            android:backgroundTint="@color/ButtonColor"
+            android:contentDescription="Add a subcategory within this category"/>
+
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="@color/TopBarColor"
-            android:elevation="4dp"
-            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
+            android:layout_height="match_parent"
+            android:orientation="vertical">
 
-        <!--
+            <!-- Header Bar -->
+            <include
+                android:id="@+id/header_bar"
+                layout="@layout/header_bar_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <!--
         <TextView
             android:id="@+id/txt_Summary"
             android:layout_width="match_parent"
@@ -33,82 +47,83 @@
             android:background="@color/ItemBackgroundColor"
             android:textColor="@color/NegativeBalanceColor" />
         -->
-    <!-- Main Category 1 with 2 Subcategories -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginHorizontal="15dp"
-        android:layout_marginVertical="0dp"
-        android:background="@drawable/roundedcorners_background"
-        android:backgroundTint="@color/ItemBackgroundColor"
-        android:orientation="vertical">
-
-        <!-- Balance, Allocation and Spent-->
-        <LinearLayout
-            android:layout_width="380dp"
-            android:layout_height="wrap_content"
-            android:background="@color/TransparentColor"
-            android:paddingHorizontal="10dp"
-            android:paddingVertical="1dp"
-            android:layout_gravity="center"
-            android:padding="10dp"
-            android:layout_marginTop="5dp">
-
+            <!-- Main Category 1 with 2 Subcategories -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
                 android:layout_gravity="center"
-                android:gravity="center">
+                android:layout_marginHorizontal="15dp"
+                android:layout_marginVertical="0dp"
+                android:background="@drawable/roundedcorners_background"
+                android:backgroundTint="@color/ItemBackgroundColor"
+                android:orientation="vertical">
 
-                <TextView
-                    android:id="@+id/txt_Balance"
-                    android:layout_width="190dp"
-                    android:layout_height="wrap_content"
-                    android:text="- R 100 000"
-                    android:textAlignment="textStart"
-                    android:textAppearance="@style/MainTextStyle"
-                    android:textSize="30sp"/>
-
+                <!-- Balance, Allocation and Spent-->
                 <LinearLayout
-                    android:layout_width="match_parent"
+                    android:layout_width="380dp"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical">
+                    android:layout_gravity="center"
+                    android:layout_marginTop="5dp"
+                    android:background="@color/TransparentColor"
+                    android:padding="10dp"
+                    android:paddingHorizontal="10dp"
+                    android:paddingVertical="1dp">
 
-                    <TextView
-                        android:id="@+id/txt_Allocation"
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="R 100 000"
-                        android:textAlignment="textEnd"
-                        android:textAppearance="@style/SubTextStyle"
-                        android:textSize="16sp"/>
+                        android:layout_gravity="center"
+                        android:gravity="center"
+                        android:orientation="horizontal">
 
-                    <TextView
-                        android:id="@+id/txt_Spent"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="R 80 000"
-                        android:textAlignment="textEnd"
-                        android:textAppearance="@style/SubTextStyle"
-                        android:textSize="16sp"/>
+                        <TextView
+                            android:id="@+id/txt_Balance"
+                            android:layout_width="190dp"
+                            android:layout_height="wrap_content"
+                            android:text="- R 100 000"
+                            android:textAlignment="textStart"
+                            android:textAppearance="@style/MainTextStyle"
+                            android:textSize="30sp" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/txt_Allocation"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="R 100 000"
+                                android:textAlignment="textEnd"
+                                android:textAppearance="@style/SubTextStyle"
+                                android:textSize="16sp" />
+
+                            <TextView
+                                android:id="@+id/txt_Spent"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="R 80 000"
+                                android:textAlignment="textEnd"
+                                android:textAppearance="@style/SubTextStyle"
+                                android:textSize="16sp" />
+                        </LinearLayout>
+                    </LinearLayout>
                 </LinearLayout>
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclerView_Subcategories"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_margin="10dp"
+                    android:background="@drawable/roundedcorners_background"
+                    android:backgroundTint="@color/SubItemBackgroundColor"
+                    tools:itemCount="9"
+                    tools:listitem="@layout/subcategory_layout" />
             </LinearLayout>
         </LinearLayout>
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerView_Subcategories"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_margin="10dp"
-            android:background="@drawable/roundedcorners_background"
-            android:backgroundTint="@color/SubItemBackgroundColor"
-            tools:itemCount="9"
-            tools:listitem="@layout/subcategory_layout" />
-    </LinearLayout>
-    </LinearLayout>
+    </FrameLayout>
 
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/nav_view"
@@ -118,15 +133,6 @@
         android:fitsSystemWindows="true"
         app:headerLayout="@layout/header_bar_layout"
         app:menu="@menu/drawer_menu" />
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab_AddSubcategory"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="16dp"
-        android:src="@drawable/ic_launcher_foreground"
-        app:tint="@android:color/white" />
 
 </androidx.drawerlayout.widget.DrawerLayout>
 

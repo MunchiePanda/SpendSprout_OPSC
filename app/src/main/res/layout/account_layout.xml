@@ -6,6 +6,7 @@
     android:orientation="vertical"
     android:padding="16dp"
     android:background="@drawable/roundedcorners_background"
+    android:backgroundTint="@color/ItemBackgroundColor"
     android:layout_margin="8dp">
 
     <!-- Account Header -->
@@ -56,8 +57,9 @@
                 android:layout_height="24dp"
                 android:layout_marginStart="8dp"
                 android:background="@drawable/circle_drawable"
+                android:backgroundTint="@color/ButtonColor"
                 android:src="@drawable/ic_edit"
-                android:tint="@color/MainTextColor"
+                app:tint="@color/black"
                 android:padding="4dp" />
         </LinearLayout>
     </LinearLayout>
