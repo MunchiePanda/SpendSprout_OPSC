@@ -9,18 +9,21 @@
     android:fitsSystemWindows="true"
     android:background="@color/BackgroundColor">
 
-    <LinearLayout
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_height="match_parent">
 
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="@color/TopBarColor"
-            android:elevation="4dp"
-            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+        <!-- Header Bar -->
+        <include
+            android:id="@+id/header_bar"
+            layout="@layout/header_bar_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
 
         <ScrollView
             android:layout_width="match_parent"
@@ -223,6 +226,41 @@
                     android:gravity="top"
                     android:inputType="textMultiLine" />
 
+                <Button
+                    android:id="@+id/btn_AddImage"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Add Image"
+                    android:background="@drawable/edit_text_background"
+                    android:textColor="@color/MainTextColor" />
+
+                <!-- Bottom image preview area (hidden until image exists) -->
+                <LinearLayout
+                    android:id="@+id/bottomPreviewContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginTop="8dp"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Attached Image"
+                        android:textColor="@color/SubTextColor"
+                        android:textSize="12sp"
+                        android:layout_marginBottom="4dp" />
+
+                    <ImageView
+                        android:id="@+id/img_EditPreview"
+                        android:layout_width="match_parent"
+                        android:layout_height="200dp"
+                        android:scaleType="centerCrop"
+                        android:adjustViewBounds="true"
+                        android:visibility="gone" />
+                </LinearLayout>
+
             </LinearLayout>
         </ScrollView>
 
@@ -254,16 +292,33 @@
                 android:textColor="@color/MainTextColor" />
         </LinearLayout>
 
-    </LinearLayout>
+        </LinearLayout>
 
+        <!-- Save FAB inside content so it floats above -->
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fab_SaveTransaction"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="16dp"
+            android:contentDescription="@string/save"
+            android:src="@drawable/ic_launcher_foreground"
+            app:tint="@android:color/white" />
+
+    </FrameLayout>
+
+    <!-- Navigation Drawer -->
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/nav_view"
-        android:layout_width="wrap_content"
+        android:layout_width="280dp"
         android:layout_height="match_parent"
         android:layout_gravity="start"
         android:fitsSystemWindows="true"
-        app:headerLayout="@layout/header_bar_layout"
-        app:menu="@menu/drawer_menu" />
+        app:headerLayout="@layout/menu_header_layout"
+        app:menu="@menu/drawer_menu"
+        android:backgroundTint="@color/MenuBackgroundColor"
+        app:itemTextColor="@color/black"
+        app:subheaderColor="@color/black"
+        app:itemIconTint="@color/IconColor" />
 
 </androidx.drawerlayout.widget.DrawerLayout>
-

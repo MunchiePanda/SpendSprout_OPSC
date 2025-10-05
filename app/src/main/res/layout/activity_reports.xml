@@ -9,183 +9,81 @@
     android:fitsSystemWindows="true"
     android:background="@color/BackgroundColor">
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
-
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar"
+        android:layout_height="match_parent">
+        <!-- Header Bar -->
+        <include
+            android:id="@+id/header_bar"
+            layout="@layout/header_bar_layout"
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="@color/TopBarColor"
-            android:elevation="4dp"
-            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-        <ScrollView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:fillViewport="true">
+        <Spinner
+            android:id="@+id/spinner_Month"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/header_bar" />
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
+        <Button
+            android:id="@+id/btn_Export"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Export"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/spinner_Month" />
 
-            <!-- Month Filter and Segmented Control -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginBottom="24dp"
-                android:gravity="center_vertical">
+        <ProgressBar
+            android:id="@+id/progressBar_Spending"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:layout_marginTop="32dp"
+            android:progress="75"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/spinner_Month" />
 
-                <!-- Month Filter Button -->
-                <LinearLayout
-                    android:id="@+id/btn_MonthFilter"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:background="@drawable/roundedcorners_background"
-                    android:padding="12dp"
-                    android:layout_marginEnd="16dp">
+        <TextView
+            android:id="@+id/txt_ProgressAmount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="R 6000"
+            android:textAppearance="@style/HeaderTextStyle"
+            app:layout_constraintBottom_toBottomOf="@+id/progressBar_Spending"
+            app:layout_constraintEnd_toEndOf="@+id/progressBar_Spending"
+            app:layout_constraintStart_toStartOf="@+id/progressBar_Spending"
+            app:layout_constraintTop_toTopOf="@+id/progressBar_Spending" />
 
-                    <ImageView
-                        android:layout_width="16dp"
-                        android:layout_height="16dp"
-                        android:src="@drawable/ic_chevron_right"
-                        android:tint="@color/MainTextColor"
-                        android:rotation="90"
-                        android:layout_marginEnd="8dp" />
+        <com.example.spendsprout_opsc.reports.ChartView
+            android:id="@+id/chartView"
+            android:layout_width="0dp"
+            android:layout_height="300dp"
+            android:layout_marginTop="32dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/progressBar_Spending" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Month"
-                        android:textColor="@color/MainTextColor"
-                        android:textSize="16sp" />
-                </LinearLayout>
-
-                <!-- Segmented Control -->
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:background="@drawable/roundedcorners_background"
-                    android:padding="4dp">
-
-                    <!-- Line Chart Button (Selected) -->
-                    <LinearLayout
-                        android:id="@+id/btn_LineChart"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:background="@color/HighlightTextColor"
-                        android:padding="8dp"
-                        android:layout_marginEnd="4dp">
-
-                        <ImageView
-                            android:layout_width="16dp"
-                            android:layout_height="16dp"
-                            android:src="@drawable/ic_line_chart"
-                            android:tint="@color/BackgroundColor" />
-                    </LinearLayout>
-
-                    <!-- Pie Chart Button (Unselected) -->
-                    <LinearLayout
-                        android:id="@+id/btn_PieChart"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:padding="8dp">
-
-                        <ImageView
-                            android:layout_width="16dp"
-                            android:layout_height="16dp"
-                            android:src="@drawable/ic_pie_chart"
-                            android:tint="@color/MainTextColor" />
-                    </LinearLayout>
-                </LinearLayout>
-            </LinearLayout>
-
-            <!-- Circular Progress Card -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:background="@drawable/roundedcorners_background"
-                android:padding="24dp"
-                android:layout_marginBottom="24dp"
-                android:gravity="center">
-
-                <!-- Circular Progress Indicator -->
-                <com.example.spendsprout_opsc.reports.CircularProgressView
-                    android:id="@+id/circularProgressView"
-                    android:layout_width="200dp"
-                    android:layout_height="200dp"
-                    android:layout_marginBottom="16dp" />
-
-                <!-- Progress Amount -->
-                <TextView
-                    android:id="@+id/txt_ProgressAmount"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="R 6000"
-                    android:textColor="@color/MainTextColor"
-                    android:textSize="24sp"
-                    android:textStyle="bold" />
-            </LinearLayout>
-
-            <!-- Revenue vs Target Chart Card -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:background="@drawable/roundedcorners_background"
-                android:padding="16dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Revenue vs. Target by Month"
-                    android:textColor="@color/MainTextColor"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    android:layout_marginBottom="12dp" />
-
-                <FrameLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="300dp">
-
-                    <com.example.spendsprout_opsc.overview.ChartView
-                        android:id="@+id/chartView"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent" />
-                </FrameLayout>
-            </LinearLayout>
-
-            </LinearLayout>
-        </ScrollView>
-    </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/nav_view"
-        android:layout_width="wrap_content"
+        android:layout_width="280dp"
         android:layout_height="match_parent"
         android:layout_gravity="start"
         android:fitsSystemWindows="true"
-        app:headerLayout="@layout/header_bar_layout"
-        app:menu="@menu/drawer_menu" />
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab_AddReport"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="16dp"
-        android:src="@drawable/ic_add"
-        app:tint="@android:color/white" />
+        app:headerLayout="@layout/menu_header_layout"
+        app:menu="@menu/drawer_menu"
+        android:backgroundTint="@color/MenuBackgroundColor"
+        app:itemTextColor="@color/black"
+        app:subheaderColor="@color/black"
+        app:itemIconTint="@color/IconColor" />
 
 </androidx.drawerlayout.widget.DrawerLayout>
 

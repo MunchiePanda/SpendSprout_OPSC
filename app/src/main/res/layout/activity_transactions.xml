@@ -14,39 +14,47 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar"
+        <!-- Header Bar -->
+        <include
+            android:id="@+id/header_bar"
+            layout="@layout/header_bar_layout"
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="@color/TopBarColor"
-            android:elevation="4dp"
-            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
+            android:layout_height="wrap_content" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fab_AddTransaction"
+            android:layout_width="103dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="16dp"
+            android:contentDescription="@string/add_transaction"
+            android:src="@android:drawable/ic_input_add"
+            app:backgroundTint="@color/HighlightTextColor"
+            app:tint="@android:color/black" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerView_Transactions"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="961dp"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             tools:listitem="@layout/expense_layout" />
+
     </LinearLayout>
 
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/nav_view"
-        android:layout_width="wrap_content"
+        android:layout_width="280dp"
         android:layout_height="match_parent"
         android:layout_gravity="start"
         android:fitsSystemWindows="true"
-        app:headerLayout="@layout/header_bar_layout"
-        app:menu="@menu/drawer_menu" />
+        app:headerLayout="@layout/menu_header_layout"
+        app:menu="@menu/drawer_menu"
+        android:backgroundTint="@color/MenuBackgroundColor"
+        app:itemTextColor="@color/black"
+        app:subheaderColor="@color/black"
+        app:itemIconTint="@color/IconColor" >
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab_AddTransaction"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="16dp"
-        android:src="@drawable/ic_launcher_foreground"
-        app:tint="@android:color/white" />
+    </com.google.android.material.navigation.NavigationView>
 
 </androidx.drawerlayout.widget.DrawerLayout>
 

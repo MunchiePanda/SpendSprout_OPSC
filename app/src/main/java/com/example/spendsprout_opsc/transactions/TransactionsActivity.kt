@@ -4,6 +4,8 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
@@ -33,8 +35,9 @@ class TransactionsActivity : AppCompatActivity(), NavigationView.OnNavigationIte
         drawerLayout = findViewById(R.id.drawer_layout)
         navView = findViewById(R.id.nav_view)
 
-        // Set up the toolbar
-        val toolbar: androidx.appcompat.widget.Toolbar = findViewById(R.id.toolbar)
+        // Set up the toolbar from the included header bar
+        val headerBar = findViewById<View>(R.id.header_bar)
+        val toolbar: androidx.appcompat.widget.Toolbar = headerBar.findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
 
         val toggle = ActionBarDrawerToggle(
@@ -66,24 +69,48 @@ class TransactionsActivity : AppCompatActivity(), NavigationView.OnNavigationIte
         val recyclerView = findViewById<RecyclerView>(R.id.recyclerView_Transactions)
         recyclerView.layoutManager = LinearLayoutManager(this)
 
-        val transactions = transactionsViewModel.getAllTransactions()
-        transactionAdapter = TransactionAdapter(transactions) { transaction ->
-            // Transaction items are not clickable - they just display information
-            // Only the FAB should navigate to edit screen
+        // Initialize with empty list, will be populated from database
+        transactionAdapter = TransactionAdapter(emptyList()) { transaction ->
+            // Handle transaction click - open edit screen
+            val intent = Intent(this, com.example.spendsprout_opsc.edit.EditTransactionActivity::class.java)
+            intent.putExtra("transactionId", transaction.id)
+            startActivity(intent)
         }
         recyclerView.adapter = transactionAdapter
+        
+        // Load transactions from database
+        loadTransactionsFromDatabase()
     }
 
     private fun setupFab() {
         val fabAddTransaction = findViewById<FloatingActionButton>(R.id.fab_AddTransaction)
-        fabAddTransaction.setOnClickListener {
-            val intent = Intent(this, com.example.spendsprout_opsc.edit.EditTransactionActivity::class.java)
-            startActivity(intent)
+        if (fabAddTransaction != null) {
+            fabAddTransaction.setOnClickListener {
+                val intent = Intent(this, com.example.spendsprout_opsc.edit.EditTransactionActivity::class.java)
+                startActivity(intent)
+            }
+            // Make sure FAB is visible
+            fabAddTransaction.visibility = android.view.View.VISIBLE
+        } else {
+            Toast.makeText(this, "FAB not found!", Toast.LENGTH_SHORT).show()
         }
     }
 
     private fun observeData() {
         // Observe ViewModel data changes
+    }
+    
+    private fun loadTransactionsFromDatabase() {
+        // Prefer all transactions to avoid date filter hiding new entries
+        transactionsViewModel.loadAllTransactionsFromDatabase { transactions ->
+            transactionAdapter.updateData(transactions)
+        }
+    }
+    
+    override fun onResume() {
+        super.onResume()
+        // Reload transactions when returning to this activity
+        loadTransactionsFromDatabase()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -121,7 +148,7 @@ class TransactionsActivity : AppCompatActivity(), NavigationView.OnNavigationIte
                 startActivity(Intent(this, OverviewActivity::class.java))
             }
             R.id.nav_categories -> {
-                startActivity(Intent(this, CategoriesActivity::class.java))
+                startActivity(Intent(this, com.example.spendsprout_opsc.CategoryOverviewActivity::class.java))
             }
             R.id.nav_transactions -> {
                 // Already in Transactions, do nothing
@@ -143,7 +170,7 @@ class TransactionsActivity : AppCompatActivity(), NavigationView.OnNavigationIte
         return true
     }
 
-    @Deprecated("Use onBackPressedDispatcher instead")
+    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
             drawerLayout.closeDrawer(GravityCompat.START)

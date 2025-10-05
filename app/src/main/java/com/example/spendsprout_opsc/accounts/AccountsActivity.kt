@@ -65,12 +65,17 @@ class AccountsActivity : AppCompatActivity(), NavigationView.OnNavigationItemSel
         val recyclerView = findViewById<RecyclerView>(R.id.recyclerView_Accounts)
         recyclerView.layoutManager = LinearLayoutManager(this)
 
-        val accounts = accountsViewModel.getAllAccounts()
-        accountAdapter = AccountAdapter(accounts) { account ->
-            // Account items are not clickable - they just display information
-            // Only the FAB should navigate to edit screen for adding new accounts
+        // Initialize with empty list, will be populated from database
+        accountAdapter = AccountAdapter(emptyList()) { account ->
+            // Handle account click - open edit screen
+            val intent = Intent(this, com.example.spendsprout_opsc.edit.EditAccountActivity::class.java)
+            intent.putExtra("accountId", account.id)
+            startActivity(intent)
         }
         recyclerView.adapter = accountAdapter
+
+        // Load accounts from database
+        loadAccountsFromDatabase()
     }
 
     private fun setupFab() {
@@ -84,6 +89,18 @@ class AccountsActivity : AppCompatActivity(), NavigationView.OnNavigationItemSel
     private fun observeData() {
         // Observe ViewModel data changes
     }
+    
+    private fun loadAccountsFromDatabase() {
+        accountsViewModel.loadAccountsFromDatabase { accounts ->
+            accountAdapter.updateData(accounts)
+        }
+    }
+    
+    override fun onResume() {
+        super.onResume()
+        // Reload accounts when returning to this activity
+        loadAccountsFromDatabase()
+    }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
@@ -91,7 +108,7 @@ class AccountsActivity : AppCompatActivity(), NavigationView.OnNavigationItemSel
                 startActivity(Intent(this, OverviewActivity::class.java))
             }
             R.id.nav_categories -> {
-                startActivity(Intent(this, CategoriesActivity::class.java))
+                startActivity(Intent(this, com.example.spendsprout_opsc.CategoryOverviewActivity::class.java))
             }
             R.id.nav_transactions -> {
                 startActivity(Intent(this, TransactionsActivity::class.java))
@@ -113,7 +130,7 @@ class AccountsActivity : AppCompatActivity(), NavigationView.OnNavigationItemSel
         return true
     }
 
-    @Deprecated("Use onBackPressedDispatcher instead")
+    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
             drawerLayout.closeDrawer(GravityCompat.START)

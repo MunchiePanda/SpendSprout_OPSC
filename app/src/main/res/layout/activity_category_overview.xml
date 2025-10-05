@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
@@ -7,103 +7,135 @@
     android:layout_height="match_parent"
     tools:context=".CategoryOverviewActivity">
 
-
-    <!-- Layout with filter and main categories -->
-    <LinearLayout
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        android:layout_height="match_parent">
 
-        <!-- Spacer so that Top Bar is visible -->
-        <Space
-            android:id="@+id/spacer_header"
-            android:layout_width="match_parent"
-            android:layout_height="60dp" />
-
-        <!-- Filter with background image/layout -->
-        <LinearLayout
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fab_AddCategory"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:background="@drawable/roundedcorners_background"
-            android:backgroundTint="@color/ItemBackgroundColor"
-            android:padding="5dp"
-            android:layout_marginVertical="10dp"
-            android:orientation="horizontal">
+            android:layout_gravity="bottom|end"
+            android:layout_margin="16dp"
+            android:contentDescription="@string/add_subcategory"
+            android:src="@android:drawable/ic_input_add"
+            app:backgroundTint="@color/HighlightTextColor"
+            app:tint="@android:color/black" />
 
-            <ImageView
-                android:id="@+id/imageView2"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                app:srcCompat="@drawable/filter_icon" />
+        <include
+            android:id="@+id/layout_HeaderBar"
+            layout="@layout/header_bar_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
 
-            <Spinner
-                android:id="@+id/spinner2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:backgroundTint="@color/ButtonColor" />
-
-
-        </LinearLayout>
-
-        <!-- Main Category 1 with 2 Subcategories -->
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_gravity="center"
-            android:layout_marginHorizontal="15dp"
-            android:layout_marginVertical="0dp"
-            android:background="@drawable/roundedcorners_background"
-            android:backgroundTint="@color/ItemBackgroundColor"
-            android:orientation="vertical">
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
-            <include layout="@layout/category_layout" />
+            <!-- Spacer so that Top Bar is visible -->
+            <Space
+                android:id="@+id/spacer_header"
+                android:layout_width="match_parent"
+                android:layout_height="60dp" />
 
+            <!-- Filter with background image/layout -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginHorizontal="5dp"
+                    android:layout_marginVertical="10dp">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_selectDateRange"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/roundedcorners_background"
+                        android:backgroundTint="@color/ItemBackgroundColor"
+                        android:paddingHorizontal="4dp"
+                        android:paddingVertical="0dp"
+                        android:text="Select Date Range"
+                        android:textColor="@color/MainTextColor"
+                        app:icon="@android:drawable/ic_menu_my_calendar"
+                        app:iconTint="@color/IconColor"
+                        android:gravity="center"/>
+
+                    <TextView
+                        android:id="@+id/txt_dateRange"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Last 30 days"
+                        android:textColor="@color/SubTextColor"
+                        android:textSize="12sp"
+                        android:layout_marginTop="4dp"
+                        android:layout_gravity="center"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginVertical="10dp"
+                    android:background="@drawable/roundedcorners_background"
+                    android:backgroundTint="@color/ItemBackgroundColor"
+                    android:orientation="horizontal"
+                    android:padding="5dp">
+
+                    <ImageView
+                        android:id="@+id/imageView2"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        app:srcCompat="@drawable/filter_icon" />
+
+                    <Spinner
+                        android:id="@+id/spinner2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:backgroundTint="@color/ButtonColor" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Categories RecyclerView -->
             <androidx.recyclerview.widget.RecyclerView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_margin="10dp"
+                android:id="@+id/recyclerView_Categories"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginHorizontal="15dp"
+                android:layout_marginVertical="10dp"
                 android:background="@drawable/roundedcorners_background"
-                android:backgroundTint="@color/SubItemBackgroundColor"
-                tools:itemCount="2"
-                tools:listitem="@layout/subcategory_layout" />
-
-            <!-- Main Category 2 with 2 Subcategories -->
-            <include layout="@layout/category_layout" />
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_margin="10dp"
-                android:background="@drawable/roundedcorners_background"
-                android:backgroundTint="@color/SubItemBackgroundColor"
-                tools:itemCount="2"
-                tools:listitem="@layout/subcategory_layout" />
-
-            <!-- Main Category 3 with 2 Subcategories -->
-            <include layout="@layout/category_layout"/>
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_margin="10dp"
-                android:background="@drawable/roundedcorners_background"
-                android:backgroundTint="@color/SubItemBackgroundColor"
-                tools:itemCount="2"
-                tools:listitem="@layout/subcategory_layout" />
+                android:backgroundTint="@color/ItemBackgroundColor"
+                tools:itemCount="3"
+                tools:listitem="@layout/category_layout" />
         </LinearLayout>
-    </LinearLayout>
 
-    <include
-        android:id="@+id/layout_HeaderBar"
-        layout="@layout/header_bar_layout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+    </FrameLayout>
 
-</FrameLayout>
+    <!-- Layout with filter and main categories -->
+
+    <com.google.android.material.navigation.NavigationView
+        android:id="@+id/navigationView"
+        android:layout_width="280dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:fitsSystemWindows="true"
+        app:headerLayout="@layout/menu_header_layout"
+        app:menu="@menu/drawer_menu"
+        android:backgroundTint="@color/MenuBackgroundColor"
+        app:itemTextColor="@color/black"
+        app:subheaderColor="@color/black"
+        app:itemIconTint="@color/IconColor">
+    </com.google.android.material.navigation.NavigationView>
+
+    <!-- Add Subcategory FAB -->
+
+</androidx.drawerlayout.widget.DrawerLayout>

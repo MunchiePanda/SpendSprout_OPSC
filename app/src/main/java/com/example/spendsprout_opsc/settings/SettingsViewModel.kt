@@ -36,5 +36,18 @@ class SettingsViewModel(private val context: Context) {
     fun setLanguage(language: String) {
         sharedPref.edit().putString("Language", language).apply()
     }
+    
+    // Goals functionality for submission requirements
+    fun getMinMonthlyGoal(): Float = sharedPref.getFloat("MinMonthlyGoal", 0f)
+    
+    fun setMinMonthlyGoal(goal: Float) {
+        sharedPref.edit().putFloat("MinMonthlyGoal", goal).apply()
+    }
+    
+    fun getMaxMonthlyGoal(): Float = sharedPref.getFloat("MaxMonthlyGoal", 0f)
+    
+    fun setMaxMonthlyGoal(goal: Float) {
+        sharedPref.edit().putFloat("MaxMonthlyGoal", goal).apply()
+    }
 }
 

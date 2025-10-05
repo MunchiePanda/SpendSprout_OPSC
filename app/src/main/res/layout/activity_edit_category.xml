@@ -9,18 +9,21 @@
     android:fitsSystemWindows="true"
     android:background="@color/BackgroundColor">
 
-    <LinearLayout
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_height="match_parent">
 
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="@color/TopBarColor"
-            android:elevation="4dp"
-            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+        <!-- Header Bar -->
+        <include
+            android:id="@+id/header_bar"
+            layout="@layout/header_bar_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
 
         <ScrollView
             android:layout_width="match_parent"
@@ -54,27 +57,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Allocated Amount"
-                    android:textColor="@color/SubTextColor"
-                    android:textSize="12sp"
-                    android:layout_marginBottom="8dp" />
-
-                <EditText
-                    android:id="@+id/edt_AllocatedAmount"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Less than Needs Amount"
-                    android:textColor="@color/MainTextColor"
-                    android:textColorHint="@color/SubTextColor"
-                    android:background="@drawable/edit_text_background"
-                    android:padding="12dp"
-                    android:inputType="numberDecimal"
-                    android:layout_marginBottom="16dp" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Main Category"
+                    android:text="Type"
                     android:textColor="@color/SubTextColor"
                     android:textSize="12sp"
                     android:layout_marginBottom="8dp" />
@@ -90,7 +73,27 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Colour"
+                    android:text="Allocated Amount"
+                    android:textColor="@color/SubTextColor"
+                    android:textSize="12sp"
+                    android:layout_marginBottom="8dp" />
+
+                <EditText
+                    android:id="@+id/edt_AllocatedAmount"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="R 0.00"
+                    android:textColor="@color/MainTextColor"
+                    android:textColorHint="@color/SubTextColor"
+                    android:background="@drawable/edit_text_background"
+                    android:padding="12dp"
+                    android:inputType="numberDecimal"
+                    android:layout_marginBottom="16dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Color"
                     android:textColor="@color/SubTextColor"
                     android:textSize="12sp"
                     android:layout_marginBottom="8dp" />
@@ -154,16 +157,33 @@
                 android:textColor="@color/MainTextColor" />
         </LinearLayout>
 
-    </LinearLayout>
+        </LinearLayout>
 
+        <!-- Save FAB inside content so it floats above -->
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fab_SaveCategory"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="16dp"
+            android:contentDescription="@string/save"
+            android:src="@drawable/ic_launcher_foreground"
+            app:tint="@android:color/white" />
+
+    </FrameLayout>
+
+    <!-- Navigation Drawer -->
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/nav_view"
-        android:layout_width="wrap_content"
+        android:layout_width="280dp"
         android:layout_height="match_parent"
         android:layout_gravity="start"
         android:fitsSystemWindows="true"
-        app:headerLayout="@layout/header_bar_layout"
-        app:menu="@menu/drawer_menu" />
+        app:headerLayout="@layout/menu_header_layout"
+        app:menu="@menu/drawer_menu"
+        android:backgroundTint="@color/MenuBackgroundColor"
+        app:itemTextColor="@color/black"
+        app:subheaderColor="@color/black"
+        app:itemIconTint="@color/IconColor" />
 
 </androidx.drawerlayout.widget.DrawerLayout>
-

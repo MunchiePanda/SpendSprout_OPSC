@@ -1,55 +1,119 @@
 package com.example.spendsprout_opsc.reports
 
-import com.example.spendsprout_opsc.overview.model.ChartDataPoint
+import com.example.spendsprout_opsc.BudgetApp
+import com.example.spendsprout_opsc.reports.model.ChartDataPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.*
 
 class ReportsViewModel {
     
-    fun getTotalSpent(): Double = 6000.0
-    
-    fun getTotalBudget(): Double = 8000.0
-    
-    fun getProgressPercentage(): Int {
-        return ((getTotalSpent() / getTotalBudget()) * 100).toInt()
+    // Total spent this month from DB (expenses only)
+    fun loadMonthlySpent(
+        startDate: Long = getStartOfMonth(),
+        endDate: Long = getEndOfMonth(),
+        callback: (Double) -> Unit
+    ) {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val expenses = BudgetApp.db.expenseDao().getBetweenDates(startDate, endDate)
+                val total = expenses
+                    .filter { it.expenseType == com.example.spendsprout_opsc.ExpenseType.Expense }
+                    .sumOf { it.expenseAmount }
+                CoroutineScope(Dispatchers.Main).launch { callback(total) }
+            } catch (e: Exception) {
+                CoroutineScope(Dispatchers.Main).launch { callback(0.0) }
+            }
+        }
+    }
+
+    // Daily spend series for the chart (revenue = daily spent; target = daily target if provided)
+    fun loadDailySpendSeries(
+        startDate: Long = getStartOfMonth(),
+        endDate: Long = getEndOfMonth(),
+        monthlyTarget: Double = 0.0,
+        callback: (List<ChartDataPoint>) -> Unit
+    ) {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                val expenses = BudgetApp.db.expenseDao().getBetweenDates(startDate, endDate)
+                    .filter { it.expenseType == com.example.spendsprout_opsc.ExpenseType.Expense }
+
+                val days = getDaysInRange(startDate, endDate)
+                val perDayTarget = if (days.isNotEmpty() && monthlyTarget > 0) monthlyTarget / days.size else 0.0
+
+                val dailySum = expenses.groupBy { sdf.format(Date(it.expenseDate)) }
+                    .mapValues { (_, list) -> list.sumOf { it.expenseAmount } }
+
+                val series = days.map { dayMillis ->
+                    val key = sdf.format(Date(dayMillis))
+                    val spent = dailySum[key] ?: 0.0
+                    ChartDataPoint(
+                        month = key,
+                        revenue = spent,
+                        target = perDayTarget
+                    )
+                }
+                CoroutineScope(Dispatchers.Main).launch { callback(series) }
+            } catch (e: Exception) {
+                CoroutineScope(Dispatchers.Main).launch { callback(emptyList()) }
+            }
+        }
+    }
+
+    // Existing: category totals (kept)
+    fun loadCategoryTotals(
+        startDate: Long = getStartOfMonth(),
+        endDate: Long = getEndOfMonth(),
+        callback: (List<com.example.spendsprout_opsc.roomdb.CategoryTotal>) -> Unit
+    ) {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val totals = BudgetApp.db.expenseDao().totalsByCategory(startDate, endDate)
+                CoroutineScope(Dispatchers.Main).launch { callback(totals) }
+            } catch (e: Exception) {
+                CoroutineScope(Dispatchers.Main).launch { callback(emptyList()) }
+            }
+        }
+    }
+
+    private fun getDaysInRange(start: Long, end: Long): List<Long> {
+        val days = mutableListOf<Long>()
+        val cal = Calendar.getInstance()
+        cal.timeInMillis = start
+        while (cal.timeInMillis <= end) {
+            // normalize to midnight
+            cal.set(Calendar.HOUR_OF_DAY, 0)
+            cal.set(Calendar.MINUTE, 0)
+            cal.set(Calendar.SECOND, 0)
+            cal.set(Calendar.MILLISECOND, 0)
+            days.add(cal.timeInMillis)
+            cal.add(Calendar.DAY_OF_MONTH, 1)
+        }
+        return days
+    }
+
+    fun getStartOfMonth(): Long {
+        val calendar = Calendar.getInstance()
+        calendar.set(Calendar.DAY_OF_MONTH, 1)
+        calendar.set(Calendar.HOUR_OF_DAY, 0)
+        calendar.set(Calendar.MINUTE, 0)
+        calendar.set(Calendar.SECOND, 0)
+        calendar.set(Calendar.MILLISECOND, 0)
+        return calendar.timeInMillis
     }
     
-    fun getChartData(): List<ChartDataPoint> {
-        return listOf(
-            ChartDataPoint("2010/01", 15000.0, 12000.0),
-            ChartDataPoint("2010/02", 18000.0, 15000.0),
-            ChartDataPoint("2010/03", 20000.0, 18000.0),
-            ChartDataPoint("2010/04", 22000.0, 20000.0),
-            ChartDataPoint("2010/05", 25000.0, 22000.0),
-            ChartDataPoint("2010/06", 28000.0, 25000.0),
-            ChartDataPoint("2010/07", 30000.0, 28000.0),
-            ChartDataPoint("2010/08", 32000.0, 30000.0),
-            ChartDataPoint("2010/09", 35000.0, 32000.0),
-            ChartDataPoint("2010/10", 38000.0, 35000.0),
-            ChartDataPoint("2010/11", 40000.0, 38000.0),
-            ChartDataPoint("2010/12", 42000.0, 40000.0),
-            ChartDataPoint("2011/01", 45000.0, 42000.0),
-            ChartDataPoint("2011/02", 48000.0, 45000.0),
-            ChartDataPoint("2011/03", 50000.0, 48000.0),
-            ChartDataPoint("2011/04", 52000.0, 50000.0),
-            ChartDataPoint("2011/05", 55000.0, 52000.0),
-            ChartDataPoint("2011/06", 58000.0, 55000.0),
-            ChartDataPoint("2011/07", 60000.0, 58000.0),
-            ChartDataPoint("2011/08", 62000.0, 60000.0),
-            ChartDataPoint("2011/09", 65000.0, 62000.0),
-            ChartDataPoint("2011/10", 68000.0, 65000.0),
-            ChartDataPoint("2011/11", 70000.0, 68000.0),
-            ChartDataPoint("2011/12", 72000.0, 70000.0),
-            ChartDataPoint("2012/01", 75000.0, 72000.0),
-            ChartDataPoint("2012/02", 78000.0, 75000.0),
-            ChartDataPoint("2012/03", 80000.0, 78000.0),
-            ChartDataPoint("2012/04", 82000.0, 80000.0),
-            ChartDataPoint("2012/05", 85000.0, 82000.0),
-            ChartDataPoint("2012/06", 88000.0, 85000.0),
-            ChartDataPoint("2012/07", 90000.0, 88000.0),
-            ChartDataPoint("2012/08", 92000.0, 90000.0),
-            ChartDataPoint("2012/09", 95000.0, 92000.0),
-            ChartDataPoint("2012/10", 98000.0, 95000.0),
-            ChartDataPoint("2012/11", 100000.0, 98000.0)
-        )
+    fun getEndOfMonth(): Long {
+        val calendar = Calendar.getInstance()
+        calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
+        calendar.set(Calendar.HOUR_OF_DAY, 23)
+        calendar.set(Calendar.MINUTE, 59)
+        calendar.set(Calendar.SECOND, 59)
+        calendar.set(Calendar.MILLISECOND, 999)
+        return calendar.timeInMillis
     }
 }
 

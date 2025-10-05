@@ -26,7 +26,7 @@ class CategoriesActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
     private lateinit var drawerLayout: DrawerLayout
     private lateinit var navView: NavigationView
     private lateinit var categoriesViewModel: CategoriesViewModel
-    private lateinit var categoryAdapter: HierarchicalCategoryAdapter
+    private lateinit var categoryAdapter: CategoryAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -62,7 +62,6 @@ class CategoriesActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
     private fun setupUI() {
         setupCategoryRecyclerView()
         setupFab()
-        setupFilters()
     }
 
     private fun setupCategoryRecyclerView() {
@@ -70,9 +69,11 @@ class CategoriesActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
         recyclerView.layoutManager = LinearLayoutManager(this)
 
         val categories = categoriesViewModel.getAllCategories()
-        categoryAdapter = HierarchicalCategoryAdapter(categories) { category ->
-            // Category items are not clickable - they just display information
-            // Only the FAB should navigate to edit screen for adding new categories
+        categoryAdapter = CategoryAdapter(categories) { category ->
+            // Handle category click - navigate to subcategories
+            val intent = Intent(this, WantsCategoryActivity::class.java)
+            intent.putExtra("categoryName", category.name)
+            startActivity(intent)
         }
         recyclerView.adapter = categoryAdapter
     }
@@ -84,15 +85,6 @@ class CategoriesActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
             startActivity(intent)
         }
     }
-
-    private fun setupFilters() {
-        // Find the filter button (it's in the layout as a LinearLayout)
-        val filterContainer = findViewById<android.widget.LinearLayout>(R.id.filter_container)
-        filterContainer?.setOnClickListener {
-            showFilterDialog()
-        }
-    }
-
 
     private fun observeData() {
         // Observe ViewModel data changes
@@ -123,19 +115,8 @@ class CategoriesActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
     }
 
     private fun applyFilter(type: String) {
-        val filteredCategories = when (type) {
-            "All" -> categoriesViewModel.getAllCategories()
-            else -> categoriesViewModel.getFilteredCategories(type)
-        }
-        
-        // Create new adapter with filtered data
-        categoryAdapter = HierarchicalCategoryAdapter(filteredCategories) { category ->
-            // Handle category click - subcategories are now separate entities
-            val intent = Intent(this, com.example.spendsprout_opsc.edit.EditCategoryActivity::class.java)
-            intent.putExtra("categoryName", category.name)
-            startActivity(intent)
-        }
-        findViewById<RecyclerView>(R.id.recyclerView_Categories).adapter = categoryAdapter
+        val filteredCategories = categoriesViewModel.getFilteredCategories(type)
+        categoryAdapter.updateData(filteredCategories)
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
@@ -144,7 +125,7 @@ class CategoriesActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
                 startActivity(Intent(this, OverviewActivity::class.java))
             }
             R.id.nav_categories -> {
-                // Already in Categories, do nothing
+                startActivity(Intent(this, com.example.spendsprout_opsc.CategoryOverviewActivity::class.java))
             }
             R.id.nav_transactions -> {
                 startActivity(Intent(this, TransactionsActivity::class.java))
@@ -166,7 +147,7 @@ class CategoriesActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
         return true
     }
 
-    @Deprecated("Use onBackPressedDispatcher instead")
+    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
             drawerLayout.closeDrawer(GravityCompat.START)

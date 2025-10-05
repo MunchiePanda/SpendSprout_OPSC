@@ -1,81 +1,115 @@
 package com.example.spendsprout_opsc.transactions
 
+import com.example.spendsprout_opsc.BudgetApp
 import com.example.spendsprout_opsc.transactions.model.Transaction
-import com.example.spendsprout_opsc.TransactionType
-import com.example.spendsprout_opsc.RepeatType
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.*
 
 class TransactionsViewModel {
     
+    private val dateFormat = SimpleDateFormat("d MMMM yyyy", Locale.getDefault())
+    
     fun getAllTransactions(): List<Transaction> {
-        return listOf(
-            Transaction(
-                id = 1,
-                subcategoryId = 1,
-                accountId = 2,
-                contactId = null,
-                name = "Petrol",
-                date = System.currentTimeMillis() - 86400000 * 2,
-                amount = 1500.0,
-                type = TransactionType.Expense,
-                isOwed = false,
-                repeat = RepeatType.None,
-                notes = "Fuel for car",
-                image = null
-            ),
-            Transaction(
-                id = 2,
-                subcategoryId = 3,
-                accountId = 2,
-                contactId = null,
-                name = "Mug 'n Bean",
-                date = System.currentTimeMillis() - 86400000 * 4,
-                amount = 360.0,
-                type = TransactionType.Expense,
-                isOwed = false,
-                repeat = RepeatType.None,
-                notes = "Lunch with friends",
-                image = null
-            ),
-            Transaction(
-                id = 3,
-                subcategoryId = 1,
-                accountId = 2,
-                contactId = null,
-                name = "Salary",
-                date = System.currentTimeMillis() - 86400000 * 10,
-                amount = 20000.0,
-                type = TransactionType.Income,
-                isOwed = false,
-                repeat = RepeatType.None,
-                notes = "Monthly salary",
-                image = null
-            )
-        )
+        // For now, return empty list - will be populated by database queries
+        return emptyList()
     }
     
     fun getFilteredTransactions(filter: String): List<Transaction> {
-        val allTransactions = getAllTransactions()
-        return when (filter) {
-            "Income" -> allTransactions.filter { it.type == TransactionType.Income }
-            "Expenses" -> allTransactions.filter { it.type == TransactionType.Expense }
-            "This Month" -> allTransactions.filter { 
-                val currentMonth = java.util.Calendar.getInstance().get(java.util.Calendar.MONTH)
-                val transactionMonth = java.util.Calendar.getInstance().apply { 
-                    timeInMillis = it.date 
-                }.get(java.util.Calendar.MONTH)
-                currentMonth == transactionMonth
+        // For now, return empty list - will be populated by database queries
+        return emptyList()
+    }
+    
+    // New method to load transactions from database
+    fun loadTransactionsFromDatabase(
+        startDate: Long = getStartOfMonth(),
+        endDate: Long = getEndOfMonth(),
+        callback: (List<Transaction>) -> Unit
+    ) {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val expenses = BudgetApp.db.expenseDao().getBetweenDates(startDate, endDate)
+                val transactions = expenses.map { expense ->
+                    Transaction(
+                        id = expense.id.toString(),
+                        date = dateFormat.format(Date(expense.expenseDate)),
+                        description = expense.expenseName,
+                        amount = formatAmount(expense.expenseAmount, expense.expenseType),
+                        color = getCategoryColor(expense.expenseCategory),
+                        imagePath = expense.expenseImage
+                    )
+                }
+                CoroutineScope(Dispatchers.Main).launch {
+                    callback(transactions)
+                }
+            } catch (e: Exception) {
+                CoroutineScope(Dispatchers.Main).launch {
+                    callback(emptyList())
+                }
             }
-            "Last Month" -> allTransactions.filter { 
-                val lastMonth = java.util.Calendar.getInstance().apply { 
-                    add(java.util.Calendar.MONTH, -1) 
-                }.get(java.util.Calendar.MONTH)
-                val transactionMonth = java.util.Calendar.getInstance().apply { 
-                    timeInMillis = it.date 
-                }.get(java.util.Calendar.MONTH)
-                lastMonth == transactionMonth
-            }
-            else -> allTransactions
         }
+    }
+
+    // Load all transactions regardless of date (useful if user dates vary)
+    fun loadAllTransactionsFromDatabase(callback: (List<Transaction>) -> Unit) {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val expenses = BudgetApp.db.expenseDao().getAll()
+                val transactions = expenses.sortedByDescending { it.expenseDate }.map { expense ->
+                    Transaction(
+                        id = expense.id.toString(),
+                        date = dateFormat.format(Date(expense.expenseDate)),
+                        description = expense.expenseName,
+                        amount = formatAmount(expense.expenseAmount, expense.expenseType),
+                        color = getCategoryColor(expense.expenseCategory)
+                    )
+                }
+                CoroutineScope(Dispatchers.Main).launch { callback(transactions) }
+            } catch (e: Exception) {
+                CoroutineScope(Dispatchers.Main).launch { callback(emptyList()) }
+            }
+        }
+    }
+    
+    private fun formatAmount(amount: Double, expenseType: com.example.spendsprout_opsc.ExpenseType): String {
+        val formattedAmount = "R ${String.format("%.2f", amount)}"
+        return if (expenseType == com.example.spendsprout_opsc.ExpenseType.Expense) {
+            "- $formattedAmount"
+        } else {
+            "+ $formattedAmount"
+        }
+    }
+    
+    private fun getCategoryColor(category: String): String {
+        return when (category.lowercase()) {
+            "groceries" -> "#87CEEB"
+            "needs" -> "#4169E1"
+            "wants" -> "#9370DB"
+            "savings" -> "#32CD32"
+            else -> "#D3D3D3"
+        }
+    }
+    
+    private fun getStartOfMonth(): Long {
+        val calendar = Calendar.getInstance()
+        calendar.set(Calendar.DAY_OF_MONTH, 1)
+        calendar.set(Calendar.HOUR_OF_DAY, 0)
+        calendar.set(Calendar.MINUTE, 0)
+        calendar.set(Calendar.SECOND, 0)
+        calendar.set(Calendar.MILLISECOND, 0)
+        return calendar.timeInMillis
+    }
+    
+    private fun getEndOfMonth(): Long {
+        val calendar = Calendar.getInstance()
+        calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
+        calendar.set(Calendar.HOUR_OF_DAY, 23)
+        calendar.set(Calendar.MINUTE, 59)
+        calendar.set(Calendar.SECOND, 59)
+        calendar.set(Calendar.MILLISECOND, 999)
+        return calendar.timeInMillis
     }
 }
 

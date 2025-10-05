@@ -3,98 +3,80 @@ package com.example.spendsprout_opsc.categories
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.spendsprout_opsc.R
 import com.example.spendsprout_opsc.categories.model.Category
+import com.example.spendsprout_opsc.categories.model.Subcategory
 
-/**
- * HierarchicalCategoryAdapter - Handles both main categories and subcategories
- * 
- * This is like Unity's UI List that can show both parent and child items
- * Similar to Unity's hierarchical UI system or nested prefabs
- */
 class HierarchicalCategoryAdapter(
-    private val categories: List<Category>,
-    private val onItemClick: (Category) -> Unit
-) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+    private var categories: List<CategoryWithSubcategories>,
+    private val onCategoryClick: (Category) -> Unit,
+    private val onSubcategoryClick: (Subcategory) -> Unit
+) : RecyclerView.Adapter<HierarchicalCategoryAdapter.CategoryViewHolder>() {
 
-    companion object {
-        private const val TYPE_MAIN_CATEGORY = 0
-        private const val TYPE_SUBCATEGORY = 1
+    data class CategoryWithSubcategories(
+        val category: Category,
+        val subcategories: List<Subcategory>
+    )
+
+    class CategoryViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
+        val categoryNameTextView: TextView = view.findViewById(R.id.txt_Name)
+        val categoryBalanceTextView: TextView = view.findViewById(R.id.txt_Balance)
+        val categoryAllocationTextView: TextView = view.findViewById(R.id.txt_Allocation)
+        val categorySpentTextView: TextView = view.findViewById(R.id.txt_Spent)
+        val categoryImageView: ImageView = view.findViewById(R.id.img_Category)
+        val subcategoriesRecyclerView: RecyclerView = view.findViewById(R.id.recyclerView_Subcategories)
     }
 
-    // Flatten the hierarchical data into a list for RecyclerView
-    private val flatItems = mutableListOf<Any>()
-
-    init {
-        // Like Unity's flattening hierarchical data for UI display
-        categories.forEach { category ->
-            flatItems.add(category) // Add main category
-            // Note: subcategories are now separate entities, not nested in Category
-        }
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CategoryViewHolder {
+        val view = LayoutInflater.from(parent.context)
+            .inflate(R.layout.category_with_subcategories_layout, parent, false)
+        return CategoryViewHolder(view)
     }
 
-    override fun getItemViewType(position: Int): Int {
-        return TYPE_MAIN_CATEGORY // All items are main categories now
-    }
+    override fun onBindViewHolder(holder: CategoryViewHolder, position: Int) {
+        val categoryWithSubcategories = categories[position]
+        val category = categoryWithSubcategories.category
+        val subcategories = categoryWithSubcategories.subcategories
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        return when (viewType) {
-            TYPE_MAIN_CATEGORY -> {
-                val view = LayoutInflater.from(parent.context)
-                    .inflate(R.layout.category_layout, parent, false)
-                MainCategoryViewHolder(view)
-            }
-            TYPE_SUBCATEGORY -> {
-                val view = LayoutInflater.from(parent.context)
-                    .inflate(R.layout.subcategory_item_layout, parent, false)
-                SubcategoryViewHolder(view)
-            }
-            else -> throw IllegalArgumentException("Invalid view type")
-        }
-    }
-
-    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        val item = flatItems[position] as Category
+        // Set category data
+        holder.categoryNameTextView.text = category.name
+        holder.categoryBalanceTextView.text = category.spent
+        holder.categoryAllocationTextView.text = category.allocation
+        holder.categorySpentTextView.text = "" // Clear spent text for main category
         
-        when (holder) {
-            is MainCategoryViewHolder -> {
-                // Like Unity's UI Text updates for main categories
-                holder.nameTextView.text = item.name
-                holder.spentTextView.text = "R ${String.format("%.0f", item.balance)}"
-                holder.allocatedTextView.text = "R ${String.format("%.0f", item.allocation)}"
-                
-                // Set color indicator - like Unity's color changes
-                holder.colorIndicator.setBackgroundColor(item.color)
-                
-                // Set spent amount color based on overspending
-                if (item.balance > item.allocation) {
-                    holder.spentTextView.setTextColor(android.graphics.Color.parseColor("#E94444"))
-                } else {
-                    holder.spentTextView.setTextColor(android.graphics.Color.parseColor("#77B950"))
-                }
-                
-                // Set click listener - like Unity's Button.onClick
-                holder.itemView.setOnClickListener { onItemClick(item) }
-            }
+        // Set category color
+        holder.categoryImageView.setColorFilter(android.graphics.Color.parseColor(category.color))
+        
+        // Set amount color based on positive/negative
+        if (category.spent.startsWith("+") || !category.spent.startsWith("-")) {
+            holder.categoryBalanceTextView.setTextColor(android.graphics.Color.parseColor("#77B950"))
+        } else {
+            holder.categoryBalanceTextView.setTextColor(android.graphics.Color.parseColor("#E94444"))
         }
+        
+        // Setup subcategories RecyclerView
+        setupSubcategoriesRecyclerView(holder.subcategoriesRecyclerView, subcategories)
+        
+        // Set click listener for main category
+        holder.view.setOnClickListener { onCategoryClick(category) }
     }
 
-    override fun getItemCount(): Int = flatItems.size
-
-    // Main Category ViewHolder - like Unity's main UI component
-    class MainCategoryViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val nameTextView: TextView = itemView.findViewById(R.id.txt_Name)
-        val spentTextView: TextView = itemView.findViewById(R.id.txt_Spent)
-        val allocatedTextView: TextView = itemView.findViewById(R.id.txt_Allocated)
-        val colorIndicator: View = itemView.findViewById(R.id.color_indicator)
+    private fun setupSubcategoriesRecyclerView(recyclerView: RecyclerView, subcategories: List<Subcategory>) {
+        recyclerView.layoutManager = LinearLayoutManager(recyclerView.context)
+        val subcategoryAdapter = SubcategoryAdapter(subcategories) { subcategory ->
+            onSubcategoryClick(subcategory)
+        }
+        recyclerView.adapter = subcategoryAdapter
     }
 
-    // Subcategory ViewHolder - like Unity's child UI component
-    class SubcategoryViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val nameTextView: TextView = itemView.findViewById(R.id.txt_Name)
-        val spentTextView: TextView = itemView.findViewById(R.id.txt_Spent)
-        val colorIndicator: View = itemView.findViewById(R.id.color_indicator)
+    override fun getItemCount(): Int = categories.size
+    
+    fun updateData(newCategories: List<CategoryWithSubcategories>) {
+        categories = newCategories
+        notifyDataSetChanged()
     }
 }

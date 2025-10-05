@@ -1,23 +1,25 @@
-package com.example.spendsprout_opsc.wants
+package com.example.spendsprout_opsc.categories
 
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.spendsprout_opsc.R
-import com.example.spendsprout_opsc.wants.model.Subcategory
+import com.example.spendsprout_opsc.categories.model.Subcategory
 
 class SubcategoryAdapter(
-    private val subcategories: List<Subcategory>,
+    private var subcategories: List<Subcategory>,
     private val onItemClick: (Subcategory) -> Unit
 ) : RecyclerView.Adapter<SubcategoryAdapter.SubcategoryViewHolder>() {
 
     class SubcategoryViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
         val nameTextView: TextView = view.findViewById(R.id.txt_Name)
+        val balanceTextView: TextView = view.findViewById(R.id.txt_Balance)
+        val allocationTextView: TextView = view.findViewById(R.id.txt_Allocation)
         val spentTextView: TextView = view.findViewById(R.id.txt_Spent)
-        //val allocatedTextView: TextView = view.findViewById(R.id.txt_Allocated)
-        //val colorIndicator: View = view.findViewById(R.id.color_indicator)
+        val imageView: ImageView = view.findViewById(R.id.img_Category)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SubcategoryViewHolder {
@@ -29,17 +31,18 @@ class SubcategoryAdapter(
     override fun onBindViewHolder(holder: SubcategoryViewHolder, position: Int) {
         val subcategory = subcategories[position]
         holder.nameTextView.text = subcategory.name
-        holder.spentTextView.text = subcategory.spent
-        //holder.allocatedTextView.text = subcategory.allocated
+        holder.balanceTextView.text = subcategory.spent
+        holder.allocationTextView.text = subcategory.allocation
+        holder.spentTextView.text = "" // Clear spent text
         
-        // Set color indicator
-        //holder.colorIndicator.setBackgroundColor(android.graphics.Color.parseColor(subcategory.color))
+        // Set subcategory color
+        holder.imageView.setColorFilter(android.graphics.Color.parseColor(subcategory.color))
         
-        // Set spent amount color based on overspending
-        if (subcategory.spent.startsWith("-") || subcategory.spent.toDoubleOrNull() ?: 0.0 > subcategory.allocated.toDoubleOrNull() ?: 0.0) {
-            holder.spentTextView.setTextColor(android.graphics.Color.parseColor("#E94444"))
+        // Set amount color based on positive/negative
+        if (subcategory.spent.startsWith("+") || !subcategory.spent.startsWith("-")) {
+            holder.balanceTextView.setTextColor(android.graphics.Color.parseColor("#77B950"))
         } else {
-            holder.spentTextView.setTextColor(android.graphics.Color.parseColor("#77B950"))
+            holder.balanceTextView.setTextColor(android.graphics.Color.parseColor("#E94444"))
         }
         
         // Set click listener
@@ -47,5 +50,9 @@ class SubcategoryAdapter(
     }
 
     override fun getItemCount(): Int = subcategories.size
+    
+    fun updateData(newSubcategories: List<Subcategory>) {
+        subcategories = newSubcategories
+        notifyDataSetChanged()
+    }
 }
-

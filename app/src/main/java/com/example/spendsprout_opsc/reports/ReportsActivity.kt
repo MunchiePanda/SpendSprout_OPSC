@@ -3,6 +3,7 @@ package com.example.spendsprout_opsc.reports
 import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
+import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.ProgressBar
@@ -25,7 +26,7 @@ class ReportsActivity : AppCompatActivity(), NavigationView.OnNavigationItemSele
     private lateinit var drawerLayout: DrawerLayout
     private lateinit var navView: NavigationView
     private lateinit var reportsViewModel: ReportsViewModel
-    private lateinit var circularProgressView: CircularProgressView
+    private lateinit var progressBarSpending: ProgressBar
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,10 +34,11 @@ class ReportsActivity : AppCompatActivity(), NavigationView.OnNavigationItemSele
 
         drawerLayout = findViewById(R.id.drawer_layout)
         navView = findViewById(R.id.nav_view)
-        circularProgressView = findViewById(R.id.circularProgressView)
+        progressBarSpending = findViewById(R.id.progressBar_Spending)
 
-        // Set up the toolbar
-        val toolbar: androidx.appcompat.widget.Toolbar = findViewById(R.id.toolbar)
+        // Set up the toolbar from the included header bar
+        val headerBar = findViewById<View>(R.id.header_bar)
+        val toolbar: androidx.appcompat.widget.Toolbar = headerBar.findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
 
         val toggle = ActionBarDrawerToggle(
@@ -60,53 +62,59 @@ class ReportsActivity : AppCompatActivity(), NavigationView.OnNavigationItemSele
     }
 
     private fun setupUI() {
-        setupMonthFilter()
-        setupSegmentedControl()
-        setupCircularProgress()
+        setupMonthSpinner()
+        setupExportButton()
         setupChart()
-        setupFab()
+        updateProgressBar()
     }
 
-    private fun setupMonthFilter() {
-        val btnMonthFilter = findViewById<android.widget.LinearLayout>(R.id.btn_MonthFilter)
-        btnMonthFilter.setOnClickListener {
-            // Show month selection dialog
-            Toast.makeText(this, "Month filter clicked", Toast.LENGTH_SHORT).show()
-        }
+    override fun onResume() {
+        super.onResume()
+        // Refresh chart and progress in case data changed
+        setupChart()
+        updateProgressBar()
     }
 
-    private fun setupSegmentedControl() {
-        val btnLineChart = findViewById<android.widget.LinearLayout>(R.id.btn_LineChart)
-        val btnPieChart = findViewById<android.widget.LinearLayout>(R.id.btn_PieChart)
-        
-        btnLineChart.setOnClickListener {
-            // Switch to line chart view
-            Toast.makeText(this, "Line chart selected", Toast.LENGTH_SHORT).show()
-        }
-        
-        btnPieChart.setOnClickListener {
-            // Switch to pie chart view
-            Toast.makeText(this, "Pie chart selected", Toast.LENGTH_SHORT).show()
-        }
+    private fun setupMonthSpinner() {
+        val spinnerMonth = findViewById<Spinner>(R.id.spinner_Month)
+        val months = arrayOf("January 2025", "February 2025", "March 2025", "April 2025", "May 2025", "June 2025")
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, months)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerMonth.adapter = adapter
     }
 
-    private fun setupCircularProgress() {
-        circularProgressView.setProgress(0.8f) // 80% progress
+    private fun setupExportButton() {
+        val btnExport = findViewById<Button>(R.id.btn_Export)
+        btnExport.setOnClickListener {
+            Toast.makeText(this, "Report exported", Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun setupChart() {
-        val chartView = findViewById<com.example.spendsprout_opsc.overview.ChartView>(R.id.chartView)
-        chartView.setData(reportsViewModel.getChartData())
-    }
-
-    private fun setupFab() {
-        val fabAddReport = findViewById<com.google.android.material.floatingactionbutton.FloatingActionButton>(R.id.fab_AddReport)
-        fabAddReport.setOnClickListener {
-            // Navigate to create new report or export data
-            android.widget.Toast.makeText(this, "Add Report clicked", android.widget.Toast.LENGTH_SHORT).show()
+        val chartView = findViewById<com.example.spendsprout_opsc.reports.ChartView>(R.id.chartView)
+        // Load daily spend for current month and use max goal as target
+        val prefs = getSharedPreferences("Settings", MODE_PRIVATE)
+        val monthlyTarget = prefs.getFloat("MaxMonthlyGoal", 0f).toDouble()
+        reportsViewModel.loadDailySpendSeries(
+            reportsViewModel.getStartOfMonth(),
+            reportsViewModel.getEndOfMonth(),
+            monthlyTarget
+        ) { points ->
+            chartView.setData(points)
         }
     }
 
+    private fun updateProgressBar() {
+        val prefs = getSharedPreferences("Settings", MODE_PRIVATE)
+        val maxGoal = prefs.getFloat("MaxMonthlyGoal", 0f).toDouble()
+        reportsViewModel.loadMonthlySpent(
+            reportsViewModel.getStartOfMonth(),
+            reportsViewModel.getEndOfMonth()
+        ) { totalSpent ->
+            val percent = if (maxGoal > 0) ((totalSpent / maxGoal) * 100).toInt().coerceIn(0, 100) else 0
+            progressBarSpending.progress = percent
+        }
+    }
 
     private fun observeData() {
         // Observe ViewModel data changes
@@ -118,7 +126,7 @@ class ReportsActivity : AppCompatActivity(), NavigationView.OnNavigationItemSele
                 startActivity(Intent(this, OverviewActivity::class.java))
             }
             R.id.nav_categories -> {
-                startActivity(Intent(this, CategoriesActivity::class.java))
+                startActivity(Intent(this, com.example.spendsprout_opsc.CategoryOverviewActivity::class.java))
             }
             R.id.nav_transactions -> {
                 startActivity(Intent(this, TransactionsActivity::class.java))
@@ -140,7 +148,7 @@ class ReportsActivity : AppCompatActivity(), NavigationView.OnNavigationItemSele
         return true
     }
 
-    @Deprecated("Use onBackPressedDispatcher instead")
+    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
             drawerLayout.closeDrawer(GravityCompat.START)

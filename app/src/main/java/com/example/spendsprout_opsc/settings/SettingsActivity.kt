@@ -6,8 +6,10 @@ import android.os.Bundle
 import android.view.MenuItem
 import android.widget.ArrayAdapter
 import android.widget.Button
+import android.widget.EditText
 import android.widget.Spinner
 import android.widget.Switch
+import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -62,6 +64,7 @@ class SettingsActivity : AppCompatActivity(), NavigationView.OnNavigationItemSel
         setupCurrencySpinner()
         setupLanguageSpinner()
         setupSwitches()
+        setupGoals()
         setupButtons()
     }
 
@@ -105,6 +108,32 @@ class SettingsActivity : AppCompatActivity(), NavigationView.OnNavigationItemSel
         }
     }
 
+    private fun setupGoals() {
+        val edtMinGoal = findViewById<EditText>(R.id.edt_MinGoal)
+        val edtMaxGoal = findViewById<EditText>(R.id.edt_MaxGoal)
+
+        // Load saved goals
+        edtMinGoal.setText(settingsViewModel.getMinMonthlyGoal().toString())
+        edtMaxGoal.setText(settingsViewModel.getMaxMonthlyGoal().toString())
+
+        // Save goals when text changes
+        edtMinGoal.setOnFocusChangeListener { _, hasFocus ->
+            if (!hasFocus) {
+                val goal = edtMinGoal.text.toString().toFloatOrNull() ?: 0f
+                settingsViewModel.setMinMonthlyGoal(goal)
+                Toast.makeText(this, "Min goal saved", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        edtMaxGoal.setOnFocusChangeListener { _, hasFocus ->
+            if (!hasFocus) {
+                val goal = edtMaxGoal.text.toString().toFloatOrNull() ?: 0f
+                settingsViewModel.setMaxMonthlyGoal(goal)
+                Toast.makeText(this, "Max goal saved", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
     private fun setupButtons() {
         val btnAbout = findViewById<Button>(R.id.btn_About)
         val btnHelp = findViewById<Button>(R.id.btn_Help)
@@ -137,7 +166,7 @@ class SettingsActivity : AppCompatActivity(), NavigationView.OnNavigationItemSel
                 startActivity(Intent(this, OverviewActivity::class.java))
             }
             R.id.nav_categories -> {
-                startActivity(Intent(this, CategoriesActivity::class.java))
+                startActivity(Intent(this, com.example.spendsprout_opsc.CategoryOverviewActivity::class.java))
             }
             R.id.nav_transactions -> {
                 startActivity(Intent(this, TransactionsActivity::class.java))
@@ -159,7 +188,7 @@ class SettingsActivity : AppCompatActivity(), NavigationView.OnNavigationItemSel
         return true
     }
 
-    @Deprecated("Use onBackPressedDispatcher instead")
+    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
             drawerLayout.closeDrawer(GravityCompat.START)

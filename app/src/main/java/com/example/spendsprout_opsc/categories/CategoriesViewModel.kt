@@ -7,28 +7,25 @@ class CategoriesViewModel {
     fun getAllCategories(): List<Category> {
         return listOf(
             Category(
-                id = 1,
+                id = "1",
                 name = "Needs",
-                color = 0xFFBD804A.toInt(),
-                balance = 8900.0,
-                allocation = 10000.0,
-                notes = "Essential expenses"
+                spent = "R 8,900",
+                allocation = "R 10,000",
+                color = "#BD804A"
             ),
             Category(
-                id = 2,
+                id = "2", 
                 name = "Wants",
-                color = 0xFF88618E.toInt(),
-                balance = 120.0,
-                allocation = 6000.0,
-                notes = "Non-essential expenses"
+                spent = "- R 120",
+                allocation = "R 6,000",
+                color = "#88618E"
             ),
             Category(
-                id = 3,
-                name = "Savings",
-                color = 0xFF6EA19E.toInt(),
-                balance = 4000.0,
-                allocation = 4000.0,
-                notes = "Savings goals"
+                id = "3",
+                name = "Savings", 
+                spent = "R 4,000",
+                allocation = "R 4,000",
+                color = "#6EA19E"
             )
         )
     }
