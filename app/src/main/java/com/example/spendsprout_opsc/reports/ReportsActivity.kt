@@ -3,6 +3,7 @@ package com.example.spendsprout_opsc.reports
 import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
+import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.ProgressBar
@@ -35,8 +36,9 @@ class ReportsActivity : AppCompatActivity(), NavigationView.OnNavigationItemSele
         navView = findViewById(R.id.nav_view)
         progressBarSpending = findViewById(R.id.progressBar_Spending)
 
-        // Set up the toolbar
-        val toolbar: androidx.appcompat.widget.Toolbar = findViewById(R.id.toolbar)
+        // Set up the toolbar from the included header bar
+        val headerBar = findViewById<View>(R.id.header_bar)
+        val toolbar: androidx.appcompat.widget.Toolbar = headerBar.findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
 
         val toggle = ActionBarDrawerToggle(
@@ -66,6 +68,13 @@ class ReportsActivity : AppCompatActivity(), NavigationView.OnNavigationItemSele
         updateProgressBar()
     }
 
+    override fun onResume() {
+        super.onResume()
+        // Refresh chart and progress in case data changed
+        setupChart()
+        updateProgressBar()
+    }
+
     private fun setupMonthSpinner() {
         val spinnerMonth = findViewById<Spinner>(R.id.spinner_Month)
         val months = arrayOf("January 2025", "February 2025", "March 2025", "April 2025", "May 2025", "June 2025")
@@ -83,11 +92,28 @@ class ReportsActivity : AppCompatActivity(), NavigationView.OnNavigationItemSele
 
     private fun setupChart() {
         val chartView = findViewById<com.example.spendsprout_opsc.reports.ChartView>(R.id.chartView)
-        chartView.setData(reportsViewModel.getChartData())
+        // Load daily spend for current month and use max goal as target
+        val prefs = getSharedPreferences("Settings", MODE_PRIVATE)
+        val monthlyTarget = prefs.getFloat("MaxMonthlyGoal", 0f).toDouble()
+        reportsViewModel.loadDailySpendSeries(
+            reportsViewModel.getStartOfMonth(),
+            reportsViewModel.getEndOfMonth(),
+            monthlyTarget
+        ) { points ->
+            chartView.setData(points)
+        }
     }
 
     private fun updateProgressBar() {
-        progressBarSpending.progress = 75
+        val prefs = getSharedPreferences("Settings", MODE_PRIVATE)
+        val maxGoal = prefs.getFloat("MaxMonthlyGoal", 0f).toDouble()
+        reportsViewModel.loadMonthlySpent(
+            reportsViewModel.getStartOfMonth(),
+            reportsViewModel.getEndOfMonth()
+        ) { totalSpent ->
+            val percent = if (maxGoal > 0) ((totalSpent / maxGoal) * 100).toInt().coerceIn(0, 100) else 0
+            progressBarSpending.progress = percent
+        }
     }
 
     private fun observeData() {
@@ -100,7 +126,7 @@ class ReportsActivity : AppCompatActivity(), NavigationView.OnNavigationItemSele
                 startActivity(Intent(this, OverviewActivity::class.java))
             }
             R.id.nav_categories -> {
-                startActivity(Intent(this, CategoriesActivity::class.java))
+                startActivity(Intent(this, com.example.spendsprout_opsc.CategoryOverviewActivity::class.java))
             }
             R.id.nav_transactions -> {
                 startActivity(Intent(this, TransactionsActivity::class.java))
@@ -122,6 +148,7 @@ class ReportsActivity : AppCompatActivity(), NavigationView.OnNavigationItemSele
         return true
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
             drawerLayout.closeDrawer(GravityCompat.START)

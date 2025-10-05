@@ -4,6 +4,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import android.widget.ImageView
+import android.view.ViewGroup.LayoutParams
+import android.graphics.BitmapFactory
 import androidx.recyclerview.widget.RecyclerView
 import com.example.spendsprout_opsc.R
 import com.example.spendsprout_opsc.transactions.model.Transaction
@@ -15,9 +18,10 @@ class TransactionAdapter(
 
     class TransactionViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
         val dateTextView: TextView = view.findViewById(R.id.txt_Date)
-        //val descriptionTextView: TextView = view.findViewById(R.id.txt_Description)
+        val nameTextView: TextView = view.findViewById(R.id.txt_Name)
         val amountTextView: TextView = view.findViewById(R.id.txt_Amount)
-        //val colorIndicator: View = view.findViewById(R.id.color_indicator)
+        val spentTextView: TextView = view.findViewById(R.id.txt_Spent)
+        val receiptImageView: ImageView = view.findViewById(R.id.img_Receipt)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TransactionViewHolder {
@@ -29,11 +33,27 @@ class TransactionAdapter(
     override fun onBindViewHolder(holder: TransactionViewHolder, position: Int) {
         val transaction = transactions[position]
         holder.dateTextView.text = transaction.date
-        //holder.descriptionTextView.text = transaction.description
+        holder.nameTextView.text = transaction.description
         holder.amountTextView.text = transaction.amount
-        
-        // Set color indicator
-        //holder.colorIndicator.setBackgroundColor(android.graphics.Color.parseColor(transaction.color))
+        holder.spentTextView.text = ""
+
+        // Show receipt image if present (from file path/URI string)
+        if (!transaction.imagePath.isNullOrBlank()) {
+            try {
+                val bmp = BitmapFactory.decodeFile(transaction.imagePath)
+                if (bmp != null) {
+                    holder.receiptImageView.setImageBitmap(bmp)
+                    holder.receiptImageView.visibility = View.VISIBLE
+                    holder.receiptImageView.layoutParams.height = LayoutParams.WRAP_CONTENT
+                } else {
+                    holder.receiptImageView.visibility = View.GONE
+                }
+            } catch (e: Exception) {
+                holder.receiptImageView.visibility = View.GONE
+            }
+        } else {
+            holder.receiptImageView.visibility = View.GONE
+        }
         
         // Set amount color based on positive/negative
         if (transaction.amount.startsWith("+")) {

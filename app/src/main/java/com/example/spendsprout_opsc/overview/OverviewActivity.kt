@@ -33,7 +33,7 @@ import com.google.android.material.navigation.NavigationView
  * - Render income vs expenses chart (like Unity's custom UI component)
  * - Handle navigation to other screens (like Unity's SceneManager.LoadScene())
  */
-class OverviewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
+class OverviewActivity : AppCompatActivity() {
 
     // OLD VARIABLES - COMMENTED OUT AS LAYOUT STRUCTURE CHANGED
     //private lateinit var drawerLayout: DrawerLayout  // OLD: was drawer_layout
@@ -81,14 +81,32 @@ class OverviewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSel
                 drawerLayout.closeDrawer(navigationView)
             }
 
-            //MenuDrawer: respond to menu item clicks
+            //MenuDrawer: respond to menu item clicks using lambda
             navigationView.setNavigationItemSelectedListener {
                 when(it.itemId){
-                    R.id.nav_overview
-                        -> Toast.makeText(applicationContext, "Overview", Toast.LENGTH_SHORT).show()
-                    R.id.nav_reports
-                        -> Toast.makeText(applicationContext, "Overview", Toast.LENGTH_SHORT).show()
+                    R.id.nav_overview -> {
+                        // Already here
+                    }
+                    R.id.nav_categories -> {
+                        startActivity(Intent(this, com.example.spendsprout_opsc.CategoryOverviewActivity::class.java))
+                    }
+                    R.id.nav_transactions -> {
+                        startActivity(Intent(this, TransactionsActivity::class.java))
+                    }
+                    R.id.nav_accounts -> {
+                        startActivity(Intent(this, AccountsActivity::class.java))
+                    }
+                    R.id.nav_reports -> {
+                        startActivity(Intent(this, ReportsActivity::class.java))
+                    }
+                    R.id.nav_settings -> {
+                        startActivity(Intent(this, SettingsActivity::class.java))
+                    }
+                    R.id.nav_exit -> {
+                        finishAffinity()
+                    }
                 }
+                drawerLayout.closeDrawer(GravityCompat.START)
                 true
             }
 
@@ -177,33 +195,7 @@ class OverviewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSel
         // This will be implemented when we add LiveData/Flow
     }
 
-    override fun onNavigationItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            R.id.nav_overview -> {
-                // Already in Overview, do nothing
-            }
-            R.id.nav_categories -> {
-                startActivity(Intent(this, CategoriesActivity::class.java))
-            }
-            R.id.nav_transactions -> {
-                startActivity(Intent(this, TransactionsActivity::class.java))
-            }
-            R.id.nav_accounts -> {
-                startActivity(Intent(this, AccountsActivity::class.java))
-            }
-            R.id.nav_reports -> {
-                startActivity(Intent(this, ReportsActivity::class.java))
-            }
-            R.id.nav_settings -> {
-                startActivity(Intent(this, SettingsActivity::class.java))
-            }
-            R.id.nav_exit -> {
-                finishAffinity()
-            }
-        }
-        drawerLayout.closeDrawer(GravityCompat.START)
-        return true
-    }
+    
 
     /*
     // OLD onBackPressed - COMMENTED OUT AS NOT CURRENTLY USED

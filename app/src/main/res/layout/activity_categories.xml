@@ -14,13 +14,12 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar"
+        <!-- Header Bar -->
+        <include
+            android:id="@+id/header_bar"
+            layout="@layout/header_bar_layout"
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="@color/TopBarColor"
-            android:elevation="4dp"
-            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
+            android:layout_height="wrap_content" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerView_Categories"
@@ -32,12 +31,16 @@
 
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/nav_view"
-        android:layout_width="wrap_content"
+        android:layout_width="280dp"
         android:layout_height="match_parent"
         android:layout_gravity="start"
         android:fitsSystemWindows="true"
-        app:headerLayout="@layout/header_bar_layout"
-        app:menu="@menu/drawer_menu" />
+        app:headerLayout="@layout/menu_header_layout"
+        app:menu="@menu/drawer_menu"
+        android:backgroundTint="@color/MenuBackgroundColor"
+        app:itemTextColor="@color/black"
+        app:subheaderColor="@color/black"
+        app:itemIconTint="@color/IconColor" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab_AddCategory"

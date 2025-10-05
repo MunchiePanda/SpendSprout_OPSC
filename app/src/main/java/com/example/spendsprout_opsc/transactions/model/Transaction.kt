@@ -5,6 +5,7 @@ data class Transaction(
     val date: String,
     val description: String,
     val amount: String,
-    val color: String
+    val color: String,
+    val imagePath: String? = null
 )
 

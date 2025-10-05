@@ -1,13 +1,21 @@
 package com.example.spendsprout_opsc
 
 import android.os.Bundle
+import android.content.Intent
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.example.spendsprout_opsc.categories.HierarchicalCategoryAdapter
+import com.example.spendsprout_opsc.categories.CategoryViewModel
+import com.example.spendsprout_opsc.categories.model.Category
+import com.example.spendsprout_opsc.categories.model.Subcategory
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.datepicker.MaterialDatePicker
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -15,6 +23,8 @@ class CategoryOverviewActivity : AppCompatActivity() {
     
     private lateinit var btnSelectDateRange: MaterialButton
     private lateinit var txtDateRange: TextView
+    private lateinit var categoryViewModel: CategoryViewModel
+    private lateinit var hierarchicalCategoryAdapter: HierarchicalCategoryAdapter
     private var startDate: Long? = null
     private var endDate: Long? = null
     
@@ -29,8 +39,15 @@ class CategoryOverviewActivity : AppCompatActivity() {
             insets
         }
         
+        // Initialize ViewModel
+        categoryViewModel = CategoryViewModel()
+        
         // Initialize date range picker
         setupDateRangePicker()
+        
+        // Setup UI
+        setupCategoryRecyclerView()
+        setupFab()
     }
     
     private fun setupDateRangePicker() {
@@ -83,6 +100,51 @@ class CategoryOverviewActivity : AppCompatActivity() {
         }
     }
     
+    private fun setupCategoryRecyclerView() {
+        val recyclerView = findViewById<RecyclerView>(R.id.recyclerView_Categories)
+        recyclerView.layoutManager = LinearLayoutManager(this)
+
+        // Initialize with empty list, will be populated from database
+        hierarchicalCategoryAdapter = HierarchicalCategoryAdapter(emptyList(), 
+            onCategoryClick = { category ->
+                // Handle category click - open edit screen
+                val intent = Intent(this, com.example.spendsprout_opsc.edit.EditCategoryActivity::class.java)
+                intent.putExtra("categoryId", category.id)
+                startActivity(intent)
+            },
+            onSubcategoryClick = { subcategory ->
+                // Handle subcategory click - open edit screen
+                val intent = Intent(this, com.example.spendsprout_opsc.edit.EditCategoryActivity::class.java)
+                intent.putExtra("subcategoryId", subcategory.id)
+                startActivity(intent)
+            }
+        )
+        recyclerView.adapter = hierarchicalCategoryAdapter
+
+        // Load categories with subcategories from database
+        loadCategoriesWithSubcategoriesFromDatabase()
+    }
+    
+    private fun setupFab() {
+        val fabAddCategory = findViewById<FloatingActionButton>(R.id.fab_AddCategory)
+        fabAddCategory.setOnClickListener {
+            val intent = Intent(this, com.example.spendsprout_opsc.edit.EditCategoryActivity::class.java)
+            startActivity(intent)
+        }
+    }
+    
+    private fun loadCategoriesWithSubcategoriesFromDatabase() {
+        categoryViewModel.loadCategoriesWithSubcategoriesFromDatabase { categoriesWithSubcategories ->
+            hierarchicalCategoryAdapter.updateData(categoriesWithSubcategories)
+        }
+    }
+    
+    override fun onResume() {
+        super.onResume()
+        // Reload categories when returning to this activity
+        loadCategoriesWithSubcategoriesFromDatabase()
+    }
+    
     private fun updateDateRangeDisplay() {
         if (startDate != null && endDate != null) {
             val dateFormat = SimpleDateFormat("MMM dd - MMM dd, yyyy", Locale.getDefault())
@@ -106,12 +168,10 @@ class CategoryOverviewActivity : AppCompatActivity() {
     }
     
     private fun filterCategoriesByDateRange() {
-        // TODO: Implement category filtering based on selected date range
-        // This would integrate with your category data source/ViewModel
-        // For example:
-        // categoryViewModel.filterCategoriesByDateRange(startDate!!, endDate!!)
+        // Reload categories with the new date range
+        loadCategoriesWithSubcategoriesFromDatabase()
         
-        // For now, just log the selected dates
+        // Log the selected dates for debugging
         val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
         val startDateStr = dateFormat.format(Date(startDate!!))
         val endDateStr = dateFormat.format(Date(endDate!!))

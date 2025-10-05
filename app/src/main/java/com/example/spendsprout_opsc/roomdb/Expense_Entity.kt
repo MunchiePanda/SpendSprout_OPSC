@@ -7,7 +7,7 @@ import com.example.spendsprout_opsc.ExpenseType
 
 @Entity(tableName = "Expense")
 data class Expense_Entity(
-    @PrimaryKey val id: Int,
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
     //ForeignKey for single subcategory
     //ForeignKey for single account
     //ForeignKey for Contact (opt. if isOwed = true)
@@ -20,4 +20,8 @@ data class Expense_Entity(
     @ColumnInfo(name= "expense_repeat") val expenseRepeat: RepeatType = RepeatType.None,    //if the expense is recurring (defaults to None)
     @ColumnInfo(name= "expense_notes") val expenseNotes: String?,               //optional user notes (change [?] to [= ""] if you don't want to deal with null checks)
     @ColumnInfo(name= "expense_image") val expenseImage: String?,               //optional image, can be stored as ByteArray as well
+    // New fields for submission requirements
+    @ColumnInfo(name= "expense_category") val expenseCategory: String,          //category for the expense
+    @ColumnInfo(name= "expense_start") val expenseStart: Long?,                 //start time for the expense
+    @ColumnInfo(name= "expense_end") val expenseEnd: Long?,                     //end time for the expense
 )

@@ -11,6 +11,17 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fab_AddCategory"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="16dp"
+            android:contentDescription="@string/add_subcategory"
+            android:src="@android:drawable/ic_input_add"
+            app:backgroundTint="@color/HighlightTextColor"
+            app:tint="@android:color/black" />
+
         <include
             android:id="@+id/layout_HeaderBar"
             layout="@layout/header_bar_layout"
@@ -58,7 +69,7 @@
                         app:icon="@android:drawable/ic_menu_my_calendar"
                         app:iconTint="@color/IconColor"
                         android:gravity="center"/>
-                    
+
                     <TextView
                         android:id="@+id/txt_dateRange"
                         android:layout_width="wrap_content"
@@ -94,55 +105,17 @@
                 </LinearLayout>
             </LinearLayout>
 
-            <!-- Main Category 1 with 2 Subcategories -->
-            <LinearLayout
+            <!-- Categories RecyclerView -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerView_Categories"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_gravity="center"
                 android:layout_marginHorizontal="15dp"
-                android:layout_marginVertical="0dp"
+                android:layout_marginVertical="10dp"
                 android:background="@drawable/roundedcorners_background"
                 android:backgroundTint="@color/ItemBackgroundColor"
-                android:orientation="vertical">
-
-                <include layout="@layout/category_layout" />
-
-                <androidx.recyclerview.widget.RecyclerView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_margin="10dp"
-                    android:background="@drawable/roundedcorners_background"
-                    android:backgroundTint="@color/SubItemBackgroundColor"
-                    tools:itemCount="2"
-                    tools:listitem="@layout/subcategory_layout" />
-
-                <!-- Main Category 2 with 2 Subcategories -->
-                <include layout="@layout/category_layout" />
-
-                <androidx.recyclerview.widget.RecyclerView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_margin="10dp"
-                    android:background="@drawable/roundedcorners_background"
-                    android:backgroundTint="@color/SubItemBackgroundColor"
-                    tools:itemCount="2"
-                    tools:listitem="@layout/subcategory_layout" />
-
-                <!-- Main Category 3 with 2 Subcategories -->
-                <include layout="@layout/category_layout" />
-
-                <androidx.recyclerview.widget.RecyclerView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_margin="10dp"
-                    android:background="@drawable/roundedcorners_background"
-                    android:backgroundTint="@color/SubItemBackgroundColor"
-                    tools:itemCount="2"
-                    tools:listitem="@layout/subcategory_layout" />
-            </LinearLayout>
+                tools:itemCount="3"
+                tools:listitem="@layout/category_layout" />
         </LinearLayout>
 
     </FrameLayout>
@@ -162,5 +135,7 @@
         app:subheaderColor="@color/black"
         app:itemIconTint="@color/IconColor">
     </com.google.android.material.navigation.NavigationView>
+
+    <!-- Add Subcategory FAB -->
 
 </androidx.drawerlayout.widget.DrawerLayout>

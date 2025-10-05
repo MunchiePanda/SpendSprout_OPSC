@@ -22,6 +22,7 @@
     <!-- Buttons & Icons -->
     <color name="ButtonColor">#B9D5A1</color>
     <color name="IconColor">#BED1CA</color>
+    <color name="primary_color">#BAE655</color>
 
     <!-- Categories -->
     <color name="NeedsCategoryColor">#BD804A</color>

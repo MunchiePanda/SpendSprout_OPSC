@@ -1,6 +1,6 @@
 package com.example.spendsprout_opsc.categories.model
 
-data class Category(
+data class Subcategory(
     val id: String,
     val name: String,
     val spent: String,

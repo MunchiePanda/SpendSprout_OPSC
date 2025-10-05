@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/roundedcorners_background"
+    android:backgroundTint="@color/ItemBackgroundColor"
+    android:layout_marginHorizontal="15dp"
+    android:layout_marginVertical="5dp"
+    android:padding="10dp">
+
+    <!-- Main Category Layout -->
+    <include layout="@layout/category_layout" />
+
+    <!-- Subcategories RecyclerView -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerView_Subcategories"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:background="@drawable/roundedcorners_background"
+        android:backgroundTint="@color/SubItemBackgroundColor"
+        android:padding="5dp"
+        tools:itemCount="3"
+        tools:listitem="@layout/subcategory_layout" />
+
+</LinearLayout>

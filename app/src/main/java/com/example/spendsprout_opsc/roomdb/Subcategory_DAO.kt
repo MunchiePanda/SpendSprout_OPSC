@@ -26,4 +26,8 @@ interface Subcategory_DAO {
     //Get subcategory based on the names that are passed in
     @Query("SELECT * FROM Subcategory WHERE subcategory_name IN (:subcategoryNames)")
     fun loadAllByNames(subcategoryNames: List<String>): List<Subcategory_Entity>
+    
+    //Get subcategories for a specific category (assuming there's a category_id field)
+    @Query("SELECT * FROM Subcategory WHERE category_id = :categoryId")
+    suspend fun getByCategoryId(categoryId: Long): List<Subcategory_Entity>
 }

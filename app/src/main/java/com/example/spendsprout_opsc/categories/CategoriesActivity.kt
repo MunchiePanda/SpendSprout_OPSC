@@ -125,7 +125,7 @@ class CategoriesActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
                 startActivity(Intent(this, OverviewActivity::class.java))
             }
             R.id.nav_categories -> {
-                // Already in Categories, do nothing
+                startActivity(Intent(this, com.example.spendsprout_opsc.CategoryOverviewActivity::class.java))
             }
             R.id.nav_transactions -> {
                 startActivity(Intent(this, TransactionsActivity::class.java))
@@ -147,6 +147,7 @@ class CategoriesActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
         return true
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
             drawerLayout.closeDrawer(GravityCompat.START)

@@ -9,7 +9,7 @@ import com.example.spendsprout_opsc.R
 import com.example.spendsprout_opsc.accounts.model.Account
 
 class AccountAdapter(
-    private val accounts: List<Account>,
+    private var accounts: List<Account>,
     private val onItemClick: (Account) -> Unit
 ) : RecyclerView.Adapter<AccountAdapter.AccountViewHolder>() {
 
@@ -57,5 +57,10 @@ class AccountAdapter(
     }
 
     override fun getItemCount(): Int = accounts.size
+    
+    fun updateData(newAccounts: List<Account>) {
+        accounts = newAccounts
+        notifyDataSetChanged()
+    }
 }
 
