@@ -16,7 +16,8 @@ class SubcategoryAdapter(
     class SubcategoryViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
         val nameTextView: TextView = view.findViewById(R.id.txt_Name)
         val spentTextView: TextView = view.findViewById(R.id.txt_Spent)
-        //val allocatedTextView: TextView = view.findViewById(R.id.txt_Allocated)
+        val balanceTextView: TextView = view.findViewById(R.id.txt_Balance)
+        val allocationTextView: TextView = view.findViewById(R.id.txt_Allocation)
         //val colorIndicator: View = view.findViewById(R.id.color_indicator)
     }
 
@@ -30,14 +31,22 @@ class SubcategoryAdapter(
         val subcategory = subcategories[position]
         holder.nameTextView.text = subcategory.name
         holder.spentTextView.text = subcategory.spent
-        //holder.allocatedTextView.text = subcategory.allocated
+        holder.allocationTextView.text = subcategory.allocation
         
-        // Set color indicator
-        //holder.colorIndicator.setBackgroundColor(android.graphics.Color.parseColor(subcategory.color))
-        
-        // Set spent amount color based on negative values (expenses)
+        // Calculate balance (allocation - spent)
         val spentValue = parseMoney(subcategory.spent)
         val allocationValue = parseMoney(subcategory.allocation)
+        val balanceValue = allocationValue - spentValue
+        
+        // Format balance with proper sign
+        val balanceText = if (balanceValue >= 0) {
+            "R ${String.format("%.2f", balanceValue)}"
+        } else {
+            "-R ${String.format("%.2f", kotlin.math.abs(balanceValue))}"
+        }
+        holder.balanceTextView.text = balanceText
+        
+        // Set spent amount color based on negative values (expenses)
         if (subcategory.spent.trim().startsWith("-") || spentValue < 0) {
             // Red for expenses (negative values)
             holder.spentTextView.setTextColor(android.graphics.Color.parseColor("#E94444"))
@@ -47,6 +56,13 @@ class SubcategoryAdapter(
         } else {
             // Green for positive values within budget
             holder.spentTextView.setTextColor(android.graphics.Color.parseColor("#77B950"))
+        }
+        
+        // Set balance color
+        if (balanceValue < 0) {
+            holder.balanceTextView.setTextColor(android.graphics.Color.parseColor("#E94444"))
+        } else {
+            holder.balanceTextView.setTextColor(android.graphics.Color.parseColor("#77B950"))
         }
         
         // Set click listener
