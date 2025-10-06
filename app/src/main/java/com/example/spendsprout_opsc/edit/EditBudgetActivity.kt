@@ -28,10 +28,14 @@ class EditBudgetActivity : AppCompatActivity() {
     lateinit var btnCloseMenu: ImageButton
 
     private lateinit var editBudgetViewModel: EditBudgetViewModel
+    private var existingBudget: com.example.spendsprout_opsc.roomdb.Budget_Entity? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_edit_budget)
+        
+        // Get budget data from intent if editing existing budget
+        existingBudget = intent.getSerializableExtra("budget") as? com.example.spendsprout_opsc.roomdb.Budget_Entity
 
         //MENU DRAWER SETUP
         //MenuDrawer: Drawer Layout/ Menu Code and connections
@@ -106,7 +110,21 @@ class EditBudgetActivity : AppCompatActivity() {
     }
 
     private fun setupUI() {
+        populateFields()
         setupButtons()
+    }
+    
+    private fun populateFields() {
+        if (existingBudget != null) {
+            // Populate fields with existing budget data
+            findViewById<EditText>(R.id.edt_BudgetName).setText(existingBudget!!.budgetName)
+            findViewById<EditText>(R.id.edt_OpeningBalance).setText(String.format("%.2f", existingBudget!!.openingBalance))
+            findViewById<EditText>(R.id.edt_MinGoal).setText(String.format("%.2f", existingBudget!!.budgetMinGoal))
+            findViewById<EditText>(R.id.edt_MaxGoal).setText(String.format("%.2f", existingBudget!!.budgetMaxGoal))
+            existingBudget!!.budgetNotes?.let { notes ->
+                findViewById<EditText>(R.id.edt_Notes).setText(notes)
+            }
+        }
     }
 
     private fun setupButtons() {
@@ -161,7 +179,13 @@ class EditBudgetActivity : AppCompatActivity() {
         }
 
         // Save budget using ViewModel
-        editBudgetViewModel.saveBudget(budgetName, openingBalanceVal, minGoalVal, maxGoalVal, notes)
+        if (existingBudget != null) {
+            // Update existing budget
+            editBudgetViewModel.updateBudget(existingBudget!!.id, budgetName, openingBalanceVal, minGoalVal, maxGoalVal, notes)
+        } else {
+            // Create new budget
+            editBudgetViewModel.saveBudget(budgetName, openingBalanceVal, minGoalVal, maxGoalVal, notes)
+        }
 
         // Return data
         val resultIntent = Intent().apply {

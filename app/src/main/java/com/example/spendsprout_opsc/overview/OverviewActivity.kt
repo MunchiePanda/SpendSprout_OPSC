@@ -210,6 +210,13 @@ class OverviewActivity : AppCompatActivity() {
         budgetOverviewLayout.setOnClickListener {
             // Navigate to EditBudgetActivity
             val intent = Intent(this, EditBudgetActivity::class.java)
+            
+            // Pass current budget data if it exists
+            val currentBudget = overviewViewModel.getCurrentBudget()
+            if (currentBudget != null) {
+                intent.putExtra("budget", currentBudget)
+            }
+            
             startActivity(intent)
         }
     }

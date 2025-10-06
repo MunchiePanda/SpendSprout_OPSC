@@ -35,6 +35,35 @@ class EditBudgetViewModel {
         }
     }
 
+    fun updateBudget(id: Int, name: String, openingBalance: Double, minGoal: Double, maxGoal: Double, notes: String) {
+        // Validate
+        require(name.isNotBlank()) { "Budget name is required" }
+        require(minGoal < maxGoal) { "Minimum goal must be less than maximum goal" }
+        require(minGoal <= openingBalance && maxGoal <= openingBalance) { "Goals cannot exceed opening balance" }
+
+        // Write to DB on IO
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                // Get the existing budget to preserve the current balance
+                val existingBudget = BudgetApp.db.budgetDao().getById(id)
+                
+                val entity = Budget_Entity(
+                    id = id,
+                    budgetName = name,
+                    openingBalance = openingBalance,
+                    budgetMinGoal = minGoal,
+                    budgetMaxGoal = maxGoal,
+                    budgetBalance = existingBudget?.budgetBalance ?: openingBalance, // Preserve current balance or use opening balance if not found
+                    budgetNotes = notes.ifBlank { null }
+                )
+                BudgetApp.db.budgetDao().update(entity)
+                Log.d("EditBudgetViewModel", "Budget updated: $name opening=$openingBalance min=$minGoal max=$maxGoal balance=${entity.budgetBalance}")
+            } catch (e: Exception) {
+                Log.e("EditBudgetViewModel", "Error updating budget: ${e.message}", e)
+            }
+        }
+    }
+
     private fun getNextBudgetId(): Int {
         return try {
             // Not a suspend func; do not call Flow.first() here. Use a safe default.
