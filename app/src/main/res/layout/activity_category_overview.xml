@@ -19,8 +19,8 @@
             android:layout_margin="16dp"
             android:contentDescription="@string/add_subcategory"
             android:src="@android:drawable/ic_input_add"
-            app:backgroundTint="@color/HighlightTextColor"
-            app:tint="@android:color/black" />
+            app:backgroundTint="@color/ButtonColor"
+            app:tint="@color/IconColor" />
 
         <include
             android:id="@+id/layout_HeaderBar"

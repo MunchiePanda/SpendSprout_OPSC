@@ -12,7 +12,7 @@
     <color name="SubItemBackgroundColor">#2E2F34</color>
     <color name="MenuBackgroundColor">#505359</color>
 
-    <!-- Text & Icons -->
+    <!-- Text  -->
     <color name="MainTextColor">#FFFFFF</color>
     <color name="SubTextColor">#505359</color>
     <color name="HighlightTextColor">#BAE655</color>
@@ -21,7 +21,7 @@
 
     <!-- Buttons & Icons -->
     <color name="ButtonColor">#B9D5A1</color>
-    <color name="IconColor">#BED1CA</color>
+    <color name="IconColor">#212327</color>
     <color name="primary_color">#BAE655</color>
 
     <!-- Categories -->

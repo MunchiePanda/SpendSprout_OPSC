@@ -303,7 +303,8 @@
             android:layout_margin="16dp"
             android:contentDescription="@string/save"
             android:src="@drawable/ic_launcher_foreground"
-            app:tint="@android:color/white" />
+            app:backgroundTint="@color/ButtonColor"
+            app:tint="@color/IconColor" />
 
     </FrameLayout>
 

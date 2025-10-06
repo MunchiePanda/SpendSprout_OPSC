@@ -45,8 +45,8 @@
             android:layout_margin="16dp"
             android:contentDescription="@string/add_transaction"
             android:src="@android:drawable/ic_input_add"
-            app:backgroundTint="@color/HighlightTextColor"
-            app:tint="@android:color/black" />
+            app:backgroundTint="@color/ButtonColor"
+            app:tint="@color/IconColor" />
     </FrameLayout>
 
     <com.google.android.material.navigation.NavigationView

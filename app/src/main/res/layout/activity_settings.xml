@@ -238,6 +238,7 @@
                         android:layout_height="wrap_content"
                         android:text="About"
                         android:background="@drawable/edit_text_background"
+                        android:backgroundTint="@color/ButtonColor"
                         android:textColor="@color/MainTextColor" />
                 </LinearLayout>
 

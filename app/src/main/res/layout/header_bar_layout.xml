@@ -6,6 +6,7 @@
     android:layout_height="match_parent"
     android:background="@color/TopBarColor">
 
+    <!--
     <ImageButton
         android:id="@+id/btn_Action"
         style="@style/CircularImageButton"
@@ -18,6 +19,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         tools:srcCompat="@android:drawable/ic_menu_add" />
+    -->
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"

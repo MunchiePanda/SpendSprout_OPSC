@@ -52,11 +52,12 @@
         android:id="@+id/btn_Login"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Login"
-        android:textSize="16sp"
-        android:padding="16dp"
         android:background="@drawable/button_background"
-        android:textColor="@color/MainTextColor" />
+        android:backgroundTint="@color/ButtonColor"
+        android:padding="16dp"
+        android:text="Login"
+        android:textColor="@color/MainTextColor"
+        android:textSize="16sp" />
 
     <TextView
         android:layout_width="wrap_content"
