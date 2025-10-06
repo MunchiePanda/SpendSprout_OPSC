@@ -16,12 +16,14 @@ The app is organized into three main parts that work together:
 **The ViewModel Layer** - This is the smart part that connects your data to what you see on screen. It takes information from the database and prepares it for display, and it handles all the business logic like calculating how much you've spent in each category.
 
 ### **The Technologies Used**
-- **Kotlin** - This is the programming language used to write the app. It's designed to be safe and easy to read.
-- **Room Database** - This is like a digital filing system that stores all your financial data on your phone. It's fast and reliable.
-- **Hilt** - This is a system that helps different parts of the app work together smoothly by automatically connecting them.
-- **Material Design** - This is Google's design system that makes the app look professional and easy to use.
-- **Coroutines** - This allows the app to do multiple things at once without freezing up.
-- **RecyclerView** - This efficiently displays long lists of transactions or categories without slowing down the app.
+- **Kotlin 2.0.21** - This is the programming language used to write the app. It's designed to be safe and easy to read.
+- **Room Database 2.7.2** - This is like a digital filing system that stores all your financial data on your phone. It's fast and reliable.
+- **Hilt 2.52** - This is a system that helps different parts of the app work together smoothly by automatically connecting them.
+- **Material Design 1.13.0** - This is Google's design system that makes the app look professional and easy to use.
+- **Coroutines 1.8.1** - This allows the app to do multiple things at once without freezing up.
+- **RecyclerView 1.4.0** - This efficiently displays long lists of transactions or categories without slowing down the app.
+- **Android Gradle Plugin 8.12.3** - Modern build system for Android development
+- **KSP (Kotlin Symbol Processing)** - Fast annotation processing for Room and Hilt
 
 ## How Data Is Stored
 
@@ -57,8 +59,17 @@ The app uses a two-level category system to help you organize your spending. The
 ### **4. Managing Multiple Accounts**
 You can add multiple financial accounts to the app, such as your bank account, cash, or credit card. Each account has its own balance that updates automatically as you add transactions. You can view the complete transaction history for any account, and the app supports different types of accounts like checking accounts, savings accounts, and credit cards.
 
-### **5. Advanced Features**
-You can analyze your spending over any time period you choose by setting custom date ranges. The app uses color coding to show you at a glance whether you're over or under budget in each category. There's a consistent navigation menu that appears on every screen, making it easy to move around the app. The app is also designed to include a reports system that will provide detailed financial insights and analytics in future updates.
+### **5. Financial Reports and Analytics**
+The app includes a comprehensive reports system that provides detailed financial insights and analytics. You can view spending patterns, income trends, and budget performance through interactive charts and visualizations. The reports help you understand your financial behavior and make informed decisions about your spending.
+
+### **6. User Settings and Preferences**
+The app includes a settings screen where you can customize your experience. You can adjust display preferences, configure notifications, and manage your account preferences. The settings are designed to be intuitive and provide you with control over how the app behaves.
+
+### **7. User Authentication**
+The app includes a login system that allows users to securely access their financial data. This ensures that your personal financial information is protected and only accessible to you.
+
+### **8. Advanced Features**
+You can analyze your spending over any time period you choose by setting custom date ranges. The app uses color coding to show you at a glance whether you're over or under budget in each category. There's a consistent navigation menu that appears on every screen, making it easy to move around the app. The app includes comprehensive data validation and error handling to ensure your financial data remains accurate and secure.
 
 ## How Users Move Through The App
 
@@ -82,6 +93,24 @@ This screen shows you the detailed view of either all your main categories or al
 #### **The Category Editor (EditCategoryActivity)**
 This is where you create new categories or edit existing ones. You can enter the category name, choose a color, set a budget limit, and add notes. The form validates your input to make sure you don't make mistakes. When you're done, you save your changes and return to the category list.
 
+#### **The Reports Screen (ReportsActivity)**
+This screen provides comprehensive financial analytics and insights. You can view detailed reports on your spending patterns, income trends, and budget performance. The reports include interactive charts and visualizations that help you understand your financial behavior and make informed decisions about your spending.
+
+#### **The Settings Screen (SettingsActivity)**
+This screen allows you to customize your app experience. You can adjust display preferences, configure notifications, manage your account settings, and control various app behaviors. The settings are organized in a user-friendly way to make customization easy and intuitive.
+
+#### **The Login Screen (LoginActivity)**
+This is the entry point for user authentication. It provides a secure login system that protects your financial data and ensures only you can access your personal financial information. The login system is designed to be simple and secure.
+
+#### **The Transaction Editor (EditTransactionActivity)**
+This screen allows you to create new transactions or edit existing ones. You can enter transaction details like amount, description, category, and account. The form includes validation to ensure data accuracy and provides a user-friendly interface for managing your financial transactions.
+
+#### **The Account Editor (EditAccountActivity)**
+This screen allows you to create new financial accounts or edit existing ones. You can set account details like name, type, and initial balance. This helps you organize your different financial accounts and track their individual balances.
+
+#### **The Budget Editor (EditBudgetActivity)**
+This screen allows you to create and manage budget plans. You can set spending limits for different categories, track your progress, and receive alerts when you're approaching or exceeding your budget limits.
+
 ## How The App Manages Your Data
 
 ### **The Repository System**
@@ -104,10 +133,23 @@ The app uses several key components to display information efficiently. The Recy
 ## How The App Is Built Technically
 
 ### **Dependency Injection with Hilt**
-The app uses a system called Hilt for dependency injection. This means that instead of manually creating connections between different parts of the app, Hilt automatically handles this for you. The main application class is marked with `@HiltAndroidApp`, which tells Hilt to set up the dependency injection system when the app starts. This makes the code cleaner and easier to test.
+The app uses Hilt 2.52 for dependency injection, which automatically manages connections between different parts of the app. The system includes:
+- **DatabaseModule** - Provides database instances and DAOs
+- **DataFlowModule** - Manages data flow and repository connections
+- **Repository Pattern** - Centralized data access through dedicated repository classes
+- **KSP Integration** - Fast annotation processing for Hilt and Room
 
 ### **Room Database Configuration**
-The app uses Room database to store all your financial data. The database is configured with all the different types of data the app needs: categories, subcategories, expenses, and accounts. The database is currently at version 4, which means it has been updated 4 times as new features were added. The database doesn't export its schema, which means the internal structure is kept private.
+The app uses Room Database 2.7.2 to store all your financial data with the following entities:
+- **Account_Entity** - Financial accounts (bank, cash, credit cards)
+- **Category_Entity** - Main spending categories (Needs, Wants, Savings)
+- **Subcategory_Entity** - Specific subcategories under main categories
+- **Expense_Entity** - Individual expense transactions
+- **Income_Entity** - Income transactions
+- **Budget_Entity** - Budget plans and limits
+- **Contact_Entity** - Personal contacts for loans/debts
+
+The database includes comprehensive error handling, data validation, and migration support.
 
 ### **The ViewModel Pattern**
 The app uses ViewModels to handle the business logic and data management. For example, the CategoryViewModel has methods to load categories from the database, calculate how much has been spent in each category, and format amounts for display. This separates the business logic from the user interface, making the code more organized and easier to maintain.
@@ -123,18 +165,46 @@ The app includes several layers of validation to make sure your data is accurate
 ## How To Get Started
 
 ### **What You Need**
-To run this app, you need Android Studio Arctic Fox or a newer version, Android SDK version 24 or higher, and Kotlin version 1.8.0 or later. These are the development tools needed to build and run the app.
+To run this app, you need:
+- **Android Studio** - Latest version (2024.1 or newer)
+- **Android SDK** - API level 26 (Android 8.0) or higher
+- **Kotlin** - Version 2.0.21 or later
+- **Java** - Version 11 or higher
+- **Gradle** - Version 8.12.3 or higher
+- **Android Device** - Android 8.0 (API 26) or higher for running the app
 
 ### **How To Install And Run The App**
-First, you need to clone the repository to get the source code. Then you open the project in Android Studio, which will automatically sync the Gradle files to download all the necessary dependencies. Once that's done, you can run the app on either a physical Android device or an Android emulator on your computer.
+1. **Clone the Repository**: First, clone this repository to your local machine using Git.
+2. **Open in Android Studio**: Open the project in Android Studio. The IDE will automatically detect the project structure and sync the Gradle files.
+3. **Sync Dependencies**: Android Studio will automatically download all necessary dependencies including Room Database, Hilt, Material Design components, and Coroutines.
+4. **Build the Project**: Use the "Build" menu to compile the project and ensure all dependencies are properly resolved.
+5. **Run the App**: You can run the app on either:
+   - A physical Android device (Android 8.0 or higher) connected via USB
+   - An Android emulator with API level 26 or higher
+6. **First Launch**: The app will automatically initialize the database with sample data to help you get started.
 
 ### **How The App Starts Up**
 When you first run the app, it automatically sets up the database with sample data to help you get started. It creates three main categories (Needs, Wants, and Savings), adds sample subcategories under each main category, creates sample accounts and transactions, and populates everything with realistic financial data so you can see how the app works right away.
 
+## Recent Features and Improvements
+
+### **New Features Added**
+- **Comprehensive Reports System** - Interactive charts and analytics for spending patterns and budget performance
+- **User Authentication** - Secure login system to protect financial data
+- **Settings Management** - Customizable app preferences and user controls
+- **Enhanced Data Validation** - Improved error handling and data consistency
+- **Modern Architecture** - Updated to latest Android development practices with Hilt 2.52 and Room 2.7.2
+
+### **Technical Improvements**
+- **KSP Integration** - Faster annotation processing for Room and Hilt
+- **Updated Dependencies** - Latest versions of all libraries for better performance and security
+- **Enhanced Database Schema** - Improved data structure with better relationships and constraints
+- **Modern UI Components** - Updated Material Design components for better user experience
+
 ## What's Coming Next
 
 ### **Planned New Features**
-The app is designed to grow with more features in the future. A comprehensive reports system will provide detailed financial analytics to help you understand your spending patterns better. Budget alerts will notify you when you're approaching or exceeding your spending limits. You'll be able to export your transactions to CSV or PDF files for external analysis. Cloud sync will allow you to backup your data and access it across multiple devices. More advanced charts will provide even better visualizations of your financial data.
+The app is designed to grow with more features in the future. Budget alerts will notify you when you're approaching or exceeding your spending limits. You'll be able to export your transactions to CSV or PDF files for external analysis. Cloud sync will allow you to backup your data and access it across multiple devices. More advanced charts will provide even better visualizations of your financial data.
 
 ### **Technical Improvements**
 The app will continue to improve technically with comprehensive unit testing to ensure reliability, performance optimizations to make database queries faster, enhanced accessibility features for users with different needs, and multi-language support for international users.

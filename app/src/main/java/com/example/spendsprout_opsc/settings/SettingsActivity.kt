@@ -63,7 +63,6 @@ class SettingsActivity : AppCompatActivity(), NavigationView.OnNavigationItemSel
         setupCurrencySpinner()
         setupLanguageSpinner()
         setupSwitches()
-        setupGoals()
         setupButtons()
     }
 
@@ -107,31 +106,6 @@ class SettingsActivity : AppCompatActivity(), NavigationView.OnNavigationItemSel
         }
     }
 
-    private fun setupGoals() {
-        val edtMinGoal = findViewById<EditText>(R.id.edt_MinGoal)
-        val edtMaxGoal = findViewById<EditText>(R.id.edt_MaxGoal)
-
-        // Load saved goals
-        edtMinGoal.setText(settingsViewModel.getMinMonthlyGoal().toString())
-        edtMaxGoal.setText(settingsViewModel.getMaxMonthlyGoal().toString())
-
-        // Save goals when text changes
-        edtMinGoal.setOnFocusChangeListener { _, hasFocus ->
-            if (!hasFocus) {
-                val goal = edtMinGoal.text.toString().toFloatOrNull() ?: 0f
-                settingsViewModel.setMinMonthlyGoal(goal)
-                Toast.makeText(this, "Min goal saved", Toast.LENGTH_SHORT).show()
-            }
-        }
-
-        edtMaxGoal.setOnFocusChangeListener { _, hasFocus ->
-            if (!hasFocus) {
-                val goal = edtMaxGoal.text.toString().toFloatOrNull() ?: 0f
-                settingsViewModel.setMaxMonthlyGoal(goal)
-                Toast.makeText(this, "Max goal saved", Toast.LENGTH_SHORT).show()
-            }
-        }
-    }
 
     private fun setupButtons() {
         val btnAbout = findViewById<Button>(R.id.btn_About)
