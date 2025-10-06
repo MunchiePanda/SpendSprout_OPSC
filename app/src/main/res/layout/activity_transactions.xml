@@ -25,6 +25,38 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
 
+            <!-- Date Range Picker -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="16dp"
+                android:background="@color/ItemBackgroundColor"
+                android:layout_margin="15dp"
+                android:layout_marginBottom="8dp">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_selectDateRange"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Select Date Range"
+                    android:textColor="@color/MainTextColor"
+                    android:backgroundTint="@color/ButtonColor"
+                    android:layout_marginEnd="8dp" />
+
+                <TextView
+                    android:id="@+id/txt_dateRange"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="All Time"
+                    android:textColor="@color/MainTextColor"
+                    android:textSize="14sp"
+                    android:gravity="center_vertical"
+                    android:padding="12dp" />
+            </LinearLayout>
+
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerView_Transactions"
                 android:layout_width="match_parent"

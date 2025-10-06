@@ -1,5 +1,6 @@
 package com.example.spendsprout_opsc
 
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.content.Intent
 import android.widget.TextView
@@ -36,6 +37,7 @@ class CategoryOverviewActivity : AppCompatActivity() {
     private lateinit var hierarchicalCategoryAdapter: HierarchicalCategoryAdapter
     private var startDate: Long? = null
     private var endDate: Long? = null
+    private lateinit var sharedPreferences: SharedPreferences
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -63,6 +65,9 @@ class CategoryOverviewActivity : AppCompatActivity() {
     }
 
     private fun setupDrawer() {
+        // Initialize SharedPreferences for login management
+        sharedPreferences = getSharedPreferences("login_prefs", MODE_PRIVATE)
+        
         drawerLayout = findViewById(R.id.main)
         navView = findViewById(R.id.navigationView)
 
@@ -79,6 +84,12 @@ class CategoryOverviewActivity : AppCompatActivity() {
         btnMenu.setOnClickListener {
             drawerLayout.openDrawer(GravityCompat.START)
         }
+
+        // Set the username in the navigation header
+        val headerView = navView.getHeaderView(0)
+        val txtUsername = headerView.findViewById<TextView>(R.id.txt_Username)
+        val currentUsername = sharedPreferences.getString("username", "User")
+        txtUsername.text = currentUsername
 
         navView.setNavigationItemSelectedListener { item ->
             when (item.itemId) {
@@ -182,7 +193,7 @@ class CategoryOverviewActivity : AppCompatActivity() {
     }
     
     private fun loadCategoriesWithSubcategoriesFromDatabase() {
-        categoryViewModel.loadCategoriesWithSubcategoriesFromDatabase { categoriesWithSubcategories ->
+        categoryViewModel.loadCategoriesWithSubcategoriesFromDatabase(startDate, endDate) { categoriesWithSubcategories ->
             hierarchicalCategoryAdapter.updateData(categoriesWithSubcategories)
         }
     }
@@ -220,11 +231,14 @@ class CategoryOverviewActivity : AppCompatActivity() {
         loadCategoriesWithSubcategoriesFromDatabase()
         
         // Log the selected dates for debugging
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-        val startDateStr = dateFormat.format(Date(startDate!!))
-        val endDateStr = dateFormat.format(Date(endDate!!))
-        
-        println("Filtering categories from $startDateStr to $endDateStr")
+        if (startDate != null && endDate != null) {
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+            val startDateStr = dateFormat.format(Date(startDate!!))
+            val endDateStr = dateFormat.format(Date(endDate!!))
+            
+            println("Filtering categories from $startDateStr to $endDateStr")
+            Toast.makeText(this, "Filtering from $startDateStr to $endDateStr", Toast.LENGTH_SHORT).show()
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

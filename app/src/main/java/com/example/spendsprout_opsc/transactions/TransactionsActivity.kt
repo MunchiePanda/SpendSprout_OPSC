@@ -1,11 +1,13 @@
 package com.example.spendsprout_opsc.transactions
 
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.ImageButton
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
@@ -18,8 +20,12 @@ import com.example.spendsprout_opsc.accounts.AccountsActivity
 import com.example.spendsprout_opsc.categories.CategoriesActivity
 import com.example.spendsprout_opsc.overview.OverviewActivity
 import com.example.spendsprout_opsc.settings.SettingsActivity
+import com.google.android.material.button.MaterialButton
+import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.navigation.NavigationView
+import java.text.SimpleDateFormat
+import java.util.*
 
 class TransactionsActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
@@ -27,6 +33,13 @@ class TransactionsActivity : AppCompatActivity(), NavigationView.OnNavigationIte
     private lateinit var navView: NavigationView
     private lateinit var transactionsViewModel: TransactionsViewModel
     private lateinit var transactionAdapter: TransactionAdapter
+    
+    // Date range picker components
+    private lateinit var btnSelectDateRange: MaterialButton
+    private lateinit var txtDateRange: TextView
+    private var startDate: Long? = null
+    private var endDate: Long? = null
+    private lateinit var sharedPreferences: SharedPreferences
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,6 +65,15 @@ class TransactionsActivity : AppCompatActivity(), NavigationView.OnNavigationIte
         }
 
         navView.setNavigationItemSelectedListener(this)
+        
+        // Initialize SharedPreferences for login management
+        sharedPreferences = getSharedPreferences("login_prefs", MODE_PRIVATE)
+        
+        // Set the username in the navigation header
+        val headerView = navView.getHeaderView(0)
+        val txtUsername = headerView.findViewById<TextView>(R.id.txt_Username)
+        val currentUsername = sharedPreferences.getString("username", "User")
+        txtUsername.text = currentUsername
 
         // Initialize ViewModel
         transactionsViewModel = TransactionsViewModel()
@@ -61,6 +83,7 @@ class TransactionsActivity : AppCompatActivity(), NavigationView.OnNavigationIte
     }
 
     private fun setupUI() {
+        setupDateRangePicker()
         setupTransactionRecyclerView()
         setupFab()
     }
@@ -82,6 +105,83 @@ class TransactionsActivity : AppCompatActivity(), NavigationView.OnNavigationIte
         loadTransactionsFromDatabase()
     }
 
+    private fun setupDateRangePicker() {
+        btnSelectDateRange = findViewById(R.id.btn_selectDateRange)
+        txtDateRange = findViewById(R.id.txt_dateRange)
+        
+        // Set default to show all transactions
+        updateDateRangeDisplay()
+        
+        btnSelectDateRange.setOnClickListener {
+            showDateRangePicker()
+        }
+    }
+    
+    private fun showDateRangePicker() {
+        // Create date range picker
+        val dateRangePicker = MaterialDatePicker.Builder.dateRangePicker()
+            .setTitleText("Select Date Range")
+            .setSelection(
+                androidx.core.util.Pair(
+                    startDate ?: MaterialDatePicker.todayInUtcMilliseconds(),
+                    endDate ?: MaterialDatePicker.todayInUtcMilliseconds()
+                )
+            )
+            .build()
+        
+        // Show the picker
+        dateRangePicker.show(supportFragmentManager, "DATE_RANGE_PICKER")
+        
+        // Handle the selection
+        dateRangePicker.addOnPositiveButtonClickListener { selection ->
+            startDate = selection.first
+            endDate = selection.second
+            
+            // Update display
+            updateDateRangeDisplay()
+            
+            // Filter transactions based on date range
+            filterTransactionsByDateRange()
+        }
+    }
+    
+    private fun updateDateRangeDisplay() {
+        if (startDate != null && endDate != null) {
+            val dateFormat = SimpleDateFormat("MMM dd - MMM dd, yyyy", Locale.getDefault())
+            val startDateStr = dateFormat.format(Date(startDate!!))
+            val endDateStr = dateFormat.format(Date(endDate!!))
+            
+            // Calculate days difference for a more user-friendly display
+            val daysDifference = ((endDate!! - startDate!!) / (1000 * 60 * 60 * 24)).toInt()
+            
+            when {
+                daysDifference == 0 -> txtDateRange.text = "Today"
+                daysDifference == 1 -> txtDateRange.text = "Yesterday"
+                daysDifference < 7 -> txtDateRange.text = "Last $daysDifference days"
+                daysDifference < 30 -> txtDateRange.text = "Last ${daysDifference / 7} weeks"
+                daysDifference < 365 -> txtDateRange.text = "Last ${daysDifference / 30} months"
+                else -> txtDateRange.text = "Last ${daysDifference / 365} years"
+            }
+        } else {
+            txtDateRange.text = "All Time"
+        }
+    }
+    
+    private fun filterTransactionsByDateRange() {
+        // Reload transactions with the new date range
+        loadTransactionsFromDatabase()
+        
+        // Log the selected dates for debugging
+        if (startDate != null && endDate != null) {
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+            val startDateStr = dateFormat.format(Date(startDate!!))
+            val endDateStr = dateFormat.format(Date(endDate!!))
+            
+            println("Filtering transactions from $startDateStr to $endDateStr")
+            Toast.makeText(this, "Filtering from $startDateStr to $endDateStr", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     private fun setupFab() {
         val fabAddTransaction = findViewById<FloatingActionButton>(R.id.fab_AddTransaction)
         if (fabAddTransaction != null) {
@@ -101,9 +201,16 @@ class TransactionsActivity : AppCompatActivity(), NavigationView.OnNavigationIte
     }
     
     private fun loadTransactionsFromDatabase() {
-        // Prefer all transactions to avoid date filter hiding new entries
-        transactionsViewModel.loadAllTransactionsFromDatabase { transactions ->
-            transactionAdapter.updateData(transactions)
+        if (startDate != null && endDate != null) {
+            // Load transactions with date filtering
+            transactionsViewModel.loadTransactionsFromDatabase(startDate!!, endDate!!) { transactions ->
+                transactionAdapter.updateData(transactions)
+            }
+        } else {
+            // Load all transactions when no date range is selected
+            transactionsViewModel.loadAllTransactionsFromDatabase { transactions ->
+                transactionAdapter.updateData(transactions)
+            }
         }
     }
     
@@ -134,14 +241,26 @@ class TransactionsActivity : AppCompatActivity(), NavigationView.OnNavigationIte
     }
 
     private fun showFilterDialog() {
-        val filters = arrayOf("All", "Income", "Expenses", "This Month", "Last Month")
+        val filters = arrayOf("All", "Income", "Expenses", "This Month", "Last Month", "Clear Date Filter")
         androidx.appcompat.app.AlertDialog.Builder(this)
             .setTitle("Filter Transactions")
             .setItems(filters) { _, which ->
                 val selected = filters[which]
-                applyFilter(selected)
+                if (selected == "Clear Date Filter") {
+                    clearDateFilter()
+                } else {
+                    applyFilter(selected)
+                }
             }
             .show()
+    }
+    
+    private fun clearDateFilter() {
+        startDate = null
+        endDate = null
+        updateDateRangeDisplay()
+        loadTransactionsFromDatabase()
+        Toast.makeText(this, "Date filter cleared - showing all transactions", Toast.LENGTH_SHORT).show()
     }
 
     private fun applyFilter(filter: String) {

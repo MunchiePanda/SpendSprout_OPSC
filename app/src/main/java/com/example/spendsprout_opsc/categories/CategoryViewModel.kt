@@ -17,6 +17,11 @@ class CategoryViewModel {
     
     // New method to load categories with subcategories from database
     fun loadCategoriesWithSubcategoriesFromDatabase(callback: (List<HierarchicalCategoryAdapter.CategoryWithSubcategories>) -> Unit) {
+        loadCategoriesWithSubcategoriesFromDatabase(null, null, callback)
+    }
+    
+    // Overloaded method with date range filtering
+    fun loadCategoriesWithSubcategoriesFromDatabase(startDate: Long?, endDate: Long?, callback: (List<HierarchicalCategoryAdapter.CategoryWithSubcategories>) -> Unit) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 // Ensure main categories exist (Needs, Wants, Savings)
@@ -25,10 +30,18 @@ class CategoryViewModel {
                 val categories = BudgetApp.db.categoryDao().getAll().first()
                 val categoryList = mutableListOf<HierarchicalCategoryAdapter.CategoryWithSubcategories>()
                 for (category in categories) {
-                    val allSubcategories = getSubcategoriesForCategory(category.id.toLong())
+                    val allSubcategories = getSubcategoriesForCategory(category.id.toLong(), startDate, endDate)
                     // Get only top 3 subcategories for overview
                     val top3Subcategories = allSubcategories.take(3)
-                    val categorySpent = getCategorySpent(category.id.toLong())
+                    
+                    // Use date filtering if dates are provided
+                    val categorySpent = if (startDate != null && endDate != null) {
+                        android.util.Log.d("CategoryViewModel", "Using date filtering for ${category.categoryName}: $startDate to $endDate")
+                        getCategorySpentForDateRange(category.id.toLong(), startDate, endDate)
+                    } else {
+                        android.util.Log.d("CategoryViewModel", "No date filtering for ${category.categoryName}")
+                        getCategorySpent(category.id.toLong())
+                    }
                     val subcategorySpent = calculateTotalSpent(allSubcategories) // Use all for total calculation
                     val totalSpent = categorySpent + subcategorySpent
                     
@@ -174,11 +187,15 @@ class CategoryViewModel {
     }
     
     private suspend fun getSubcategoriesForCategory(categoryId: Long): List<com.example.spendsprout_opsc.wants.model.Subcategory> {
+        return getSubcategoriesForCategory(categoryId, null, null)
+    }
+    
+    private suspend fun getSubcategoriesForCategory(categoryId: Long, startDate: Long?, endDate: Long?): List<com.example.spendsprout_opsc.wants.model.Subcategory> {
         return try {
             val subcategoryEntities = BudgetApp.db.subcategoryDao().getByCategoryId(categoryId)
             subcategoryEntities.map { subcategory ->
                 // Calculate actual spent amount from transactions for this subcategory
-                val actualSpent = getSubcategorySpent(subcategory.id.toLong())
+                val actualSpent = getSubcategorySpent(subcategory.id.toLong(), startDate, endDate)
                 com.example.spendsprout_opsc.wants.model.Subcategory(
                     id = subcategory.id.toString(),
                     name = subcategory.subcategoryName,
@@ -193,19 +210,34 @@ class CategoryViewModel {
     }
     
     private suspend fun getSubcategorySpent(subcategoryId: Long): Double {
+        return getSubcategorySpent(subcategoryId, null, null)
+    }
+    
+    private suspend fun getSubcategorySpent(subcategoryId: Long, startDate: Long?, endDate: Long?): Double {
         return try {
             val expenses = BudgetApp.db.expenseDao().getAll()
             val subcategoryName = BudgetApp.db.subcategoryDao().getById(subcategoryId.toInt())?.subcategoryName
             if (subcategoryName != null) {
-                expenses.filter { it.expenseCategory == subcategoryName }
-                    .sumOf { expense ->
-                        // Expenses should be negative values (decreases)
-                        if (expense.expenseType.name == "Expense") {
-                            -expense.expenseAmount  // Negative for expenses
-                        } else {
-                            expense.expenseAmount   // Positive for income
-                        }
+                val filteredExpenses = if (startDate != null && endDate != null) {
+                    android.util.Log.d("CategoryViewModel", "Filtering subcategory '$subcategoryName' by date: $startDate to $endDate")
+                    expenses.filter { 
+                        it.expenseCategory == subcategoryName && 
+                        it.expenseDate >= startDate && 
+                        it.expenseDate <= endDate 
                     }
+                } else {
+                    android.util.Log.d("CategoryViewModel", "No date filtering for subcategory '$subcategoryName'")
+                    expenses.filter { it.expenseCategory == subcategoryName }
+                }
+                
+                filteredExpenses.sumOf { expense ->
+                    // Expenses should be negative values (decreases)
+                    if (expense.expenseType.name == "Expense") {
+                        -expense.expenseAmount  // Negative for expenses
+                    } else {
+                        expense.expenseAmount   // Positive for income
+                    }
+                }
             } else {
                 0.0
             }

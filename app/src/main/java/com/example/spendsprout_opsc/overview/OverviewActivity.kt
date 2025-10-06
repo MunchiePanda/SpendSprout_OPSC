@@ -1,6 +1,7 @@
 package com.example.spendsprout_opsc.overview
 
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
@@ -56,6 +57,9 @@ class OverviewActivity : AppCompatActivity() {
     
     //ViewModel
     private lateinit var overviewViewModel: OverviewViewModel
+    
+    //Login management
+    private lateinit var sharedPreferences: SharedPreferences
 
     /**
      * onCreate() - Like Unity's Start() method
@@ -65,6 +69,9 @@ class OverviewActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         // Load the scene layout - like Unity's SceneManager.LoadScene()
         setContentView(R.layout.activity_overview)
+        
+        // Initialize SharedPreferences for login management
+        sharedPreferences = getSharedPreferences("login_prefs", MODE_PRIVATE)
 
         //MENU DRAWER SETUP
             //MenuDrawer: Drawer Layout/ Menu Code and connections
@@ -89,6 +96,11 @@ class OverviewActivity : AppCompatActivity() {
             //MenuDrawer: Access the close button from the navigation view header
             val headerView = navigationView.getHeaderView(0)
             btnCloseMenu = headerView.findViewById(R.id.btn_CloseMenu)
+            
+            // Set the username in the navigation header
+            val txtUsername = headerView.findViewById<TextView>(R.id.txt_Username)
+            val currentUsername = sharedPreferences.getString("username", "User")
+            txtUsername.text = currentUsername
 
             //MenuDrawer: Close menu button click listener to close drawer
             btnCloseMenu.setOnClickListener {
@@ -115,6 +127,9 @@ class OverviewActivity : AppCompatActivity() {
                     }
                     R.id.nav_settings -> {
                         startActivity(Intent(this, SettingsActivity::class.java))
+                    }
+                    R.id.nav_logout -> {
+                        logout()
                     }
                     R.id.nav_exit -> {
                         finishAffinity()
@@ -313,6 +328,22 @@ class OverviewActivity : AppCompatActivity() {
             }
         }
         return super.onOptionsItemSelected(item)
+    }
+    
+    private fun logout() {
+        // Clear login status
+        sharedPreferences.edit()
+            .putBoolean("is_logged_in", false)
+            .remove("username")
+            .apply()
+        
+        // Navigate back to login screen
+        val intent = Intent(this, com.example.spendsprout_opsc.login.LoginActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
+        finish()
+        
+        Toast.makeText(this, "Logged out successfully", Toast.LENGTH_SHORT).show()
     }
 }
 
