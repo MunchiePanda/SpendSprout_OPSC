@@ -23,9 +23,14 @@ class CategoryViewModel {
                 ensureMainCategoriesExist()
                 
                 val categories = BudgetApp.db.categoryDao().getAll().first()
-                val categoryList = categories.map { category ->
-                    val subcategories = getSubcategoriesForCategory(category.id.toLong())
-                    val totalSpent = calculateTotalSpent(subcategories)
+                val categoryList = mutableListOf<HierarchicalCategoryAdapter.CategoryWithSubcategories>()
+                for (category in categories) {
+                    val allSubcategories = getSubcategoriesForCategory(category.id.toLong())
+                    // Get only top 3 subcategories for overview
+                    val top3Subcategories = allSubcategories.take(3)
+                    val categorySpent = getCategorySpent(category.id.toLong())
+                    val subcategorySpent = calculateTotalSpent(allSubcategories) // Use all for total calculation
+                    val totalSpent = categorySpent + subcategorySpent
                     
                     val mainCategory = Category(
                         id = category.id.toString(),
@@ -34,7 +39,17 @@ class CategoryViewModel {
                         allocation = formatAmount(category.categoryAllocation),
                         color = getCategoryColor(category.categoryName)
                     )
-                    HierarchicalCategoryAdapter.CategoryWithSubcategories(mainCategory, subcategories)
+                    // Convert wants.model.Subcategory to categories.model.Subcategory for the adapter
+                    val convertedSubcategories = top3Subcategories.map { wantsSub ->
+                        com.example.spendsprout_opsc.categories.model.Subcategory(
+                            id = wantsSub.id,
+                            name = wantsSub.name,
+                            spent = wantsSub.spent,
+                            allocation = wantsSub.allocation,
+                            color = wantsSub.color
+                        )
+                    }
+                    categoryList.add(HierarchicalCategoryAdapter.CategoryWithSubcategories(mainCategory, convertedSubcategories))
                 }
                 CoroutineScope(Dispatchers.Main).launch {
                     callback(categoryList)
@@ -52,13 +67,17 @@ class CategoryViewModel {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val categories = BudgetApp.db.categoryDao().getAll().first()
-                val categoryList = categories.map { category ->
-                    Category(
-                        id = category.id.toString(),
-                        name = category.categoryName,
-                        spent = formatAmount(getCategorySpent(category.id.toLong())),
-                        allocation = formatAmount(category.categoryAllocation),
-                        color = getCategoryColor(category.categoryName)
+                val categoryList = mutableListOf<Category>()
+                for (category in categories) {
+                    val spent = getCategorySpent(category.id.toLong())
+                    categoryList.add(
+                        Category(
+                            id = category.id.toString(),
+                            name = category.categoryName,
+                            spent = formatAmount(spent),
+                            allocation = formatAmount(category.categoryAllocation),
+                            color = getCategoryColor(category.categoryName)
+                        )
                     )
                 }
                 CoroutineScope(Dispatchers.Main).launch {
@@ -77,13 +96,17 @@ class CategoryViewModel {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val categories = BudgetApp.db.categoryDao().getAll().first()
-                val categoryList = categories.map { category ->
-                    Category(
-                        id = category.id.toString(),
-                        name = category.categoryName,
-                        spent = formatAmount(getCategorySpentForDateRange(category.id.toLong(), startDate, endDate)),
-                        allocation = formatAmount(category.categoryAllocation),
-                        color = getCategoryColor(category.categoryName)
+                val categoryList = mutableListOf<Category>()
+                for (category in categories) {
+                    val spent = getCategorySpentForDateRange(category.id.toLong(), startDate, endDate)
+                    categoryList.add(
+                        Category(
+                            id = category.id.toString(),
+                            name = category.categoryName,
+                            spent = formatAmount(spent),
+                            allocation = formatAmount(category.categoryAllocation),
+                            color = getCategoryColor(category.categoryName)
+                        )
                     )
                 }
                 CoroutineScope(Dispatchers.Main).launch {
@@ -98,35 +121,96 @@ class CategoryViewModel {
     }
     
     private fun formatAmount(amount: Double): String {
-        return "R ${String.format("%.2f", amount)}"
+        val sign = if (amount < 0) "-" else ""
+        val absoluteAmount = kotlin.math.abs(amount)
+        return "$sign R ${String.format("%.2f", absoluteAmount)}"
     }
     
-    private fun getCategorySpent(categoryId: Long): Double {
-        // TODO: Get total spent for this category from database
-        // For now, return 0
-        return 0.0
+    private suspend fun getCategorySpent(categoryId: Long): Double {
+        return try {
+            val expenses = BudgetApp.db.expenseDao().getAll()
+            val categoryName = BudgetApp.db.categoryDao().getById(categoryId.toInt())?.categoryName
+            if (categoryName != null) {
+                expenses.filter { it.expenseCategory == categoryName }
+                    .sumOf { expense ->
+                        // Expenses should be negative values (decreases)
+                        if (expense.expenseType.name == "Expense") {
+                            -expense.expenseAmount  // Negative for expenses
+                        } else {
+                            expense.expenseAmount   // Positive for income
+                        }
+                    }
+            } else {
+                0.0
+            }
+        } catch (e: Exception) {
+            0.0
+        }
     }
     
-    private fun getCategorySpentForDateRange(categoryId: Long, startDate: Long, endDate: Long): Double {
-        // TODO: Get total spent for this category within date range from database
-        // For now, return 0
-        return 0.0
+    private suspend fun getCategorySpentForDateRange(categoryId: Long, startDate: Long, endDate: Long): Double {
+        return try {
+            val expenses = BudgetApp.db.expenseDao().getAll()
+            val categoryName = BudgetApp.db.categoryDao().getById(categoryId.toInt())?.categoryName
+            if (categoryName != null) {
+                expenses.filter { 
+                    it.expenseCategory == categoryName && 
+                    it.expenseDate >= startDate && 
+                    it.expenseDate <= endDate 
+                }.sumOf { expense ->
+                    // Expenses should be negative values (decreases)
+                    if (expense.expenseType.name == "Expense") {
+                        -expense.expenseAmount  // Negative for expenses
+                    } else {
+                        expense.expenseAmount   // Positive for income
+                    }
+                }
+            } else {
+                0.0
+            }
+        } catch (e: Exception) {
+            0.0
+        }
     }
     
-    private suspend fun getSubcategoriesForCategory(categoryId: Long): List<Subcategory> {
+    private suspend fun getSubcategoriesForCategory(categoryId: Long): List<com.example.spendsprout_opsc.wants.model.Subcategory> {
         return try {
             val subcategoryEntities = BudgetApp.db.subcategoryDao().getByCategoryId(categoryId)
             subcategoryEntities.map { subcategory ->
-                Subcategory(
+                // Calculate actual spent amount from transactions for this subcategory
+                val actualSpent = getSubcategorySpent(subcategory.id.toLong())
+                com.example.spendsprout_opsc.wants.model.Subcategory(
                     id = subcategory.id.toString(),
                     name = subcategory.subcategoryName,
-                    spent = formatAmount(subcategory.subcategoryBalance),
+                    spent = formatAmount(actualSpent),
                     allocation = formatAmount(subcategory.subcategoryAllocation),
                     color = getSubcategoryColor(subcategory.subcategoryColor)
                 )
             }
         } catch (e: Exception) {
             emptyList()
+        }
+    }
+    
+    private suspend fun getSubcategorySpent(subcategoryId: Long): Double {
+        return try {
+            val expenses = BudgetApp.db.expenseDao().getAll()
+            val subcategoryName = BudgetApp.db.subcategoryDao().getById(subcategoryId.toInt())?.subcategoryName
+            if (subcategoryName != null) {
+                expenses.filter { it.expenseCategory == subcategoryName }
+                    .sumOf { expense ->
+                        // Expenses should be negative values (decreases)
+                        if (expense.expenseType.name == "Expense") {
+                            -expense.expenseAmount  // Negative for expenses
+                        } else {
+                            expense.expenseAmount   // Positive for income
+                        }
+                    }
+            } else {
+                0.0
+            }
+        } catch (e: Exception) {
+            0.0
         }
     }
     
@@ -185,7 +269,7 @@ class CategoryViewModel {
         }
     }
     
-    private fun calculateTotalSpent(subcategories: List<Subcategory>): Double {
+    private fun calculateTotalSpent(subcategories: List<com.example.spendsprout_opsc.wants.model.Subcategory>): Double {
         return subcategories.sumOf { subcategory ->
             // Parse the amount from the formatted string (e.g., "R 3,500" -> 3500.0)
             parseAmountFromString(subcategory.spent)
@@ -198,6 +282,31 @@ class CategoryViewModel {
             amountString.replace("R ", "").replace(",", "").toDouble()
         } catch (e: Exception) {
             0.0
+        }
+    }
+    
+    fun loadSubcategoriesForCategory(categoryName: String, callback: (List<com.example.spendsprout_opsc.wants.model.Subcategory>) -> Unit) {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                // Find the category by name
+                val categories = BudgetApp.db.categoryDao().getAll().first()
+                val category = categories.find { it.categoryName.equals(categoryName, ignoreCase = true) }
+                
+                if (category != null) {
+                    val subcategories = getSubcategoriesForCategory(category.id.toLong())
+                    CoroutineScope(Dispatchers.Main).launch {
+                        callback(subcategories)
+                    }
+                } else {
+                    CoroutineScope(Dispatchers.Main).launch {
+                        callback(emptyList())
+                    }
+                }
+            } catch (e: Exception) {
+                CoroutineScope(Dispatchers.Main).launch {
+                    callback(emptyList())
+                }
+            }
         }
     }
     

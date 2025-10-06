@@ -35,12 +35,17 @@ class SubcategoryAdapter(
         // Set color indicator
         //holder.colorIndicator.setBackgroundColor(android.graphics.Color.parseColor(subcategory.color))
         
-        // Set spent amount color based on overspending
+        // Set spent amount color based on negative values (expenses)
         val spentValue = parseMoney(subcategory.spent)
         val allocationValue = parseMoney(subcategory.allocation)
-        if (subcategory.spent.trim().startsWith("-") || spentValue > allocationValue) {
+        if (subcategory.spent.trim().startsWith("-") || spentValue < 0) {
+            // Red for expenses (negative values)
+            holder.spentTextView.setTextColor(android.graphics.Color.parseColor("#E94444"))
+        } else if (spentValue > allocationValue) {
+            // Red for overspending
             holder.spentTextView.setTextColor(android.graphics.Color.parseColor("#E94444"))
         } else {
+            // Green for positive values within budget
             holder.spentTextView.setTextColor(android.graphics.Color.parseColor("#77B950"))
         }
         

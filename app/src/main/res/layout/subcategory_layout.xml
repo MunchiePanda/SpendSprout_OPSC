@@ -39,7 +39,7 @@
                 android:id="@+id/txt_Name"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:text="Groceries"
+                android:text="@string/blank_string"
                 android:textAlignment="textStart"
                 android:textAppearance="@style/MainTextStyle" />
 
@@ -48,7 +48,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="- R 100 000"
+                android:text="@string/blank_string"
                 android:textAlignment="textEnd"
                 android:textAppearance="@style/MainTextStyle" />
 
@@ -58,7 +58,7 @@
             android:id="@+id/txt_Allocation"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="R 100 000"
+            android:text="@string/blank_string"
             android:textAlignment="textEnd"
             android:textAppearance="@style/SubTextStyle" />
 

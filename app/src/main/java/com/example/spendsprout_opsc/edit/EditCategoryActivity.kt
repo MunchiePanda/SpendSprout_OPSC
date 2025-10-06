@@ -16,8 +16,6 @@ import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import com.example.spendsprout_opsc.R
 import com.example.spendsprout_opsc.accounts.AccountsActivity
-import com.example.spendsprout_opsc.categories.CategoriesActivity
-import com.example.spendsprout_opsc.reports.ReportsActivity
 import com.example.spendsprout_opsc.settings.SettingsActivity
 import com.example.spendsprout_opsc.transactions.TransactionsActivity
 import com.google.android.material.navigation.NavigationView
@@ -71,7 +69,7 @@ class EditCategoryActivity : AppCompatActivity() {
                 }
                 R.id.nav_categories -> {
                     Toast.makeText(this, "Navigating to Categories", Toast.LENGTH_SHORT).show()
-                    startActivity(Intent(this, CategoriesActivity::class.java))
+                    startActivity(Intent(this, com.example.spendsprout_opsc.CategoryOverviewActivity::class.java))
                 }
                 R.id.nav_transactions -> {
                     Toast.makeText(this, "Navigating to Transactions", Toast.LENGTH_SHORT).show()
@@ -83,7 +81,7 @@ class EditCategoryActivity : AppCompatActivity() {
                 }
                 R.id.nav_reports -> {
                     Toast.makeText(this, "Navigating to Reports", Toast.LENGTH_SHORT).show()
-                    startActivity(Intent(this, ReportsActivity::class.java))
+                    android.widget.Toast.makeText(this, "Reports coming soon!", android.widget.Toast.LENGTH_SHORT).show()
                 }
                 R.id.nav_settings -> {
                     Toast.makeText(this, "Navigating to Settings", Toast.LENGTH_SHORT).show()
@@ -102,6 +100,7 @@ class EditCategoryActivity : AppCompatActivity() {
         editCategoryViewModel = EditCategoryViewModel()
 
         setupUI()
+        prefillIfEditing()
 
         // Save FAB triggers same save method
         findViewById<com.google.android.material.floatingactionbutton.FloatingActionButton>(R.id.fab_SaveCategory)
@@ -140,6 +139,35 @@ class EditCategoryActivity : AppCompatActivity() {
 
         btnSave.setOnClickListener {
             saveCategory()
+        }
+    }
+
+    private fun prefillIfEditing() {
+        val subcategoryId = intent.getStringExtra("subcategoryId")
+        val isEditMode = intent.getBooleanExtra("isEditMode", false)
+        
+        if (isEditMode && subcategoryId != null) {
+            // Load subcategory data from database and prefill form
+            editCategoryViewModel.loadSubcategoryById(subcategoryId.toInt()) { subcategory ->
+                if (subcategory != null) {
+                    val edtCategoryName = findViewById<EditText>(R.id.edt_CategoryName)
+                    val edtAllocatedAmount = findViewById<EditText>(R.id.edt_AllocatedAmount)
+                    val edtNotes = findViewById<EditText>(R.id.edt_Notes)
+                    
+                    edtCategoryName.setText(subcategory.subcategoryName)
+                    edtAllocatedAmount.setText(subcategory.subcategoryAllocation.toString())
+                    edtNotes.setText(subcategory.subcategoryNotes ?: "")
+                    
+                    // Set the type spinner based on parent category
+                    val spinnerType = findViewById<Spinner>(R.id.spinner_Type)
+                    val parentCategoryName = editCategoryViewModel.getParentCategoryName(subcategory.categoryId)
+                    val types = arrayOf("Needs", "Wants", "Savings")
+                    val typeIndex = types.indexOf(parentCategoryName)
+                    if (typeIndex >= 0) {
+                        spinnerType.setSelection(typeIndex)
+                    }
+                }
+            }
         }
     }
 

@@ -11,9 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.spendsprout_opsc.R
 import com.example.spendsprout_opsc.accounts.AccountsActivity
-import com.example.spendsprout_opsc.categories.CategoriesActivity
 import com.example.spendsprout_opsc.overview.OverviewActivity
-import com.example.spendsprout_opsc.reports.ReportsActivity
 import com.example.spendsprout_opsc.settings.SettingsActivity
 import com.example.spendsprout_opsc.transactions.TransactionsActivity
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -101,7 +99,7 @@ class WantsCategoryActivity : AppCompatActivity(), NavigationView.OnNavigationIt
                 startActivity(Intent(this, OverviewActivity::class.java))
             }
             R.id.nav_categories -> {
-                startActivity(Intent(this, CategoriesActivity::class.java))
+                startActivity(Intent(this, com.example.spendsprout_opsc.CategoryOverviewActivity::class.java))
             }
             R.id.nav_transactions -> {
                 startActivity(Intent(this, TransactionsActivity::class.java))
@@ -110,7 +108,7 @@ class WantsCategoryActivity : AppCompatActivity(), NavigationView.OnNavigationIt
                 startActivity(Intent(this, AccountsActivity::class.java))
             }
             R.id.nav_reports -> {
-                startActivity(Intent(this, ReportsActivity::class.java))
+                android.widget.Toast.makeText(this, "Reports coming soon!", android.widget.Toast.LENGTH_SHORT).show()
             }
             R.id.nav_settings -> {
                 startActivity(Intent(this, SettingsActivity::class.java))

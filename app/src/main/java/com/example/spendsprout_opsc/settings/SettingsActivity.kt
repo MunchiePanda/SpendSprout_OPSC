@@ -19,7 +19,6 @@ import com.example.spendsprout_opsc.R
 import com.example.spendsprout_opsc.accounts.AccountsActivity
 import com.example.spendsprout_opsc.categories.CategoriesActivity
 import com.example.spendsprout_opsc.overview.OverviewActivity
-import com.example.spendsprout_opsc.reports.ReportsActivity
 import com.example.spendsprout_opsc.transactions.TransactionsActivity
 import com.google.android.material.navigation.NavigationView
 
@@ -175,7 +174,7 @@ class SettingsActivity : AppCompatActivity(), NavigationView.OnNavigationItemSel
                 startActivity(Intent(this, AccountsActivity::class.java))
             }
             R.id.nav_reports -> {
-                startActivity(Intent(this, ReportsActivity::class.java))
+                android.widget.Toast.makeText(this, "Reports coming soon!", android.widget.Toast.LENGTH_SHORT).show()
             }
             R.id.nav_settings -> {
                 // Already in Settings, do nothing

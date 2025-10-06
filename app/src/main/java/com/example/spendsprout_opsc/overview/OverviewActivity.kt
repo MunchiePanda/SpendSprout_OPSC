@@ -16,7 +16,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.spendsprout_opsc.R
 import com.example.spendsprout_opsc.accounts.AccountsActivity
 import com.example.spendsprout_opsc.categories.CategoriesActivity
-import com.example.spendsprout_opsc.reports.ReportsActivity
 import com.example.spendsprout_opsc.settings.SettingsActivity
 import com.example.spendsprout_opsc.transactions.TransactionsActivity
 import com.google.android.material.navigation.NavigationView
@@ -97,7 +96,7 @@ class OverviewActivity : AppCompatActivity() {
                         startActivity(Intent(this, AccountsActivity::class.java))
                     }
                     R.id.nav_reports -> {
-                        startActivity(Intent(this, ReportsActivity::class.java))
+                        android.widget.Toast.makeText(this, "Reports coming soon!", android.widget.Toast.LENGTH_SHORT).show()
                     }
                     R.id.nav_settings -> {
                         startActivity(Intent(this, SettingsActivity::class.java))

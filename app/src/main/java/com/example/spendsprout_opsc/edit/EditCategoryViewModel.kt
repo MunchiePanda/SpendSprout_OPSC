@@ -8,6 +8,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import android.graphics.Color
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 
 class EditCategoryViewModel {
     
@@ -71,6 +72,32 @@ class EditCategoryViewModel {
             (existingSubcategories.maxOfOrNull { it.id } ?: 0) + 1
         } catch (e: Exception) {
             1 // Default to 1 if there's an error
+        }
+    }
+    
+    fun loadSubcategoryById(subcategoryId: Int, callback: (Subcategory_Entity?) -> Unit) {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val subcategory = BudgetApp.db.subcategoryDao().getById(subcategoryId)
+                CoroutineScope(Dispatchers.Main).launch {
+                    callback(subcategory)
+                }
+            } catch (e: Exception) {
+                CoroutineScope(Dispatchers.Main).launch {
+                    callback(null)
+                }
+            }
+        }
+    }
+    
+    fun getParentCategoryName(categoryId: Int): String {
+        return try {
+            runBlocking {
+                val categories = BudgetApp.db.categoryDao().getAll().first()
+                categories.find { it.id == categoryId }?.categoryName ?: "Needs"
+            }
+        } catch (e: Exception) {
+            "Needs"
         }
     }
 }

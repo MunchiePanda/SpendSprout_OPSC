@@ -3,6 +3,7 @@ package com.example.spendsprout_opsc
 import android.os.Bundle
 import android.content.Intent
 import android.widget.TextView
+import android.widget.Toast
 import android.view.MenuItem
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.drawerlayout.widget.DrawerLayout
@@ -89,7 +90,7 @@ class CategoryOverviewActivity : AppCompatActivity() {
                 R.id.nav_categories -> { /* already here */ }
                 R.id.nav_transactions -> startActivity(Intent(this, com.example.spendsprout_opsc.transactions.TransactionsActivity::class.java))
                 R.id.nav_accounts -> startActivity(Intent(this, com.example.spendsprout_opsc.accounts.AccountsActivity::class.java))
-                R.id.nav_reports -> startActivity(Intent(this, com.example.spendsprout_opsc.reports.ReportsActivity::class.java))
+                R.id.nav_reports -> Toast.makeText(this, "Reports coming soon!", Toast.LENGTH_SHORT).show()
                 R.id.nav_settings -> startActivity(Intent(this, com.example.spendsprout_opsc.settings.SettingsActivity::class.java))
                 R.id.nav_exit -> finishAffinity()
             }
@@ -155,15 +156,17 @@ class CategoryOverviewActivity : AppCompatActivity() {
         // Initialize with empty list, will be populated from database
         hierarchicalCategoryAdapter = HierarchicalCategoryAdapter(emptyList(), 
             onCategoryClick = { category ->
-                // Handle category click - open edit screen
-                val intent = Intent(this, com.example.spendsprout_opsc.edit.EditCategoryActivity::class.java)
-                intent.putExtra("categoryId", category.id)
+                // Navigate to activity_categories (CategoriesActivity) for selected main category (Needs, Wants, Savings)
+                val intent = Intent(this, com.example.spendsprout_opsc.categories.CategoriesActivity::class.java)
+                intent.putExtra("filterByCategory", category.name) // Filter to show only this category's subcategories
                 startActivity(intent)
             },
             onSubcategoryClick = { subcategory ->
-                // Handle subcategory click - open edit screen
+                // Navigate to edit screen for selected subcategory with prefilled data
                 val intent = Intent(this, com.example.spendsprout_opsc.edit.EditCategoryActivity::class.java)
                 intent.putExtra("subcategoryId", subcategory.id)
+                intent.putExtra("subcategoryName", subcategory.name)
+                intent.putExtra("isEditMode", true)
                 startActivity(intent)
             }
         )
@@ -176,7 +179,8 @@ class CategoryOverviewActivity : AppCompatActivity() {
     private fun setupFab() {
         val fabAddCategory = findViewById<FloatingActionButton>(R.id.fab_AddCategory)
         fabAddCategory.setOnClickListener {
-            val intent = Intent(this, com.example.spendsprout_opsc.edit.EditCategoryActivity::class.java)
+            // Navigate to activity_categories (CategoriesActivity) to add new category/subcategory
+            val intent = Intent(this, com.example.spendsprout_opsc.categories.CategoriesActivity::class.java)
             startActivity(intent)
         }
     }

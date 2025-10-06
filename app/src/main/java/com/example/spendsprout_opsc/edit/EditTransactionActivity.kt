@@ -23,8 +23,6 @@ import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import com.example.spendsprout_opsc.R
 import com.example.spendsprout_opsc.accounts.AccountsActivity
-import com.example.spendsprout_opsc.categories.CategoriesActivity
-import com.example.spendsprout_opsc.reports.ReportsActivity
 import com.example.spendsprout_opsc.settings.SettingsActivity
 import com.example.spendsprout_opsc.transactions.TransactionsActivity
 import com.google.android.material.navigation.NavigationView
@@ -80,7 +78,7 @@ class EditTransactionActivity : AppCompatActivity() {
                 }
                 R.id.nav_categories -> {
                     Toast.makeText(this, "Navigating to Categories", Toast.LENGTH_SHORT).show()
-                    startActivity(Intent(this, CategoriesActivity::class.java))
+                    startActivity(Intent(this, com.example.spendsprout_opsc.CategoryOverviewActivity::class.java))
                 }
                 R.id.nav_transactions -> {
                     Toast.makeText(this, "Navigating to Transactions", Toast.LENGTH_SHORT).show()
@@ -92,7 +90,7 @@ class EditTransactionActivity : AppCompatActivity() {
                 }
                 R.id.nav_reports -> {
                     Toast.makeText(this, "Navigating to Reports", Toast.LENGTH_SHORT).show()
-                    startActivity(Intent(this, ReportsActivity::class.java))
+                    android.widget.Toast.makeText(this, "Reports coming soon!", android.widget.Toast.LENGTH_SHORT).show()
                 }
                 R.id.nav_settings -> {
                     Toast.makeText(this, "Navigating to Settings", Toast.LENGTH_SHORT).show()

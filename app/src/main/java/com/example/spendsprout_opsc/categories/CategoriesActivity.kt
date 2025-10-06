@@ -14,10 +14,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.spendsprout_opsc.R
 import com.example.spendsprout_opsc.accounts.AccountsActivity
 import com.example.spendsprout_opsc.overview.OverviewActivity
-import com.example.spendsprout_opsc.reports.ReportsActivity
 import com.example.spendsprout_opsc.settings.SettingsActivity
 import com.example.spendsprout_opsc.transactions.TransactionsActivity
 import com.example.spendsprout_opsc.wants.WantsCategoryActivity
+import com.example.spendsprout_opsc.wants.SubcategoryAdapter
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.navigation.NavigationView
 
@@ -27,6 +27,7 @@ class CategoriesActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
     private lateinit var navView: NavigationView
     private lateinit var categoriesViewModel: CategoriesViewModel
     private lateinit var categoryAdapter: CategoryAdapter
+    private var filterByCategory: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,6 +53,14 @@ class CategoriesActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
 
         navView.setNavigationItemSelectedListener(this)
 
+        // Get filter parameter
+        filterByCategory = intent.getStringExtra("filterByCategory")
+        
+        // Update title based on filter
+        if (filterByCategory != null) {
+            supportActionBar?.title = filterByCategory
+        }
+        
         // Initialize ViewModel
         categoriesViewModel = CategoriesViewModel()
 
@@ -68,14 +77,13 @@ class CategoriesActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
         val recyclerView = findViewById<RecyclerView>(R.id.recyclerView_Categories)
         recyclerView.layoutManager = LinearLayoutManager(this)
 
-        val categories = categoriesViewModel.getAllCategories()
-        categoryAdapter = CategoryAdapter(categories) { category ->
-            // Handle category click - navigate to subcategories
-            val intent = Intent(this, WantsCategoryActivity::class.java)
-            intent.putExtra("categoryName", category.name)
-            startActivity(intent)
+        if (filterByCategory != null) {
+            // Show subcategories for the filtered category
+            loadSubcategoriesForCategory(filterByCategory!!)
+        } else {
+            // Show main categories from database (not hardcoded)
+            loadMainCategoriesFromDatabase()
         }
-        recyclerView.adapter = categoryAdapter
     }
 
     private fun setupFab() {
@@ -83,6 +91,44 @@ class CategoriesActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
         fabAddCategory.setOnClickListener {
             val intent = Intent(this, com.example.spendsprout_opsc.edit.EditCategoryActivity::class.java)
             startActivity(intent)
+        }
+    }
+
+    private fun loadMainCategoriesFromDatabase() {
+        // Load main categories from database instead of hardcoded data
+        categoriesViewModel.loadMainCategoriesFromDatabase { categories ->
+            val recyclerView = findViewById<RecyclerView>(R.id.recyclerView_Categories)
+            categoryAdapter = CategoryAdapter(categories) { category ->
+                // Handle category click - navigate to edit screen
+                val intent = Intent(this, com.example.spendsprout_opsc.edit.EditCategoryActivity::class.java)
+                intent.putExtra("categoryId", category.id)
+                intent.putExtra("categoryName", category.name)
+                startActivity(intent)
+            }
+            recyclerView.adapter = categoryAdapter
+        }
+    }
+
+    private fun loadSubcategoriesForCategory(categoryName: String) {
+        // Load subcategories for the specific category
+        categoriesViewModel.loadSubcategoriesForCategory(categoryName) { subcategories ->
+            val recyclerView = findViewById<RecyclerView>(R.id.recyclerView_Categories)
+            
+            if (subcategories.isEmpty()) {
+                // Show empty state or message if no subcategories exist
+                android.util.Log.d("CategoriesActivity", "No subcategories found for category: $categoryName")
+                // You could show a message like "No subcategories found. Add some subcategories to this category."
+            }
+            
+            val subcategoryAdapter = SubcategoryAdapter(subcategories) { subcategory ->
+                // Handle subcategory click - navigate to edit screen with prefilled data
+                val intent = Intent(this, com.example.spendsprout_opsc.edit.EditCategoryActivity::class.java)
+                intent.putExtra("subcategoryId", subcategory.id)
+                intent.putExtra("subcategoryName", subcategory.name)
+                intent.putExtra("isEditMode", true)
+                startActivity(intent)
+            }
+            recyclerView.adapter = subcategoryAdapter
         }
     }
 
@@ -134,7 +180,7 @@ class CategoriesActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
                 startActivity(Intent(this, AccountsActivity::class.java))
             }
             R.id.nav_reports -> {
-                startActivity(Intent(this, ReportsActivity::class.java))
+                android.widget.Toast.makeText(this, "Reports coming soon!", android.widget.Toast.LENGTH_SHORT).show()
             }
             R.id.nav_settings -> {
                 startActivity(Intent(this, SettingsActivity::class.java))

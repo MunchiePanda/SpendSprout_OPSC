@@ -60,7 +60,7 @@
             app:layout_constraintStart_toStartOf="@+id/progressBar_Spending"
             app:layout_constraintTop_toTopOf="@+id/progressBar_Spending" />
 
-        <com.example.spendsprout_opsc.reports.ChartView
+        <com.example.spendsprout_opsc.overview.ChartView
             android:id="@+id/chartView"
             android:layout_width="0dp"
             android:layout_height="300dp"
