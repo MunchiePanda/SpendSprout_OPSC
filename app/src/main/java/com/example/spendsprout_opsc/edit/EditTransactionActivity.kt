@@ -234,11 +234,14 @@ class EditTransactionActivity : AppCompatActivity() {
         val description = edtDescription.text.toString()
         val amount = edtAmount.text.toString()
         val category = spinnerCategory.selectedItem.toString()
-        val date = btnDate.text.toString()
+        val dateString = btnDate.text.toString()
         val account = spinnerAccount.selectedItem.toString()
         val repeat = spinnerRepeat.selectedItem.toString()
         val oweOwed = checkBoxOweOwed.isChecked
         val notes = edtNotes.text.toString()
+        
+        // Convert date string to Long
+        val date = editTransactionViewModel.parseUiDateToMillis(dateString)
 
         if (description.isEmpty() || amount.isEmpty()) {
             Toast.makeText(this, "Please fill in all required fields", Toast.LENGTH_SHORT).show()
@@ -255,14 +258,21 @@ class EditTransactionActivity : AppCompatActivity() {
         val formattedAmount = if (oweOwed) "+ R $amount" else "- R $amount"
 
         try {
-            // Save transaction using ViewModel (pass image path if selected)
-            editTransactionViewModel.saveTransaction(
-                description, amountVal, category, date, account, repeat, oweOwed, notes,
-                imagePath = selectedImageUri?.toString()
-            )
-
-            // Show success message
-            Toast.makeText(this, "Transaction saved successfully", Toast.LENGTH_SHORT).show()
+            if (editingTransactionId != null) {
+                // Update existing transaction
+                editTransactionViewModel.updateTransaction(
+                    editingTransactionId!!, description, amountVal, category, date, account, repeat, oweOwed, notes,
+                    imagePath = selectedImageUri?.toString()
+                )
+                Toast.makeText(this, "Transaction updated successfully", Toast.LENGTH_SHORT).show()
+            } else {
+                // Create new transaction
+                editTransactionViewModel.saveTransaction(
+                    description, amountVal, category, date, account, repeat, oweOwed, notes,
+                    imagePath = selectedImageUri?.toString()
+                )
+                Toast.makeText(this, "Transaction saved successfully", Toast.LENGTH_SHORT).show()
+            }
 
             // Return data
             val resultIntent = Intent().apply {
@@ -270,6 +280,7 @@ class EditTransactionActivity : AppCompatActivity() {
                 putExtra("amount", formattedAmount)
                 putExtra("category", category)
                 putExtra("date", date)
+                putExtra("updated", editingTransactionId != null)
             }
             setResult(RESULT_OK, resultIntent)
             finish()

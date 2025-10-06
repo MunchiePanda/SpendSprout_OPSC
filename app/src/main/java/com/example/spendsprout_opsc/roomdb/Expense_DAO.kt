@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Update
 
 @Dao
 interface Expense_DAO {
@@ -18,6 +19,10 @@ interface Expense_DAO {
     //Delete an expense from the database
     @Delete
     fun delete(expense: Expense_Entity)
+    
+    //Update an expense in the database
+    @Update
+    suspend fun update(expense: Expense_Entity)
 
     //Get all
     @Query("SELECT * FROM Expense ORDER BY expense_date ASC")   //* is select all

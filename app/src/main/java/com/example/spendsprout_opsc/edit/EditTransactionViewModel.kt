@@ -16,7 +16,7 @@ class EditTransactionViewModel {
         description: String,
         amount: Double,
         category: String,
-        date: String,
+        date: Long,
         account: String,
         repeat: String,
         oweOwed: Boolean,
@@ -33,7 +33,7 @@ class EditTransactionViewModel {
             try {
                 val entity = Expense_Entity(
                     expenseName = description,
-                    expenseDate = parseUiDateToMillis(date),
+                    expenseDate = date,
                     expenseAmount = amount,
                     expenseType = if (oweOwed) ExpenseType.Income else ExpenseType.Expense,
                     expenseIsOwed = oweOwed,
@@ -52,18 +52,7 @@ class EditTransactionViewModel {
         }
     }
 
-    fun loadTransactionById(id: Long, callback: (com.example.spendsprout_opsc.roomdb.Expense_Entity?) -> Unit) {
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                val entity = BudgetApp.db.expenseDao().getById(id)
-                CoroutineScope(Dispatchers.Main).launch { callback(entity) }
-            } catch (e: Exception) {
-                CoroutineScope(Dispatchers.Main).launch { callback(null) }
-            }
-        }
-    }
-    
-    private fun parseUiDateToMillis(ui: String): Long {
+    fun parseUiDateToMillis(ui: String): Long {
         return try {
             SimpleDateFormat("d MMMM yyyy", Locale.getDefault()).parse(ui)?.time ?: System.currentTimeMillis()
         } catch (e: Exception) {
@@ -77,6 +66,58 @@ class EditTransactionViewModel {
             "weekly" -> RepeatType.Weekly
             "monthly" -> RepeatType.Monthly
             else -> RepeatType.None
+        }
+    }
+    
+    fun loadTransactionById(transactionId: Long, callback: (Expense_Entity?) -> Unit) {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val expense = BudgetApp.db.expenseDao().getById(transactionId)
+                CoroutineScope(Dispatchers.Main).launch {
+                    callback(expense)
+                }
+            } catch (e: Exception) {
+                CoroutineScope(Dispatchers.Main).launch {
+                    callback(null)
+                }
+            }
+        }
+    }
+    
+    fun updateTransaction(
+        transactionId: Long,
+        name: String,
+        amount: Double,
+        category: String,
+        date: Long,
+        account: String,
+        repeat: String,
+        oweOwed: Boolean,
+        notes: String,
+        imagePath: String? = null
+    ) {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val expense = Expense_Entity(
+                    id = transactionId,
+                    expenseName = name,
+                    expenseAmount = amount,
+                    expenseCategory = category,
+                    expenseDate = date,
+                    expenseIsOwed = oweOwed,
+                    expenseRepeat = parseRepeatType(repeat),
+                    expenseType = if (oweOwed) ExpenseType.Income else ExpenseType.Expense,
+                    expenseNotes = notes.ifBlank { null },
+                    expenseImage = imagePath,
+                    expenseStart = null,
+                    expenseEnd = null
+                )
+                
+                BudgetApp.db.expenseDao().update(expense)
+                android.util.Log.d("EditTransactionViewModel", "Transaction updated: $name")
+            } catch (e: Exception) {
+                android.util.Log.e("EditTransactionViewModel", "Error updating transaction: ${e.message}", e)
+            }
         }
     }
 }
