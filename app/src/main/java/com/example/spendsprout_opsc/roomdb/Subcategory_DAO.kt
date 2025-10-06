@@ -42,5 +42,9 @@ interface Subcategory_DAO {
 
     //Get subcategories for a specific category (assuming there's a category_id field)
     @Query("SELECT * FROM Subcategory WHERE category_id = :categoryId")
-    suspend fun getByCategoryId(categoryId: Long): List<Subcategory_Entity>
+    suspend fun getByCategoryId(categoryId: Int): List<Subcategory_Entity>
+    
+    //Get count of subcategories
+    @Query("SELECT COUNT(*) FROM Subcategory")
+    suspend fun getCount(): Int
 }

@@ -95,40 +95,49 @@ class CategoriesActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
     }
 
     private fun loadMainCategoriesFromDatabase() {
-        // Load main categories from database instead of hardcoded data
-        categoriesViewModel.loadMainCategoriesFromDatabase { categories ->
-            val recyclerView = findViewById<RecyclerView>(R.id.recyclerView_Categories)
-            categoryAdapter = CategoryAdapter(categories) { category ->
-                // Handle category click - navigate to edit screen
-                val intent = Intent(this, com.example.spendsprout_opsc.edit.EditCategoryActivity::class.java)
-                intent.putExtra("categoryId", category.id)
-                intent.putExtra("categoryName", category.name)
-                startActivity(intent)
+        try {
+            // Load main categories from database instead of hardcoded data
+            categoriesViewModel.loadMainCategoriesFromDatabase { categories ->
+                try {
+                    val recyclerView = findViewById<RecyclerView>(R.id.recyclerView_Categories)
+                    categoryAdapter = CategoryAdapter(categories) { category ->
+                        // Handle category click - navigate to edit screen
+                        val intent = Intent(this, com.example.spendsprout_opsc.edit.EditCategoryActivity::class.java)
+                        intent.putExtra("categoryId", category.id)
+                        intent.putExtra("categoryName", category.name)
+                        startActivity(intent)
+                    }
+                    recyclerView.adapter = categoryAdapter
+                } catch (e: Exception) {
+                    android.util.Log.e("CategoriesActivity", "Error setting up category adapter: ${e.message}", e)
+                }
             }
-            recyclerView.adapter = categoryAdapter
+        } catch (e: Exception) {
+            android.util.Log.e("CategoriesActivity", "Error loading main categories: ${e.message}", e)
         }
     }
 
     private fun loadSubcategoriesForCategory(categoryName: String) {
-        // Load subcategories for the specific category
-        categoriesViewModel.loadSubcategoriesForCategory(categoryName) { subcategories ->
-            val recyclerView = findViewById<RecyclerView>(R.id.recyclerView_Categories)
-            
-            if (subcategories.isEmpty()) {
-                // Show empty state or message if no subcategories exist
-                android.util.Log.d("CategoriesActivity", "No subcategories found for category: $categoryName")
-                // You could show a message like "No subcategories found. Add some subcategories to this category."
+        try {
+            // Load subcategories for the specific category
+            categoriesViewModel.loadSubcategoriesForCategory(categoryName) { subcategories ->
+                try {
+                    val recyclerView = findViewById<RecyclerView>(R.id.recyclerView_Categories)
+                    
+                    if (subcategories.isEmpty()) {
+                        // Show empty state or message if no subcategories exist
+                        android.util.Log.d("CategoriesActivity", "No subcategories found for category: $categoryName")
+                        // You could show a message like "No subcategories found. Add some subcategories to this category."
+                    }
+                    
+                    val subcategoryAdapter = SubcategoryAdapter(subcategories)
+                    recyclerView.adapter = subcategoryAdapter
+                } catch (e: Exception) {
+                    android.util.Log.e("CategoriesActivity", "Error setting up subcategory adapter: ${e.message}", e)
+                }
             }
-            
-            val subcategoryAdapter = SubcategoryAdapter(subcategories) { subcategory ->
-                // Handle subcategory click - navigate to edit screen with prefilled data
-                val intent = Intent(this, com.example.spendsprout_opsc.edit.EditCategoryActivity::class.java)
-                intent.putExtra("subcategoryId", subcategory.id)
-                intent.putExtra("subcategoryName", subcategory.name)
-                intent.putExtra("isEditMode", true)
-                startActivity(intent)
-            }
-            recyclerView.adapter = subcategoryAdapter
+        } catch (e: Exception) {
+            android.util.Log.e("CategoriesActivity", "Error loading subcategories: ${e.message}", e)
         }
     }
 
@@ -161,8 +170,11 @@ class CategoriesActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
     }
 
     private fun applyFilter(type: String) {
-        val filteredCategories = categoriesViewModel.getFilteredCategories(type)
-        categoryAdapter.updateData(filteredCategories)
+        // Only apply filter if we're showing main categories, not subcategories
+        if (filterByCategory == null) {
+            val filteredCategories = categoriesViewModel.getFilteredCategories(type)
+            categoryAdapter.updateData(filteredCategories)
+        }
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {

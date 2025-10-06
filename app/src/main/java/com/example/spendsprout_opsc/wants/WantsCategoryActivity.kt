@@ -66,12 +66,7 @@ class WantsCategoryActivity : AppCompatActivity(), NavigationView.OnNavigationIt
         recyclerView.layoutManager = LinearLayoutManager(this)
 
         val subcategories = wantsViewModel.getSubcategories()
-        subcategoryAdapter = SubcategoryAdapter(subcategories) { subcategory ->
-            // Handle subcategory click - open edit screen
-            val intent = Intent(this, com.example.spendsprout_opsc.edit.EditCategoryActivity::class.java)
-            intent.putExtra("subcategoryId", subcategory.id)
-            startActivity(intent)
-        }
+        subcategoryAdapter = SubcategoryAdapter(subcategories)
         recyclerView.adapter = subcategoryAdapter
     }
 

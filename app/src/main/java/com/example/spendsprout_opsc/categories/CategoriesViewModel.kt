@@ -51,7 +51,7 @@ class CategoriesViewModel {
                 val categories = BudgetApp.db.categoryDao().getAll().first()
                 val categoryList = mutableListOf<Category>()
                 for (category in categories) {
-                    val spent = getCategorySpent(category.id.toLong())
+                    val spent = getCategorySpent(category.id)
                     categoryList.add(
                         Category(
                             id = category.id.toString(),
@@ -73,10 +73,10 @@ class CategoriesViewModel {
         }
     }
     
-    private suspend fun getCategorySpent(categoryId: Long): Double {
+    private suspend fun getCategorySpent(categoryId: Int): Double {
         return try {
             val expenses = BudgetApp.db.expenseDao().getAll()
-            val categoryName = BudgetApp.db.categoryDao().getById(categoryId.toInt())?.categoryName
+            val categoryName = BudgetApp.db.categoryDao().getById(categoryId)?.categoryName
             if (categoryName != null) {
                 expenses.filter { it.expenseCategory == categoryName }
                     .sumOf { expense ->
@@ -114,7 +114,7 @@ class CategoriesViewModel {
                 
                 if (category != null) {
                     // Only get subcategories that actually belong to this category
-                    val subcategories = getSubcategoriesForCategory(category.id.toLong())
+                    val subcategories = getSubcategoriesForCategory(category.id)
                     CoroutineScope(Dispatchers.Main).launch {
                         callback(subcategories)
                     }
@@ -132,14 +132,14 @@ class CategoriesViewModel {
         }
     }
     
-    private suspend fun getSubcategoriesForCategory(categoryId: Long): List<com.example.spendsprout_opsc.wants.model.Subcategory> {
+    private suspend fun getSubcategoriesForCategory(categoryId: Int): List<com.example.spendsprout_opsc.wants.model.Subcategory> {
         return try {
             val subcategoryEntities = BudgetApp.db.subcategoryDao().getByCategoryId(categoryId)
             android.util.Log.d("CategoriesViewModel", "Found ${subcategoryEntities.size} subcategories for categoryId: $categoryId")
             
             subcategoryEntities.map { subcategory ->
                 // Calculate actual spent amount from transactions for this subcategory
-                val actualSpent = getSubcategorySpent(subcategory.id.toLong())
+                val actualSpent = getSubcategorySpent(subcategory.id)
                 android.util.Log.d("CategoriesViewModel", "Subcategory: ${subcategory.subcategoryName}, Spent: $actualSpent")
                 
                 com.example.spendsprout_opsc.wants.model.Subcategory(
@@ -156,10 +156,10 @@ class CategoriesViewModel {
         }
     }
     
-    private suspend fun getSubcategorySpent(subcategoryId: Long): Double {
+    private suspend fun getSubcategorySpent(subcategoryId: Int): Double {
         return try {
             val expenses = BudgetApp.db.expenseDao().getAll()
-            val subcategoryName = BudgetApp.db.subcategoryDao().getById(subcategoryId.toInt())?.subcategoryName
+            val subcategoryName = BudgetApp.db.subcategoryDao().getById(subcategoryId)?.subcategoryName
             if (subcategoryName != null) {
                 expenses.filter { it.expenseCategory == subcategoryName }
                     .sumOf { expense ->

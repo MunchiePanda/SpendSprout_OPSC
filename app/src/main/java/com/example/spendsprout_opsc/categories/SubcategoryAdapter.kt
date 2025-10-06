@@ -1,5 +1,6 @@
 package com.example.spendsprout_opsc.categories
 
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -8,10 +9,10 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.spendsprout_opsc.R
 import com.example.spendsprout_opsc.categories.model.Subcategory
+import com.example.spendsprout_opsc.edit.EditSubcategoryActivity
 
 class SubcategoryAdapter(
-    private var subcategories: List<Subcategory>,
-    private val onItemClick: (Subcategory) -> Unit
+    private var subcategories: List<Subcategory>
 ) : RecyclerView.Adapter<SubcategoryAdapter.SubcategoryViewHolder>() {
 
     class SubcategoryViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
@@ -45,8 +46,16 @@ class SubcategoryAdapter(
             holder.balanceTextView.setTextColor(android.graphics.Color.parseColor("#E94444"))
         }
         
-        // Set click listener
-        holder.view.setOnClickListener { onItemClick(subcategory) }
+        // Set click listener to open EditSubcategoryActivity
+        holder.view.setOnClickListener {
+            val intent = Intent(holder.view.context, EditSubcategoryActivity::class.java)
+            // Convert UI model to database entity
+            // Note: We need to get the actual Subcategory_Entity from database
+            // For now, we'll pass the ID and let the activity load the full entity
+            intent.putExtra("subcategoryId", subcategory.id.toIntOrNull() ?: 0)
+            intent.putExtra("isEdit", true)
+            holder.view.context.startActivity(intent)
+        }
     }
 
     override fun getItemCount(): Int = subcategories.size

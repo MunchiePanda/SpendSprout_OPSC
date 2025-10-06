@@ -67,9 +67,7 @@ class HierarchicalCategoryAdapter(
 
     private fun setupSubcategoriesRecyclerView(recyclerView: RecyclerView, subcategories: List<Subcategory>) {
         recyclerView.layoutManager = LinearLayoutManager(recyclerView.context)
-        val subcategoryAdapter = SubcategoryAdapter(subcategories) { subcategory ->
-            onSubcategoryClick(subcategory)
-        }
+        val subcategoryAdapter = SubcategoryAdapter(subcategories)
         recyclerView.adapter = subcategoryAdapter
     }
 
