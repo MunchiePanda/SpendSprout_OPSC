@@ -21,11 +21,16 @@ import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.lifecycle.lifecycleScope
+import com.example.spendsprout_opsc.BudgetApp
 import com.example.spendsprout_opsc.R
 import com.example.spendsprout_opsc.accounts.AccountsActivity
 import com.example.spendsprout_opsc.settings.SettingsActivity
 import com.example.spendsprout_opsc.transactions.TransactionsActivity
 import com.google.android.material.navigation.NavigationView
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.Calendar
 
 class EditTransactionActivity : AppCompatActivity() {
@@ -129,11 +134,28 @@ class EditTransactionActivity : AppCompatActivity() {
 
     private fun setupCategorySpinner() {
         val spinnerCategory = findViewById<Spinner>(R.id.spinner_Category)
-        val categories = arrayOf("Groceries", "Needs", "Wants", "Savings")
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, categories)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinnerCategory.adapter = adapter
+
+        // launch a coroutine to fetch data safely
+        lifecycleScope.launch {
+            // run the database query on a background thread
+            val categories = withContext(Dispatchers.IO) {
+                BudgetApp.db.subcategoryDao().getAll()
+            }
+
+            // extract subcategory names
+            val categoryNames = categories.map { it.subcategoryName }.toTypedArray()
+
+            // update UI on the main thread
+            val adapter = ArrayAdapter(
+                this@EditTransactionActivity,          // replace with your activity name
+                android.R.layout.simple_spinner_item,
+                categoryNames
+            )
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            spinnerCategory.adapter = adapter
+        }
     }
+
 
     private fun setupAccountSpinner() {
         val spinnerAccount = findViewById<Spinner>(R.id.spinner_Account)
