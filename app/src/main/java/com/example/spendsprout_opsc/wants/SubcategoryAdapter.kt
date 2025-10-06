@@ -34,9 +34,16 @@ class SubcategoryAdapter(
         holder.allocationTextView.text = subcategory.allocation
         
         // Calculate balance (allocation - spent)
-        val spentValue = parseMoney(subcategory.spent)
+        // Note: spent is already negative in display, so we need to treat it as positive expense
+        val spentValue = kotlin.math.abs(parseMoney(subcategory.spent)) // Make spent positive
         val allocationValue = parseMoney(subcategory.allocation)
-        val balanceValue = allocationValue - spentValue
+        val balanceValue = allocationValue - spentValue // Now: allocation - positive_spent
+        
+        // Debug logging (remove in production)
+        android.util.Log.d("SubcategoryAdapter", "Subcategory: ${subcategory.name}")
+        android.util.Log.d("SubcategoryAdapter", "Spent: '${subcategory.spent}' -> $spentValue")
+        android.util.Log.d("SubcategoryAdapter", "Allocation: '${subcategory.allocation}' -> $allocationValue")
+        android.util.Log.d("SubcategoryAdapter", "Balance: $allocationValue - $spentValue = $balanceValue")
         
         // Format balance with proper sign
         val balanceText = if (balanceValue >= 0) {
@@ -72,7 +79,15 @@ class SubcategoryAdapter(
     override fun getItemCount(): Int = subcategories.size
 
     private fun parseMoney(text: String): Double {
-        return text.replace("R", "").replace(",", "").trim().toDoubleOrNull() ?: 0.0
+        // Remove currency symbol, commas, and extra spaces
+        val cleanedText = text.replace("R", "").replace(",", "").replace(" ", "").trim()
+        
+        // Handle negative values properly
+        val isNegative = cleanedText.startsWith("-")
+        val absoluteValue = if (isNegative) cleanedText.substring(1) else cleanedText
+        
+        val value = absoluteValue.toDoubleOrNull() ?: 0.0
+        return if (isNegative) -value else value
     }
 }
 
