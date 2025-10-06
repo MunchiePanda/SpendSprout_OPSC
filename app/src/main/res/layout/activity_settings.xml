@@ -153,68 +153,6 @@
                         android:layout_height="wrap_content" />
                 </LinearLayout>
 
-                <!-- Monthly Goals Section -->
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Monthly Goals"
-                    android:textColor="@color/MainTextColor"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    android:layout_marginTop="16dp"
-                    android:layout_marginBottom="8dp" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:padding="16dp"
-                    android:background="@color/ItemBackgroundColor"
-                    android:layout_marginBottom="8dp">
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Min Monthly Goal"
-                        android:textColor="@color/MainTextColor"
-                        android:textSize="16sp" />
-
-                    <EditText
-                        android:id="@+id/edt_MinGoal"
-                        android:layout_width="120dp"
-                        android:layout_height="wrap_content"
-                        android:inputType="numberDecimal"
-                        android:hint="0.00"
-                        android:background="@drawable/edit_text_background"
-                        android:padding="8dp" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:padding="16dp"
-                    android:background="@color/ItemBackgroundColor"
-                    android:layout_marginBottom="8dp">
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Max Monthly Goal"
-                        android:textColor="@color/MainTextColor"
-                        android:textSize="16sp" />
-
-                    <EditText
-                        android:id="@+id/edt_MaxGoal"
-                        android:layout_width="120dp"
-                        android:layout_height="wrap_content"
-                        android:inputType="numberDecimal"
-                        android:hint="0.00"
-                        android:background="@drawable/edit_text_background"
-                        android:padding="8dp" />
-                </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"
