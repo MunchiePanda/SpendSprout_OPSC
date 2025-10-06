@@ -50,8 +50,8 @@ class OverviewViewModel : ViewModel() {
             // Load real data from database
             loadBudgets()
             
-            // Mock data for now - will be replaced with real database once build environment is fixed
-            _totalBalance.value = 1880.0
+            // Use real budget data instead of mock data
+            // _totalBalance will be calculated from actual budget data
 
             // Mock recent transactions
             _recentTransactions.value = listOf(
@@ -155,11 +155,26 @@ class OverviewViewModel : ViewModel() {
                 val budgetFlow = com.example.spendsprout_opsc.BudgetApp.db.budgetDao().getAll()
                 budgetFlow.collect { budgetList ->
                     _budgets.value = budgetList
-                    // Set the first budget as current if none is selected
-                    if (_currentBudget.value == null && budgetList.isNotEmpty()) {
+                    
+                    // Update current budget if it exists in the new list, or set first if none selected
+                    val currentBudget = _currentBudget.value
+                    if (currentBudget != null) {
+                        // Find the updated budget with the same ID
+                        val updatedBudget = budgetList.find { it.id == currentBudget.id }
+                        if (updatedBudget != null) {
+                            _currentBudget.value = updatedBudget
+                            android.util.Log.d("OverviewViewModel", "Updated current budget: ${updatedBudget.budgetName}")
+                        }
+                    } else if (budgetList.isNotEmpty()) {
+                        // Set the first budget as current if none is selected
                         _currentBudget.value = budgetList.first()
+                        android.util.Log.d("OverviewViewModel", "Set first budget as current: ${budgetList.first().budgetName}")
                     }
-                    android.util.Log.d("OverviewViewModel", "Loaded ${budgetList.size} budgets")
+                    
+                    // Update total balance with real budget data
+                    _totalBalance.value = getTotalBalance()
+                    
+                    android.util.Log.d("OverviewViewModel", "Loaded ${budgetList.size} budgets, total balance: ${_totalBalance.value}")
                 }
             } catch (e: Exception) {
                 android.util.Log.e("OverviewViewModel", "Error loading budgets: ${e.message}", e)
@@ -190,6 +205,23 @@ class OverviewViewModel : ViewModel() {
     
     fun refreshData() {
         loadData()
+    }
+    
+    fun refreshCurrentBudget() {
+        viewModelScope.launch {
+            try {
+                val currentBudget = _currentBudget.value
+                if (currentBudget != null) {
+                    val updatedBudget = com.example.spendsprout_opsc.BudgetApp.db.budgetDao().getById(currentBudget.id)
+                    if (updatedBudget != null) {
+                        _currentBudget.value = updatedBudget
+                        android.util.Log.d("OverviewViewModel", "Refreshed current budget: ${updatedBudget.budgetName}")
+                    }
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("OverviewViewModel", "Error refreshing current budget: ${e.message}", e)
+            }
+        }
     }
     
     // Methods that were referenced in the commented code in OverviewActivity

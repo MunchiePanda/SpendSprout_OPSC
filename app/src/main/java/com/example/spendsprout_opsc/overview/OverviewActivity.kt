@@ -39,6 +39,10 @@ import com.google.android.material.navigation.NavigationView
  */
 class OverviewActivity : AppCompatActivity() {
 
+    companion object {
+        private const val BUDGET_EDIT_REQUEST_CODE = 1001
+    }
+
     // OLD VARIABLES - COMMENTED OUT AS LAYOUT STRUCTURE CHANGED
     //private lateinit var drawerLayout: DrawerLayout  // OLD: was drawer_layout
     //private lateinit var navView: NavigationView    // OLD: was nav_view
@@ -178,6 +182,8 @@ class OverviewActivity : AppCompatActivity() {
     }
     
     private fun updateBudgetDisplay(budget: com.example.spendsprout_opsc.roomdb.Budget_Entity) {
+        android.util.Log.d("OverviewActivity", "Updating budget display with: ${budget.budgetName}, balance: ${budget.budgetBalance}, opening: ${budget.openingBalance}")
+        
         val budgetBalanceTextView = findViewById<TextView>(R.id.txt_BudgetBalance)
         budgetBalanceTextView.text = "R ${String.format("%.2f", budget.budgetBalance)}"
         
@@ -189,6 +195,8 @@ class OverviewActivity : AppCompatActivity() {
         
         val maxTextView = findViewById<TextView>(R.id.txt_Max)
         maxTextView.text = "R ${String.format("%.2f", budget.budgetMaxGoal)}"
+        
+        android.util.Log.d("OverviewActivity", "Budget display updated successfully")
     }
     
     private fun updateBudgetDisplayWithDefaults() {
@@ -217,7 +225,7 @@ class OverviewActivity : AppCompatActivity() {
                 intent.putExtra("budget", currentBudget)
             }
             
-            startActivity(intent)
+            startActivityForResult(intent, BUDGET_EDIT_REQUEST_CODE)
         }
     }
 
@@ -260,6 +268,19 @@ class OverviewActivity : AppCompatActivity() {
             }
         }
         
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        
+        android.util.Log.d("OverviewActivity", "onActivityResult called: requestCode=$requestCode, resultCode=$resultCode")
+        
+        if (requestCode == BUDGET_EDIT_REQUEST_CODE && resultCode == RESULT_OK) {
+            android.util.Log.d("OverviewActivity", "Budget edit successful, refreshing data...")
+            // Budget was updated successfully, refresh data immediately
+            overviewViewModel.refreshCurrentBudget()
+            Toast.makeText(this, "Budget updated successfully!", Toast.LENGTH_SHORT).show()
+        }
     }
 
     override fun onResume() {

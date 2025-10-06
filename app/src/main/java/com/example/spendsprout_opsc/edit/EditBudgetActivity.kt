@@ -2,6 +2,7 @@ package com.example.spendsprout_opsc.edit
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.MenuItem
 import android.view.View
 import android.widget.Button
@@ -12,6 +13,8 @@ import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import com.example.spendsprout_opsc.R
 import com.example.spendsprout_opsc.accounts.AccountsActivity
 import com.example.spendsprout_opsc.categories.CategoriesActivity
@@ -178,25 +181,34 @@ class EditBudgetActivity : AppCompatActivity() {
             return
         }
 
-        // Save budget using ViewModel
-        if (existingBudget != null) {
-            // Update existing budget
-            editBudgetViewModel.updateBudget(existingBudget!!.id, budgetName, openingBalanceVal, minGoalVal, maxGoalVal, notes)
-        } else {
-            // Create new budget
-            editBudgetViewModel.saveBudget(budgetName, openingBalanceVal, minGoalVal, maxGoalVal, notes)
-        }
+        // Save budget using ViewModel with coroutine to wait for completion
+        lifecycleScope.launch {
+            try {
+                if (existingBudget != null) {
+                    // Update existing budget
+                    editBudgetViewModel.updateBudget(existingBudget!!.id, budgetName, openingBalanceVal, minGoalVal, maxGoalVal, notes)
+                    Toast.makeText(this@EditBudgetActivity, "Budget updated successfully", Toast.LENGTH_SHORT).show()
+                } else {
+                    // Create new budget
+                    editBudgetViewModel.saveBudget(budgetName, openingBalanceVal, minGoalVal, maxGoalVal, notes)
+                    Toast.makeText(this@EditBudgetActivity, "Budget created successfully", Toast.LENGTH_SHORT).show()
+                }
 
-        // Return data
-        val resultIntent = Intent().apply {
-            putExtra("budgetName", budgetName)
-            putExtra("openingBalance", openingBalance)
-            putExtra("minGoal", minGoal)
-            putExtra("maxGoal", maxGoal)
-            putExtra("notes", notes)
+                // Return data
+                val resultIntent = Intent().apply {
+                    putExtra("budgetName", budgetName)
+                    putExtra("openingBalance", openingBalance)
+                    putExtra("minGoal", minGoal)
+                    putExtra("maxGoal", maxGoal)
+                    putExtra("notes", notes)
+                }
+                setResult(RESULT_OK, resultIntent)
+                finish()
+            } catch (e: Exception) {
+                Toast.makeText(this@EditBudgetActivity, "Error saving budget: ${e.message}", Toast.LENGTH_LONG).show()
+                Log.e("EditBudgetActivity", "Error saving budget", e)
+            }
         }
-        setResult(RESULT_OK, resultIntent)
-        finish()
     }
 
     //MenuDrawer: Drawer Layout/ Menu Code
