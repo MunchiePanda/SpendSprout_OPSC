@@ -225,6 +225,7 @@ This is a personal project that demonstrates modern Android development practice
 
 This project is for educational and portfolio purposes, demonstrating proficiency in Android development with Kotlin, Room database, and modern Android architecture patterns.
 
----
+---Link to Presentation Video----
+https://drive.google.com/file/d/17DMQCbJxKcLOZDTivYcKsxCmXe2rjAf5/view?usp=sharing
 
 **SpendSprout** - Your personal financial companion for better money management!
