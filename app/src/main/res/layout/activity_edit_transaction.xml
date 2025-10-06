@@ -302,7 +302,7 @@
             android:layout_gravity="bottom|end"
             android:layout_margin="16dp"
             android:contentDescription="@string/save"
-            android:src="@drawable/ic_launcher_foreground"
+            android:src="@drawable/ic_check"
             app:backgroundTint="@color/ButtonColor"
             app:tint="@color/IconColor" />
 

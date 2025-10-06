@@ -44,7 +44,7 @@
             android:layout_weight="1"
             android:contentDescription="Opens the main menu."
             android:gravity="center"
-            tools:srcCompat="@android:drawable/ic_menu_sort_by_size" />
+            android:src="@android:drawable/btn_dialog" />
 
     </LinearLayout>
 

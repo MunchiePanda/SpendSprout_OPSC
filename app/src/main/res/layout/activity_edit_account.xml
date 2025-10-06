@@ -25,97 +25,97 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
-        <ScrollView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:padding="16dp">
-
-            <LinearLayout
+            <ScrollView
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:background="@color/ItemBackgroundColor"
+                android:layout_height="match_parent"
                 android:padding="16dp">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Account Name"
-                    android:textColor="@color/SubTextColor"
-                    android:textSize="12sp"
-                    android:layout_marginBottom="8dp" />
-
-                <EditText
-                    android:id="@+id/edt_AccountName"
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Enter your account name here."
-                    android:textColor="@color/MainTextColor"
-                    android:textColorHint="@color/SubTextColor"
-                    android:background="@drawable/edit_text_background"
-                    android:padding="12dp"
-                    android:layout_marginBottom="16dp" />
+                    android:background="@color/ItemBackgroundColor"
+                    android:orientation="vertical"
+                    android:padding="16dp">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Account Type"
-                    android:textColor="@color/SubTextColor"
-                    android:textSize="12sp"
-                    android:layout_marginBottom="8dp" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:text="Account Name"
+                        android:textColor="@color/SubTextColor"
+                        android:textSize="12sp" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Balance"
-                    android:textColor="@color/SubTextColor"
-                    android:textSize="12sp"
-                    android:layout_marginBottom="8dp" />
+                    <EditText
+                        android:id="@+id/edt_AccountName"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="16dp"
+                        android:background="@drawable/edit_text_background"
+                        android:hint="Enter your account name here."
+                        android:padding="12dp"
+                        android:textColor="@color/MainTextColor"
+                        android:textColorHint="@color/SubTextColor" />
 
-                <EditText
-                    android:id="@+id/edt_Balance"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="R 0.00"
-                    android:textColor="@color/MainTextColor"
-                    android:textColorHint="@color/SubTextColor"
-                    android:background="@drawable/edit_text_background"
-                    android:padding="12dp"
-                    android:inputType="numberDecimal"
-                    android:layout_marginBottom="16dp" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:text="Account Type"
+                        android:textColor="@color/SubTextColor"
+                        android:textSize="12sp" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Notes"
-                    android:textColor="@color/SubTextColor"
-                    android:textSize="12sp"
-                    android:layout_marginBottom="8dp" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:text="Balance"
+                        android:textColor="@color/SubTextColor"
+                        android:textSize="12sp" />
 
-                <EditText
-                    android:id="@+id/edt_Notes"
-                    android:layout_width="match_parent"
-                    android:layout_height="120dp"
-                    android:hint="Any additional notes can be written here."
-                    android:textColor="@color/MainTextColor"
-                    android:textColorHint="@color/SubTextColor"
-                    android:background="@drawable/edit_text_background"
-                    android:padding="12dp"
-                    android:gravity="top"
-                    android:inputType="textMultiLine" />
+                    <EditText
+                        android:id="@+id/edt_Balance"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="16dp"
+                        android:background="@drawable/edit_text_background"
+                        android:hint="R 0.00"
+                        android:inputType="numberDecimal"
+                        android:padding="12dp"
+                        android:textColor="@color/MainTextColor"
+                        android:textColorHint="@color/SubTextColor" />
 
-                <Spinner
-                    android:id="@+id/spinner_AccountType"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="16dp"
-                    android:background="@drawable/edit_text_background"
-                    android:padding="12dp" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:text="Notes"
+                        android:textColor="@color/SubTextColor"
+                        android:textSize="12sp" />
 
-            </LinearLayout>
-        </ScrollView>
+                    <EditText
+                        android:id="@+id/edt_Notes"
+                        android:layout_width="match_parent"
+                        android:layout_height="120dp"
+                        android:background="@drawable/edit_text_background"
+                        android:gravity="top"
+                        android:hint="Any additional notes can be written here."
+                        android:inputType="textMultiLine"
+                        android:padding="12dp"
+                        android:textColor="@color/MainTextColor"
+                        android:textColorHint="@color/SubTextColor" />
 
-        <LinearLayout
+                    <Spinner
+                        android:id="@+id/spinner_AccountType"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="16dp"
+                        android:background="@drawable/edit_text_background"
+                        android:padding="12dp" />
+
+                </LinearLayout>
+            </ScrollView>
+
+            <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
@@ -153,7 +153,7 @@
             android:layout_gravity="bottom|end"
             android:layout_margin="16dp"
             android:contentDescription="@string/save"
-            android:src="@drawable/ic_launcher_foreground"
+            android:src="@drawable/ic_check"
             app:backgroundTint="@color/ButtonColor"
             app:tint="@color/IconColor" />
 
