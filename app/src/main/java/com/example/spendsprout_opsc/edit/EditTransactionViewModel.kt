@@ -35,7 +35,7 @@ class EditTransactionViewModel {
                     expenseName = description,
                     expenseDate = parseUiDateToMillis(date),
                     expenseAmount = amount,
-                    expenseType = if (oweOwed) ExpenseType.Expense else ExpenseType.Income,
+                    expenseType = if (oweOwed) ExpenseType.Income else ExpenseType.Expense,
                     expenseIsOwed = oweOwed,
                     expenseRepeat = parseRepeatType(repeat),
                     expenseNotes = notes.ifBlank { null },

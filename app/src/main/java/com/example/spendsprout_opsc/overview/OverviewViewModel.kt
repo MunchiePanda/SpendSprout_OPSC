@@ -123,7 +123,7 @@ class OverviewViewModel : ViewModel() {
     }
     
     private fun formatAmount(amount: Double, type: String): String {
-        val sign = if (type == "Income") "+" else "-"
+        val sign = if (type == "Expense") "-" else "+"
         return "$sign R ${String.format("%.0f", amount)}"
     }
     

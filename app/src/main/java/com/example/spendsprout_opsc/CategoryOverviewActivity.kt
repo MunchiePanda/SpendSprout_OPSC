@@ -179,8 +179,8 @@ class CategoryOverviewActivity : AppCompatActivity() {
     private fun setupFab() {
         val fabAddCategory = findViewById<FloatingActionButton>(R.id.fab_AddCategory)
         fabAddCategory.setOnClickListener {
-            // Navigate to activity_categories (CategoriesActivity) to add new category/subcategory
-            val intent = Intent(this, com.example.spendsprout_opsc.categories.CategoriesActivity::class.java)
+            // Navigate directly to edit categories screen to add new category/subcategory
+            val intent = Intent(this, com.example.spendsprout_opsc.edit.EditCategoryActivity::class.java)
             startActivity(intent)
         }
     }
