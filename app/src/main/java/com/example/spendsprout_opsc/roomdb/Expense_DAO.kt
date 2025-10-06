@@ -20,7 +20,7 @@ interface Expense_DAO {
     fun delete(expense: Expense_Entity)
 
     //Get all
-    @Query("SELECT * FROM Expense")   //* is select all
+    @Query("SELECT * FROM Expense ORDER BY expense_date ASC")   //* is select all
     fun getAll(): List<Expense_Entity>       //function name is getAll, it returns a list
 
     //Get all based on the IDs that are passed in

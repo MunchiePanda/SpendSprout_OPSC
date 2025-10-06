@@ -27,6 +27,7 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <LinearLayout
+            android:id="@+id/layout_budgetOverview"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
@@ -120,6 +121,7 @@
 
         <!-- Categories -->
         <LinearLayout
+            android:id="@+id/layout_categoryOverview"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
@@ -157,6 +159,7 @@
 
         <!-- Recent Transactions -->
         <LinearLayout
+            android:id="@+id/layout_transactionOverview"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"

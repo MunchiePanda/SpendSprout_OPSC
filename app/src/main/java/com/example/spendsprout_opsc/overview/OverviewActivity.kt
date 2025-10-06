@@ -5,17 +5,22 @@ import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
 import android.widget.ImageButton
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.launch
 import com.example.spendsprout_opsc.R
 import com.example.spendsprout_opsc.accounts.AccountsActivity
 import com.example.spendsprout_opsc.categories.CategoriesActivity
+import com.example.spendsprout_opsc.edit.EditBudgetActivity
+import com.example.spendsprout_opsc.reports.ReportsActivity
 import com.example.spendsprout_opsc.settings.SettingsActivity
 import com.example.spendsprout_opsc.transactions.TransactionsActivity
 import com.google.android.material.navigation.NavigationView
@@ -44,6 +49,9 @@ class OverviewActivity : AppCompatActivity() {
     lateinit var drawerLayout: DrawerLayout
     lateinit var navigationView: NavigationView
     lateinit var btnCloseMenu: ImageButton
+    
+    //ViewModel
+    private lateinit var overviewViewModel: OverviewViewModel
 
     /**
      * onCreate() - Like Unity's Start() method
@@ -96,7 +104,7 @@ class OverviewActivity : AppCompatActivity() {
                         startActivity(Intent(this, AccountsActivity::class.java))
                     }
                     R.id.nav_reports -> {
-                        android.widget.Toast.makeText(this, "Reports coming soon!", android.widget.Toast.LENGTH_SHORT).show()
+                        startActivity(Intent(this, ReportsActivity::class.java))
                     }
                     R.id.nav_settings -> {
                         startActivity(Intent(this, SettingsActivity::class.java))
@@ -138,6 +146,9 @@ class OverviewActivity : AppCompatActivity() {
         // overviewViewModel = OverviewViewModel()
         */
 
+        // Initialize ViewModel
+        overviewViewModel = OverviewViewModel()
+        
         // Initialize UI components - like Unity's UI setup in Start()
         setupUI()
         // Start observing data changes - like Unity's coroutines or Update()
@@ -146,25 +157,61 @@ class OverviewActivity : AppCompatActivity() {
 
     private fun setupUI() {
         setupBudgetInfo()
+        setupBudgetOverviewClickListener()
         setupTransactionRecyclerView()
         setupCategoriesRecyclerView()
         setupChart()
     }
 
     private fun setupBudgetInfo() {
-        // Update the budget balance display
+        // Update budget info with real data from ViewModel
+        lifecycleScope.launch {
+            overviewViewModel.currentBudget.collect { currentBudget ->
+                if (currentBudget != null) {
+                    updateBudgetDisplay(currentBudget)
+                } else {
+                    // Show default values if no budget exists
+                    updateBudgetDisplayWithDefaults()
+                }
+            }
+        }
+    }
+    
+    private fun updateBudgetDisplay(budget: com.example.spendsprout_opsc.roomdb.Budget_Entity) {
         val budgetBalanceTextView = findViewById<TextView>(R.id.txt_BudgetBalance)
-        budgetBalanceTextView.text = "R 12,780"
+        budgetBalanceTextView.text = "R ${String.format("%.2f", budget.budgetBalance)}"
         
-        // Update other budget fields
         val budgetAllocationTextView = findViewById<TextView>(R.id.txt_BudgetAllocation)
-        budgetAllocationTextView.text = "R 100,000"
+        budgetAllocationTextView.text = "R ${String.format("%.2f", budget.openingBalance)}"
         
         val minTextView = findViewById<TextView>(R.id.txt_Min)
-        minTextView.text = "R 200"
+        minTextView.text = "R ${String.format("%.2f", budget.budgetMinGoal)}"
         
         val maxTextView = findViewById<TextView>(R.id.txt_Max)
-        maxTextView.text = "R 1,000"
+        maxTextView.text = "R ${String.format("%.2f", budget.budgetMaxGoal)}"
+    }
+    
+    private fun updateBudgetDisplayWithDefaults() {
+        val budgetBalanceTextView = findViewById<TextView>(R.id.txt_BudgetBalance)
+        budgetBalanceTextView.text = "R 0.00"
+        
+        val budgetAllocationTextView = findViewById<TextView>(R.id.txt_BudgetAllocation)
+        budgetAllocationTextView.text = "R 0.00"
+        
+        val minTextView = findViewById<TextView>(R.id.txt_Min)
+        minTextView.text = "R 0.00"
+        
+        val maxTextView = findViewById<TextView>(R.id.txt_Max)
+        maxTextView.text = "R 0.00"
+    }
+
+    private fun setupBudgetOverviewClickListener() {
+        val budgetOverviewLayout = findViewById<LinearLayout>(R.id.layout_budgetOverview)
+        budgetOverviewLayout.setOnClickListener {
+            // Navigate to EditBudgetActivity
+            val intent = Intent(this, EditBudgetActivity::class.java)
+            startActivity(intent)
+        }
     }
 
     private fun setupTransactionRecyclerView() {
@@ -172,7 +219,7 @@ class OverviewActivity : AppCompatActivity() {
         recyclerView.layoutManager = LinearLayoutManager(this)
 
         //val transactions = overviewViewModel.getRecentTransactions()
-        //recyclerView.adapter = TransactionAdapter(transactions)
+        //recyclerView.adapter = TransactionAdapter(transactions) // TODO: Implement TransactionAdapter
     }
     
     private fun setupCategoriesRecyclerView() {
@@ -180,21 +227,39 @@ class OverviewActivity : AppCompatActivity() {
         recyclerView.layoutManager = LinearLayoutManager(this)
 
         //val categories = overviewViewModel.getCategories()
-        //recyclerView.adapter = CategoryAdapter(categories)
+        //recyclerView.adapter = CategoryAdapter(categories) // TODO: Implement CategoryAdapter
     }
 
     private fun setupChart() {
         // Chart setup will be handled by the custom view
         val chartView = findViewById<com.example.spendsprout_opsc.overview.ChartView>(R.id.chartView)
-        //chartView.setData(overviewViewModel.getChartData())
+        val chartData = overviewViewModel.getChartData()
+        //chartView.setData(chartData) // TODO: Implement chart data setting
     }
 
     private fun observeData() {
         // Observe ViewModel data changes
-        // This will be implemented when we add LiveData/Flow
+        lifecycleScope.launch {
+            overviewViewModel.budgets.collect { budgets ->
+                // Update UI when budgets change
+                if (budgets.isNotEmpty()) {
+                    val currentBudget = overviewViewModel.getCurrentBudget()
+                    if (currentBudget != null) {
+                        updateBudgetDisplay(currentBudget)
+                    }
+                } else {
+                    updateBudgetDisplayWithDefaults()
+                }
+            }
+        }
+        
     }
 
-    
+    override fun onResume() {
+        super.onResume()
+        // Refresh data when returning to this activity
+        overviewViewModel.refreshData()
+    }
 
     /*
     // OLD onBackPressed - COMMENTED OUT AS NOT CURRENTLY USED

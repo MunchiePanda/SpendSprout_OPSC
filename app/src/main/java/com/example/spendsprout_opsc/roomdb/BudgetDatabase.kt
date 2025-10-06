@@ -6,8 +6,9 @@ import androidx.room.RoomDatabase
                         Subcategory_Entity::class,
                         Expense_Entity::class,
                         Contact_Entity::class,
-                        Account_Entity::class],
-                    version = 3,
+                        Account_Entity::class,
+                        Budget_Entity::class],
+                    version = 4,
                     exportSchema = false)
 abstract class BudgetDatabase : RoomDatabase()
 {
@@ -16,6 +17,7 @@ abstract class BudgetDatabase : RoomDatabase()
     abstract fun expenseDao(): Expense_DAO
     abstract fun contactDao(): Contact_DAO
     abstract fun accountDao(): Account_DAO
+    abstract fun budgetDao(): Budget_DAO
 }
 
 //Create an instance of this database:

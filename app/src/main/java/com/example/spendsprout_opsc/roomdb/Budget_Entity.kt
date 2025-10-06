@@ -1,8 +1,10 @@
 package com.example.spendsprout_opsc.roomdb
 
 import androidx.room.ColumnInfo
+import androidx.room.Entity
 import androidx.room.PrimaryKey
 
+@Entity(tableName = "Budget")
 data class Budget_Entity(
     @PrimaryKey val id: Int,
     //ForeignKeys for associated accounts

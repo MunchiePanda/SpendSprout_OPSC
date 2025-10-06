@@ -12,22 +12,22 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.SpendSprout_OPSC">
+        <activity
+            android:name=".edit.EditBudgetActivity"
+            android:exported="false" />
         <!-- Login Activity (Main Launcher) -->
         <activity
             android:name=".login.LoginActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-
-        <!-- Overview Activity -->
+        </activity> <!-- Overview Activity -->
         <activity
             android:name=".overview.OverviewActivity"
-            android:exported="false" />
-
-        <!-- Screen Activities -->
+            android:exported="false" /> <!-- Screen Activities -->
         <activity
             android:name=".categories.CategoriesActivity"
             android:exported="false" />
@@ -45,9 +45,7 @@
             android:exported="false" />
         <activity
             android:name=".wants.WantsCategoryActivity"
-            android:exported="false" />
-
-        <!-- Edit Activities -->
+            android:exported="false" /> <!-- Edit Activities -->
         <activity
             android:name=".edit.EditCategoryActivity"
             android:exported="false" />
@@ -56,9 +54,7 @@
             android:exported="false" />
         <activity
             android:name=".edit.EditAccountActivity"
-            android:exported="false" />
-
-        <!-- Legacy Activity -->
+            android:exported="false" /> <!-- Legacy Activity -->
         <activity
             android:name=".CategoryOverviewActivity"
             android:exported="false" />

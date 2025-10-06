@@ -10,7 +10,7 @@ import com.example.spendsprout_opsc.repository.AccountRepository
 import com.example.spendsprout_opsc.repository.CategoryRepository
 import com.example.spendsprout_opsc.repository.TransactionRepository
 import com.example.spendsprout_opsc.roomdb.Account_Entity
-import com.example.spendsprout_opsc.roomdb.Category_Entity
+import com.example.spendsprout_opsc.roomdb.Budget_Entity
 // Removed old Payment_Entity import; using DataService via DataFlow for data
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -34,12 +34,22 @@ class OverviewViewModel : ViewModel() {
     private val _chartData = MutableStateFlow<List<ChartDataPoint>>(emptyList())
     val chartData: StateFlow<List<ChartDataPoint>> = _chartData.asStateFlow()
     
+    // Budget data
+    private val _budgets = MutableStateFlow<List<Budget_Entity>>(emptyList())
+    val budgets: StateFlow<List<Budget_Entity>> = _budgets.asStateFlow()
+    
+    private val _currentBudget = MutableStateFlow<Budget_Entity?>(null)
+    val currentBudget: StateFlow<Budget_Entity?> = _currentBudget.asStateFlow()
+    
     init {
         loadData()
     }
     
     private fun loadData() {
         viewModelScope.launch {
+            // Load real data from database
+            loadBudgets()
+            
             // Mock data for now - will be replaced with real database once build environment is fixed
             _totalBalance.value = 1880.0
 
@@ -137,6 +147,64 @@ class OverviewViewModel : ViewModel() {
             ChartDataPoint("2025-06", 28000.0, 25000.0)
         )
     }
+    
+    // Database loading methods
+    private fun loadBudgets() {
+        viewModelScope.launch {
+            try {
+                val budgetFlow = com.example.spendsprout_opsc.BudgetApp.db.budgetDao().getAll()
+                budgetFlow.collect { budgetList ->
+                    _budgets.value = budgetList
+                    // Set the first budget as current if none is selected
+                    if (_currentBudget.value == null && budgetList.isNotEmpty()) {
+                        _currentBudget.value = budgetList.first()
+                    }
+                    android.util.Log.d("OverviewViewModel", "Loaded ${budgetList.size} budgets")
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("OverviewViewModel", "Error loading budgets: ${e.message}", e)
+            }
+        }
+    }
+    
+    
+    fun getCurrentBudget(): Budget_Entity? {
+        return _currentBudget.value
+    }
+    
+    fun getTotalAllocation(): Double {
+        return _budgets.value.sumOf { it.openingBalance }
+    }
+    
+    fun getTotalBalance(): Double {
+        return _budgets.value.sumOf { it.budgetBalance }
+    }
+    
+    fun getTotalMinGoal(): Double {
+        return _budgets.value.sumOf { it.budgetMinGoal }
+    }
+    
+    fun getTotalMaxGoal(): Double {
+        return _budgets.value.sumOf { it.budgetMaxGoal }
+    }
+    
+    fun refreshData() {
+        loadData()
+    }
+    
+    // Methods that were referenced in the commented code in OverviewActivity
+    fun getRecentTransactions(): List<Transaction> {
+        return _recentTransactions.value
+    }
+    
+    fun getCategories(): List<CategorySummary> {
+        return _categorySummary.value
+    }
+    
+    fun getChartData(): List<ChartDataPoint> {
+        return _chartData.value
+    }
+    
 }
 
 
