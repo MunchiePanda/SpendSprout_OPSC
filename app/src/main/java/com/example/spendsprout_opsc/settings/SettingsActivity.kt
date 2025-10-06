@@ -39,16 +39,16 @@ class SettingsActivity : AppCompatActivity(), NavigationView.OnNavigationItemSel
         val toolbar: androidx.appcompat.widget.Toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
 
-        val toggle = ActionBarDrawerToggle(
-            this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close
-        )
-        drawerLayout.addDrawerListener(toggle)
-        toggle.syncState()
-
-        // Enable the drawer indicator in the action bar
+        // Enable back button functionality
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setHomeButtonEnabled(true)
         supportActionBar?.title = "Settings"
+        
+        // Set up menu button click listener
+        val btnMenu = findViewById<android.widget.ImageButton>(R.id.btn_Menu)
+        btnMenu.setOnClickListener {
+            drawerLayout.openDrawer(GravityCompat.START)
+        }
 
         navView.setNavigationItemSelectedListener(this)
 
@@ -185,6 +185,17 @@ class SettingsActivity : AppCompatActivity(), NavigationView.OnNavigationItemSel
         }
         drawerLayout.closeDrawer(GravityCompat.START)
         return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            android.R.id.home -> {
+                // Handle back button - finish this activity
+                finish()
+                return true
+            }
+        }
+        return super.onOptionsItemSelected(item)
     }
 
     @Deprecated("Deprecated in Java")

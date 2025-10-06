@@ -6,6 +6,7 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.Button
+import android.widget.ImageButton
 import android.widget.ProgressBar
 import android.widget.Spinner
 import android.widget.Toast
@@ -41,16 +42,16 @@ class ReportsActivity : AppCompatActivity(), NavigationView.OnNavigationItemSele
         val toolbar: androidx.appcompat.widget.Toolbar = headerBar.findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
 
-        val toggle = ActionBarDrawerToggle(
-            this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close
-        )
-        drawerLayout.addDrawerListener(toggle)
-        toggle.syncState()
-
-        // Enable the drawer indicator in the action bar
+        // Enable back button functionality
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setHomeButtonEnabled(true)
         supportActionBar?.title = "Reports"
+        
+        // Set up menu button click listener
+        val btnMenu = headerBar.findViewById<ImageButton>(R.id.btn_Menu)
+        btnMenu.setOnClickListener {
+            drawerLayout.openDrawer(GravityCompat.START)
+        }
 
         navView.setNavigationItemSelectedListener(this)
 
@@ -146,6 +147,17 @@ class ReportsActivity : AppCompatActivity(), NavigationView.OnNavigationItemSele
         }
         drawerLayout.closeDrawer(GravityCompat.START)
         return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            android.R.id.home -> {
+                // Handle back button - finish this activity
+                finish()
+                return true
+            }
+        }
+        return super.onOptionsItemSelected(item)
     }
 
     @Deprecated("Deprecated in Java")

@@ -69,18 +69,14 @@ class CategoryOverviewActivity : AppCompatActivity() {
         val toolbar: androidx.appcompat.widget.Toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
 
-        toggle = ActionBarDrawerToggle(
-            this, drawerLayout, toolbar,
-            R.string.navigation_drawer_open, R.string.navigation_drawer_close
-        )
-        drawerLayout.addDrawerListener(toggle)
-        toggle.syncState()
+        // Enable back button functionality
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setHomeButtonEnabled(true)
         supportActionBar?.title = "Categories"
 
-        // Optional: menu button inside header bar opens drawer
-        findViewById<android.widget.ImageButton?>(R.id.btn_Menu)?.setOnClickListener {
+        // Set up menu button click listener
+        val btnMenu = findViewById<android.widget.ImageButton>(R.id.btn_Menu)
+        btnMenu.setOnClickListener {
             drawerLayout.openDrawer(GravityCompat.START)
         }
 
@@ -229,5 +225,16 @@ class CategoryOverviewActivity : AppCompatActivity() {
         val endDateStr = dateFormat.format(Date(endDate!!))
         
         println("Filtering categories from $startDateStr to $endDateStr")
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            android.R.id.home -> {
+                // Handle back button - finish this activity
+                finish()
+                return true
+            }
+        }
+        return super.onOptionsItemSelected(item)
     }
 }

@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.ImageButton
 import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
@@ -39,16 +40,16 @@ class TransactionsActivity : AppCompatActivity(), NavigationView.OnNavigationIte
         val toolbar: androidx.appcompat.widget.Toolbar = headerBar.findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
 
-        val toggle = ActionBarDrawerToggle(
-            this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close
-        )
-        drawerLayout.addDrawerListener(toggle)
-        toggle.syncState()
-
-        // Enable the drawer indicator in the action bar
+        // Enable back button functionality
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setHomeButtonEnabled(true)
         supportActionBar?.title = "Transactions"
+        
+        // Set up menu button click listener
+        val btnMenu = headerBar.findViewById<ImageButton>(R.id.btn_Menu)
+        btnMenu.setOnClickListener {
+            drawerLayout.openDrawer(GravityCompat.START)
+        }
 
         navView.setNavigationItemSelectedListener(this)
 
@@ -118,9 +119,16 @@ class TransactionsActivity : AppCompatActivity(), NavigationView.OnNavigationIte
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (item.itemId == 1001) {
-            showFilterDialog()
-            return true
+        when (item.itemId) {
+            android.R.id.home -> {
+                // Handle back button - finish this activity
+                finish()
+                return true
+            }
+            1001 -> {
+                showFilterDialog()
+                return true
+            }
         }
         return super.onOptionsItemSelected(item)
     }

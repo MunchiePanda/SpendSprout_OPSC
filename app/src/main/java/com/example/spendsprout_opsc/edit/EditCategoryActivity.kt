@@ -44,12 +44,15 @@ class EditCategoryActivity : AppCompatActivity() {
         val toolbar: androidx.appcompat.widget.Toolbar = headerBar.findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
 
-        //MenuDrawer: Drawer Layout/ Menu Code and connections
-        toggle = ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
-        drawerLayout.addDrawerListener(toggle)
-        toggle.syncState()  //tell toggle it is ready to be used
-        //MenuDrawer
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)   //able to open toggle, when it is opened the toggle button moves to back arrow
+        // Enable back button functionality
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.setHomeButtonEnabled(true)
+        
+        // Set up menu button click listener
+        val btnMenu = headerBar.findViewById<ImageButton>(R.id.btn_Menu)
+        btnMenu.setOnClickListener {
+            drawerLayout.openDrawer(GravityCompat.START)
+        }
 
         //MenuDrawer: Access the close button from the navigation view header
         val headerView = navigationView.getHeaderView(0)
@@ -80,8 +83,7 @@ class EditCategoryActivity : AppCompatActivity() {
                     startActivity(Intent(this, AccountsActivity::class.java))
                 }
                 R.id.nav_reports -> {
-                    Toast.makeText(this, "Navigating to Reports", Toast.LENGTH_SHORT).show()
-                    android.widget.Toast.makeText(this, "Reports coming soon!", android.widget.Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Reports coming soon!", Toast.LENGTH_SHORT).show()
                 }
                 R.id.nav_settings -> {
                     Toast.makeText(this, "Navigating to Settings", Toast.LENGTH_SHORT).show()
@@ -228,8 +230,12 @@ class EditCategoryActivity : AppCompatActivity() {
 
     //MenuDrawer: Drawer Layout/ Menu Code
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if(toggle.onOptionsItemSelected(item)){
-            return true
+        when (item.itemId) {
+            android.R.id.home -> {
+                // Handle back button - finish this activity
+                finish()
+                return true
+            }
         }
         return super.onOptionsItemSelected(item)
     }

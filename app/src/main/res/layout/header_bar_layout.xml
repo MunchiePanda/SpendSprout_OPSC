@@ -32,16 +32,16 @@
         app:title="Overview"
         app:titleTextAppearance="@style/HeaderTextStyle">
 
-        <!-- Action button on the right side -->
+        <!-- Menu button on the left side (where drawer opens) -->
         <ImageButton
             android:id="@+id/btn_Menu"
             style="@style/CircularImageButton"
             android:layout_width="50dp"
             android:layout_height="50dp"
-            android:layout_gravity="end"
-            android:layout_marginEnd="15dp"
-            android:contentDescription="For the menu action."
-            tools:srcCompat="@android:drawable/ic_menu_add" />
+            android:layout_gravity="start"
+            android:layout_marginStart="15dp"
+            android:contentDescription="Menu button"
+            android:src="@android:drawable/ic_menu_more" />
 
     </androidx.appcompat.widget.Toolbar>
 
