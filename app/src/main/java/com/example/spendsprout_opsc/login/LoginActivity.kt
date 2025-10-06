@@ -27,12 +27,6 @@ class LoginActivity : AppCompatActivity() {
             return
         }
         
-        // TEMPORARY: Auto-login for testing (remove this later)
-        saveLoginStatus("testuser")
-        startActivity(Intent(this, OverviewActivity::class.java))
-        finish()
-        return
-        
         setupUI()
     }
     
@@ -42,22 +36,32 @@ class LoginActivity : AppCompatActivity() {
         val btnLogin = findViewById<Button>(R.id.btn_Login)
         
         btnLogin.setOnClickListener {
-            val username = edtUsername.text.toString()
-            val password = edtPassword.text.toString()
+            val username = edtUsername.text.toString().trim()
+            val password = edtPassword.text.toString().trim()
             
             if (username.isEmpty() || password.isEmpty()) {
                 Toast.makeText(this, "Please enter username and password", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
             
-            // Simple validation - accept any non-empty credentials for testing
-            if (username.isNotEmpty() && password.isNotEmpty()) {
+            // Check if user exists
+            if (userExists(username)) {
+                // Try to login
+                if (validateLogin(username, password)) {
+                    saveLoginStatus(username)
+                    Toast.makeText(this, "Login successful! Welcome back, $username", Toast.LENGTH_SHORT).show()
+                    startActivity(Intent(this, OverviewActivity::class.java))
+                    finish()
+                } else {
+                    Toast.makeText(this, "Invalid password. Please try again.", Toast.LENGTH_SHORT).show()
+                }
+            } else {
+                // Register new user
+                registerUser(username, password)
                 saveLoginStatus(username)
-                Toast.makeText(this, "Login successful", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Account created! Welcome, $username", Toast.LENGTH_SHORT).show()
                 startActivity(Intent(this, OverviewActivity::class.java))
                 finish()
-            } else {
-                Toast.makeText(this, "Please enter both username and password", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -70,6 +74,28 @@ class LoginActivity : AppCompatActivity() {
         sharedPreferences.edit()
             .putBoolean("is_logged_in", true)
             .putString("username", username)
+            .apply()
+    }
+    
+    private fun userExists(username: String): Boolean {
+        return sharedPreferences.getString("user_$username", null) != null
+    }
+    
+    private fun validateLogin(username: String, password: String): Boolean {
+        val storedPassword = sharedPreferences.getString("user_$username", null)
+        return storedPassword == password
+    }
+    
+    private fun registerUser(username: String, password: String) {
+        sharedPreferences.edit()
+            .putString("user_$username", password)
+            .apply()
+    }
+    
+    fun logout() {
+        sharedPreferences.edit()
+            .putBoolean("is_logged_in", false)
+            .remove("username")
             .apply()
     }
 }

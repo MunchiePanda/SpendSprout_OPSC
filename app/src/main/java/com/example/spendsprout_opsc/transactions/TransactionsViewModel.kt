@@ -22,16 +22,17 @@ class TransactionsViewModel {
         return emptyList()
     }
     
-    // New method to load transactions from database
+    // New method to load transactions from database with date filtering
     fun loadTransactionsFromDatabase(
-        startDate: Long = getStartOfMonth(),
-        endDate: Long = getEndOfMonth(),
+        startDate: Long,
+        endDate: Long,
         callback: (List<Transaction>) -> Unit
     ) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
+                android.util.Log.d("TransactionsViewModel", "Loading transactions from $startDate to $endDate")
                 val expenses = BudgetApp.db.expenseDao().getBetweenDates(startDate, endDate)
-                val transactions = expenses.map { expense ->
+                val transactions = expenses.sortedByDescending { it.expenseDate }.map { expense ->
                     Transaction(
                         id = expense.id.toString(),
                         date = dateFormat.format(Date(expense.expenseDate)),
@@ -41,10 +42,12 @@ class TransactionsViewModel {
                         imagePath = expense.expenseImage
                     )
                 }
+                android.util.Log.d("TransactionsViewModel", "Found ${transactions.size} transactions in date range")
                 CoroutineScope(Dispatchers.Main).launch {
                     callback(transactions)
                 }
             } catch (e: Exception) {
+                android.util.Log.e("TransactionsViewModel", "Error loading transactions: ${e.message}", e)
                 CoroutineScope(Dispatchers.Main).launch {
                     callback(emptyList())
                 }
@@ -56,6 +59,7 @@ class TransactionsViewModel {
     fun loadAllTransactionsFromDatabase(callback: (List<Transaction>) -> Unit) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
+                android.util.Log.d("TransactionsViewModel", "Loading all transactions")
                 val expenses = BudgetApp.db.expenseDao().getAll()
                 val transactions = expenses.sortedByDescending { it.expenseDate }.map { expense ->
                     Transaction(
@@ -63,11 +67,14 @@ class TransactionsViewModel {
                         date = dateFormat.format(Date(expense.expenseDate)),
                         description = expense.expenseName,
                         amount = formatAmount(expense.expenseAmount, expense.expenseType),
-                        color = getCategoryColor(expense.expenseCategory)
+                        color = getCategoryColor(expense.expenseCategory),
+                        imagePath = expense.expenseImage
                     )
                 }
+                android.util.Log.d("TransactionsViewModel", "Found ${transactions.size} total transactions")
                 CoroutineScope(Dispatchers.Main).launch { callback(transactions) }
             } catch (e: Exception) {
+                android.util.Log.e("TransactionsViewModel", "Error loading all transactions: ${e.message}", e)
                 CoroutineScope(Dispatchers.Main).launch { callback(emptyList()) }
             }
         }
