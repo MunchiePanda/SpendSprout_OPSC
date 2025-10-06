@@ -250,7 +250,7 @@ class EditTransactionActivity : AppCompatActivity() {
         }
 
         // Determine if the amount is positive or negative
-        val formattedAmount = if (oweOwed) "- R $amount" else "+ R $amount"
+        val formattedAmount = if (oweOwed) "+ R $amount" else "- R $amount"
 
         try {
             // Save transaction using ViewModel (pass image path if selected)
