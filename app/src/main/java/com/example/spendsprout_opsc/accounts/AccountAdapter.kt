@@ -55,8 +55,15 @@ class AccountAdapter(
         // Set click listener for edit button
         holder.editButton.setOnClickListener {
             val intent = Intent(holder.view.context, EditAccountActivity::class.java)
-            intent.putExtra("accountId", account.id)
-            intent.putExtra("isEdit", true)
+            // Convert UI model to database entity
+            val accountEntity = com.example.spendsprout_opsc.roomdb.Account_Entity(
+                id = account.id,
+                accountName = account.name,
+                accountType = account.type,
+                accountBalance = account.balance,
+                accountNotes = account.notes
+            )
+            intent.putExtra("account", accountEntity)
             holder.view.context.startActivity(intent)
         }
         

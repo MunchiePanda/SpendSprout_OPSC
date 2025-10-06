@@ -68,7 +68,15 @@ class AccountsActivity : AppCompatActivity(), NavigationView.OnNavigationItemSel
         accountAdapter = AccountAdapter(emptyList()) { account ->
             // Handle account click - open edit screen
             val intent = Intent(this, com.example.spendsprout_opsc.edit.EditAccountActivity::class.java)
-            intent.putExtra("accountId", account.id)
+            // Convert UI model to database entity
+            val accountEntity = com.example.spendsprout_opsc.roomdb.Account_Entity(
+                id = account.id,
+                accountName = account.name,
+                accountType = account.type,
+                accountBalance = account.balance,
+                accountNotes = account.notes
+            )
+            intent.putExtra("account", accountEntity)
             startActivity(intent)
         }
         recyclerView.adapter = accountAdapter

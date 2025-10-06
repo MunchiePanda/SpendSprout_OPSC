@@ -3,6 +3,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.example.spendsprout_opsc.AccountType
+import java.io.Serializable
 
 @Entity(tableName = "Account")
 data class Account_Entity(
@@ -16,4 +17,4 @@ data class Account_Entity(
     @ColumnInfo(name= "account_balance") val accountBalance: Double,        //the current balance of the account (how much was deposited/spent this month)
     @ColumnInfo(name= "account_notes") val accountNotes: String?,           //optional user notes (change [?] to [= ""] if you don't want to deal with null checks)
     //Any other API relevant info
-)
+) : Serializable

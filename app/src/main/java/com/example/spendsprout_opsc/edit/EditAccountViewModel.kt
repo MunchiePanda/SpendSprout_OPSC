@@ -1,37 +1,36 @@
 package com.example.spendsprout_opsc.edit
 
+import android.util.Log
 import com.example.spendsprout_opsc.BudgetApp
 import com.example.spendsprout_opsc.AccountType
 import com.example.spendsprout_opsc.roomdb.Account_Entity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.flow.first
 
 class EditAccountViewModel {
     
-    fun saveAccount(name: String, type: String, balance: Double, notes: String) {
+    suspend fun saveAccount(name: String, type: String, balance: Double, notes: String) {
         // Validate
         require(name.isNotBlank()) { "Account name is required" }
 
         // Map UI type to enum
         val accountType = mapToAccountType(type)
 
-        // Write to DB on IO
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                val entity = Account_Entity(
-                    id = getNextAccountId(),
-                    accountName = name,
-                    accountType = accountType,
-                    accountBalance = balance,
-                    accountNotes = notes.ifBlank { null }
-                )
-                BudgetApp.db.accountDao().insertAll(entity)
-                android.util.Log.d("EditAccountViewModel", "Account saved: $name ($accountType) balance=$balance")
-            } catch (e: Exception) {
-                android.util.Log.e("EditAccountViewModel", "Error saving account: ${e.message}", e)
-            }
+        // Write to DB synchronously
+        try {
+            val entity = Account_Entity(
+                id = getNextAccountId(),
+                accountName = name,
+                accountType = accountType,
+                accountBalance = balance,
+                accountNotes = notes.ifBlank { null }
+            )
+            BudgetApp.db.accountDao().insert(entity)
+            Log.d("EditAccountViewModel", "Account saved: $name ($accountType) balance=$balance")
+        } catch (e: Exception) {
+            Log.e("EditAccountViewModel", "Error saving account: ${e.message}", e)
+            throw e // Re-throw to handle in Activity
         }
     }
 
@@ -44,11 +43,39 @@ class EditAccountViewModel {
         }
     }
 
-    private fun getNextAccountId(): Int {
+    suspend fun updateAccount(id: Int, name: String, type: String, balance: Double, notes: String) {
+        // Validate
+        require(name.isNotBlank()) { "Account name is required" }
+
+        // Map UI type to enum
+        val accountType = mapToAccountType(type)
+
+        Log.d("EditAccountViewModel", "Starting account update for ID: $id, name: $name")
+
+        // Write to DB synchronously
+        try {
+            val entity = Account_Entity(
+                id = id,
+                accountName = name,
+                accountType = accountType,
+                accountBalance = balance,
+                accountNotes = notes.ifBlank { null }
+            )
+            
+            Log.d("EditAccountViewModel", "Updating with entity: $entity")
+            val result = BudgetApp.db.accountDao().update(entity)
+            Log.d("EditAccountViewModel", "Update result: $result")
+            Log.d("EditAccountViewModel", "Account updated successfully: $name ($accountType) balance=$balance")
+        } catch (e: Exception) {
+            Log.e("EditAccountViewModel", "Error updating account: ${e.message}", e)
+            throw e // Re-throw to handle in Activity
+        }
+    }
+
+    private suspend fun getNextAccountId(): Int {
         return try {
-            // Not a suspend func; do not call Flow.first() here. Use a safe default.
-            val existing = emptyList<com.example.spendsprout_opsc.roomdb.Account_Entity>()
-            (existing.maxOfOrNull { it.id } ?: 0) + 1
+            val count = BudgetApp.db.accountDao().getCount()
+            count + 1
         } catch (e: Exception) {
             1
         }

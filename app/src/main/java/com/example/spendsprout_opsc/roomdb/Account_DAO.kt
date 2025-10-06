@@ -44,4 +44,8 @@ interface Account_DAO {
     //Get total balance across all accounts
     @Query("SELECT SUM(account_balance) FROM Account")
     suspend fun getTotalBalance(): Double?
+    
+    //Get count of accounts
+    @Query("SELECT COUNT(*) FROM Account")
+    suspend fun getCount(): Int
 }
