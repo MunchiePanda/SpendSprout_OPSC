@@ -16,12 +16,13 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.launch
 import com.example.spendsprout_opsc.R
 import com.example.spendsprout_opsc.accounts.AccountsActivity
 import com.example.spendsprout_opsc.settings.SettingsActivity
 import com.example.spendsprout_opsc.transactions.TransactionsActivity
 import com.google.android.material.navigation.NavigationView
+import com.example.spendsprout_opsc.firebase.FirebaseRepositoryProvider
+import kotlinx.coroutines.launch
 
 class EditAccountActivity : AppCompatActivity() {
 
@@ -133,7 +134,7 @@ class EditAccountActivity : AppCompatActivity() {
             // Load account from database
             lifecycleScope.launch {
                 try {
-                    existingAccount = com.example.spendsprout_opsc.BudgetApp.db.accountDao().getById(accountId)
+                    existingAccount = FirebaseRepositoryProvider.accountRepository.getAccountById(accountId)
                     populateFields()
                 } catch (e: Exception) {
                     Log.e("EditAccountActivity", "Error loading account: ${e.message}", e)

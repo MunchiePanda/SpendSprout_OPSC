@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "481728876021",
+    "firebase_url": "https://spendsprout-49aaa-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "spendsprout-49aaa",
+    "storage_bucket": "spendsprout-49aaa.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:481728876021:android:5c10bf7ee4e916ec0f64bc",
+        "android_client_info": {
+          "package_name": "com.SBMH.SpendSprout"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAT2ZRLeWo9T4RmVz-Kc6numZDYUfbhock"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

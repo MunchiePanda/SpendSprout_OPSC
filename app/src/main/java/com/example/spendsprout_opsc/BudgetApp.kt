@@ -1,21 +1,22 @@
 package com.example.spendsprout_opsc
 
 import android.app.Application
-import androidx.room.Room
-import com.example.spendsprout_opsc.roomdb.BudgetDatabase
+import com.google.firebase.FirebaseApp
 import dagger.hilt.android.HiltAndroidApp
 
 @HiltAndroidApp
 class BudgetApp : Application() {
+
     companion object {
-        lateinit var db: BudgetDatabase
-            private set
+        val db: com.example.spendsprout_opsc.roomdb.BudgetDatabase
+            get() = throw UnsupportedOperationException(
+                "Room database has been removed. Use Firebase repositories instead."
+            )
     }
-    
+
     override fun onCreate() {
         super.onCreate()
-        db = Room.databaseBuilder(this, BudgetDatabase::class.java, "budget.db")
-            .fallbackToDestructiveMigration(true)   // prototype speed
-            .build()
+        FirebaseApp.initializeApp(this)
+        com.google.firebase.database.FirebaseDatabase.getInstance().setPersistenceEnabled(true)
     }
 }

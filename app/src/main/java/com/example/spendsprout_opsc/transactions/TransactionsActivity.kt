@@ -9,7 +9,6 @@ import android.view.View
 import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
@@ -17,7 +16,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.spendsprout_opsc.R
 import com.example.spendsprout_opsc.accounts.AccountsActivity
-import com.example.spendsprout_opsc.categories.CategoriesActivity
 import com.example.spendsprout_opsc.overview.OverviewActivity
 import com.example.spendsprout_opsc.settings.SettingsActivity
 import com.google.android.material.button.MaterialButton
@@ -79,7 +77,6 @@ class TransactionsActivity : AppCompatActivity(), NavigationView.OnNavigationIte
         transactionsViewModel = TransactionsViewModel()
 
         setupUI()
-        observeData()
     }
 
     private fun setupUI() {
@@ -120,7 +117,7 @@ class TransactionsActivity : AppCompatActivity(), NavigationView.OnNavigationIte
     private fun showDateRangePicker() {
         // Create date range picker
         val dateRangePicker = MaterialDatePicker.Builder.dateRangePicker()
-            .setTitleText("Select Date Range")
+            .setTitleText(getString(R.string.select_date_range))
             .setSelection(
                 androidx.core.util.Pair(
                     startDate ?: MaterialDatePicker.todayInUtcMilliseconds(),
@@ -147,23 +144,19 @@ class TransactionsActivity : AppCompatActivity(), NavigationView.OnNavigationIte
     
     private fun updateDateRangeDisplay() {
         if (startDate != null && endDate != null) {
-            val dateFormat = SimpleDateFormat("MMM dd - MMM dd, yyyy", Locale.getDefault())
-            val startDateStr = dateFormat.format(Date(startDate!!))
-            val endDateStr = dateFormat.format(Date(endDate!!))
-            
             // Calculate days difference for a more user-friendly display
             val daysDifference = ((endDate!! - startDate!!) / (1000 * 60 * 60 * 24)).toInt()
             
             when {
-                daysDifference == 0 -> txtDateRange.text = "Today"
-                daysDifference == 1 -> txtDateRange.text = "Yesterday"
-                daysDifference < 7 -> txtDateRange.text = "Last $daysDifference days"
-                daysDifference < 30 -> txtDateRange.text = "Last ${daysDifference / 7} weeks"
-                daysDifference < 365 -> txtDateRange.text = "Last ${daysDifference / 30} months"
-                else -> txtDateRange.text = "Last ${daysDifference / 365} years"
+                daysDifference == 0 -> txtDateRange.text = getString(R.string.today)
+                daysDifference == 1 -> txtDateRange.text = getString(R.string.yesterday)
+                daysDifference < 7 -> txtDateRange.text = getString(R.string.last_n_days, daysDifference)
+                daysDifference < 30 -> txtDateRange.text = getString(R.string.last_n_weeks, daysDifference / 7)
+                daysDifference < 365 -> txtDateRange.text = getString(R.string.last_n_months, daysDifference / 30)
+                else -> txtDateRange.text = getString(R.string.last_n_years, daysDifference / 365)
             }
         } else {
-            txtDateRange.text = "All Time"
+            txtDateRange.text = getString(R.string.select_date_range)
         }
     }
     
@@ -195,20 +188,16 @@ class TransactionsActivity : AppCompatActivity(), NavigationView.OnNavigationIte
             Toast.makeText(this, "FAB not found!", Toast.LENGTH_SHORT).show()
         }
     }
-
-    private fun observeData() {
-        // Observe ViewModel data changes
-    }
     
     private fun loadTransactionsFromDatabase() {
         if (startDate != null && endDate != null) {
             // Load transactions with date filtering
-            transactionsViewModel.loadTransactionsFromDatabase(startDate!!, endDate!!) { transactions ->
+            transactionsViewModel.loadTransactionsByDateRange(startDate!!, endDate!!) { transactions ->
                 transactionAdapter.updateData(transactions)
             }
         } else {
             // Load all transactions when no date range is selected
-            transactionsViewModel.loadAllTransactionsFromDatabase { transactions ->
+            transactionsViewModel.loadAllTransactions { transactions ->
                 transactionAdapter.updateData(transactions)
             }
         }
@@ -264,8 +253,7 @@ class TransactionsActivity : AppCompatActivity(), NavigationView.OnNavigationIte
     }
 
     private fun applyFilter(filter: String) {
-        val filteredTransactions = transactionsViewModel.getFilteredTransactions(filter)
-        transactionAdapter.updateData(filteredTransactions)
+        // This feature is not implemented yet
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
@@ -305,4 +293,3 @@ class TransactionsActivity : AppCompatActivity(), NavigationView.OnNavigationIte
         }
     }
 }
-

@@ -4,7 +4,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
-import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
@@ -16,7 +15,6 @@ import com.example.spendsprout_opsc.accounts.AccountsActivity
 import com.example.spendsprout_opsc.overview.OverviewActivity
 import com.example.spendsprout_opsc.settings.SettingsActivity
 import com.example.spendsprout_opsc.transactions.TransactionsActivity
-import com.example.spendsprout_opsc.wants.WantsCategoryActivity
 import com.example.spendsprout_opsc.wants.SubcategoryAdapter
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.navigation.NavigationView
@@ -25,7 +23,7 @@ class CategoriesActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
 
     private lateinit var drawerLayout: DrawerLayout
     private lateinit var navView: NavigationView
-    private lateinit var categoriesViewModel: CategoriesViewModel
+    private lateinit var categoriesViewModel: CategoryViewModel
     private lateinit var categoryAdapter: CategoryAdapter
     private var filterByCategory: String? = null
 
@@ -62,10 +60,9 @@ class CategoriesActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
         }
         
         // Initialize ViewModel
-        categoriesViewModel = CategoriesViewModel()
+        categoriesViewModel = CategoryViewModel()
 
         setupUI()
-        observeData()
     }
 
     private fun setupUI() {
@@ -96,7 +93,7 @@ class CategoriesActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
 
     private fun loadMainCategoriesFromDatabase() {
         // Load main categories from database instead of hardcoded data
-        categoriesViewModel.loadMainCategoriesFromDatabase { categories ->
+        categoriesViewModel.loadCategoriesFromDatabase { categories ->
             val recyclerView = findViewById<RecyclerView>(R.id.recyclerView_Categories)
             categoryAdapter = CategoryAdapter(categories) { category ->
                 // Handle category click - navigate to edit screen
@@ -114,12 +111,6 @@ class CategoriesActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
         categoriesViewModel.loadSubcategoriesForCategory(categoryName) { subcategories ->
             val recyclerView = findViewById<RecyclerView>(R.id.recyclerView_Categories)
             
-            if (subcategories.isEmpty()) {
-                // Show empty state or message if no subcategories exist
-                android.util.Log.d("CategoriesActivity", "No subcategories found for category: $categoryName")
-                // You could show a message like "No subcategories found. Add some subcategories to this category."
-            }
-            
             val subcategoryAdapter = SubcategoryAdapter(subcategories) { subcategory ->
                 // Handle subcategory click - navigate to edit screen with prefilled data
                 val intent = Intent(this, com.example.spendsprout_opsc.edit.EditCategoryActivity::class.java)
@@ -130,10 +121,6 @@ class CategoriesActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
             }
             recyclerView.adapter = subcategoryAdapter
         }
-    }
-
-    private fun observeData() {
-        // Observe ViewModel data changes
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -168,8 +155,7 @@ class CategoriesActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
     }
 
     private fun applyFilter(type: String) {
-        val filteredCategories = categoriesViewModel.getFilteredCategories(type)
-        categoryAdapter.updateData(filteredCategories)
+        //This feature is not implemented yet
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
@@ -209,4 +195,3 @@ class CategoriesActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
         }
     }
 }
-

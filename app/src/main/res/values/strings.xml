@@ -81,4 +81,13 @@
     <string name="transaction_saved">Transaction saved successfully</string>
     <string name="account_saved">Account saved successfully</string>
     <string name="report_exported">Report exported</string>
+
+    <!-- Date Ranges -->
+    <string name="today">Today</string>
+    <string name="yesterday">Yesterday</string>
+    <string name="last_n_days">Last %d days</string>
+    <string name="last_n_weeks">Last %d weeks</string>
+    <string name="last_n_months">Last %d months</string>
+    <string name="last_n_years">Last %d years</string>
+    <string name="select_date_range">Select date range</string>
 </resources>

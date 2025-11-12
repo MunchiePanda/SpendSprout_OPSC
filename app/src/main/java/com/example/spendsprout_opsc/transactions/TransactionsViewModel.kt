@@ -22,8 +22,7 @@ class TransactionsViewModel {
         return emptyList()
     }
     
-    // New method to load transactions from database with date filtering
-    fun loadTransactionsFromDatabase(
+    fun loadTransactionsByDateRange(
         startDate: Long,
         endDate: Long,
         callback: (List<Transaction>) -> Unit
@@ -55,8 +54,7 @@ class TransactionsViewModel {
         }
     }
 
-    // Load all transactions regardless of date (useful if user dates vary)
-    fun loadAllTransactionsFromDatabase(callback: (List<Transaction>) -> Unit) {
+    fun loadAllTransactions(callback: (List<Transaction>) -> Unit) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 android.util.Log.d("TransactionsViewModel", "Loading all transactions")
@@ -119,4 +117,3 @@ class TransactionsViewModel {
         return calendar.timeInMillis
     }
 }
-

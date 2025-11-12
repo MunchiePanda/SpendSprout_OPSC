@@ -6,7 +6,6 @@ import android.content.Intent
 import android.widget.TextView
 import android.widget.Toast
 import android.view.MenuItem
-import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.core.view.GravityCompat
 import androidx.activity.enableEdgeToEdge
@@ -17,8 +16,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.spendsprout_opsc.categories.HierarchicalCategoryAdapter
 import com.example.spendsprout_opsc.categories.CategoryViewModel
-import com.example.spendsprout_opsc.categories.model.Category
-import com.example.spendsprout_opsc.categories.model.Subcategory
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.datepicker.MaterialDatePicker
@@ -27,10 +24,9 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 class CategoryOverviewActivity : AppCompatActivity() {
-    
+
     private lateinit var drawerLayout: DrawerLayout
     private lateinit var navView: NavigationView
-    private lateinit var toggle: ActionBarDrawerToggle
     private lateinit var btnSelectDateRange: MaterialButton
     private lateinit var txtDateRange: TextView
     private lateinit var categoryViewModel: CategoryViewModel
@@ -38,27 +34,27 @@ class CategoryOverviewActivity : AppCompatActivity() {
     private var startDate: Long? = null
     private var endDate: Long? = null
     private lateinit var sharedPreferences: SharedPreferences
-    
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_category_overview)
-        
+
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-        
+
         // Set up drawer + toolbar
         setupDrawer()
 
         // Initialize ViewModel
         categoryViewModel = CategoryViewModel()
-        
+
         // Initialize date range picker
         setupDateRangePicker()
-        
+
         // Setup UI
         setupCategoryRecyclerView()
         setupFab()
@@ -67,7 +63,7 @@ class CategoryOverviewActivity : AppCompatActivity() {
     private fun setupDrawer() {
         // Initialize SharedPreferences for login management
         sharedPreferences = getSharedPreferences("login_prefs", MODE_PRIVATE)
-        
+
         drawerLayout = findViewById(R.id.main)
         navView = findViewById(R.id.navigationView)
 
@@ -105,24 +101,24 @@ class CategoryOverviewActivity : AppCompatActivity() {
             true
         }
     }
-    
+
     private fun setupDateRangePicker() {
         btnSelectDateRange = findViewById(R.id.btn_selectDateRange)
         txtDateRange = findViewById(R.id.txt_dateRange)
-        
+
         // Set default date range (last 30 days)
         val calendar = Calendar.getInstance()
         endDate = calendar.timeInMillis
         calendar.add(Calendar.DAY_OF_YEAR, -30)
         startDate = calendar.timeInMillis
-        
+
         updateDateRangeDisplay()
-        
+
         btnSelectDateRange.setOnClickListener {
             showDateRangePicker()
         }
     }
-    
+
     private fun showDateRangePicker() {
         // Create date range picker
         val dateRangePicker = MaterialDatePicker.Builder.dateRangePicker()
@@ -134,34 +130,29 @@ class CategoryOverviewActivity : AppCompatActivity() {
                 )
             )
             .build()
-        
+
         // Show the picker
         dateRangePicker.show(supportFragmentManager, "DATE_RANGE_PICKER")
-        
+
         // Handle the selection
         dateRangePicker.addOnPositiveButtonClickListener { selection ->
             startDate = selection.first
             endDate = selection.second
-            
-            // Format dates for display
-            val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
-            val startDateStr = dateFormat.format(Date(startDate!!))
-            val endDateStr = dateFormat.format(Date(endDate!!))
-            
+
             // Update display
             updateDateRangeDisplay()
-            
+
             // Filter categories based on date range
             filterCategoriesByDateRange()
         }
     }
-    
+
     private fun setupCategoryRecyclerView() {
         val recyclerView = findViewById<RecyclerView>(R.id.recyclerView_Categories)
         recyclerView.layoutManager = LinearLayoutManager(this)
 
         // Initialize with empty list, will be populated from database
-        hierarchicalCategoryAdapter = HierarchicalCategoryAdapter(emptyList(), 
+        hierarchicalCategoryAdapter = HierarchicalCategoryAdapter(emptyList(),
             onCategoryClick = { category ->
                 // Navigate to activity_categories (CategoriesActivity) for selected main category (Needs, Wants, Savings)
                 val intent = Intent(this, com.example.spendsprout_opsc.categories.CategoriesActivity::class.java)
@@ -182,7 +173,7 @@ class CategoryOverviewActivity : AppCompatActivity() {
         // Load categories with subcategories from database
         loadCategoriesWithSubcategoriesFromDatabase()
     }
-    
+
     private fun setupFab() {
         val fabAddCategory = findViewById<FloatingActionButton>(R.id.fab_AddCategory)
         fabAddCategory.setOnClickListener {
@@ -191,51 +182,47 @@ class CategoryOverviewActivity : AppCompatActivity() {
             startActivity(intent)
         }
     }
-    
+
     private fun loadCategoriesWithSubcategoriesFromDatabase() {
         categoryViewModel.loadCategoriesWithSubcategoriesFromDatabase(startDate, endDate) { categoriesWithSubcategories ->
             hierarchicalCategoryAdapter.updateData(categoriesWithSubcategories)
         }
     }
-    
+
     override fun onResume() {
         super.onResume()
         // Reload categories when returning to this activity
         loadCategoriesWithSubcategoriesFromDatabase()
     }
-    
+
     private fun updateDateRangeDisplay() {
         if (startDate != null && endDate != null) {
-            val dateFormat = SimpleDateFormat("MMM dd - MMM dd, yyyy", Locale.getDefault())
-            val startDateStr = dateFormat.format(Date(startDate!!))
-            val endDateStr = dateFormat.format(Date(endDate!!))
-            
             // Calculate days difference for a more user-friendly display
             val daysDifference = ((endDate!! - startDate!!) / (1000 * 60 * 60 * 24)).toInt()
-            
+
             when {
-                daysDifference == 0 -> txtDateRange.text = "Today"
-                daysDifference == 1 -> txtDateRange.text = "Yesterday"
-                daysDifference < 7 -> txtDateRange.text = "Last $daysDifference days"
-                daysDifference < 30 -> txtDateRange.text = "Last ${daysDifference / 7} weeks"
-                daysDifference < 365 -> txtDateRange.text = "Last ${daysDifference / 30} months"
-                else -> txtDateRange.text = "Last ${daysDifference / 365} years"
+                daysDifference == 0 -> txtDateRange.text = getString(R.string.today)
+                daysDifference == 1 -> txtDateRange.text = getString(R.string.yesterday)
+                daysDifference < 7 -> txtDateRange.text = getString(R.string.last_n_days, daysDifference)
+                daysDifference < 30 -> txtDateRange.text = getString(R.string.last_n_weeks, daysDifference / 7)
+                daysDifference < 365 -> txtDateRange.text = getString(R.string.last_n_months, daysDifference / 30)
+                else -> txtDateRange.text = getString(R.string.last_n_years, daysDifference / 365)
             }
         } else {
-            txtDateRange.text = "Select date range"
+            txtDateRange.text = getString(R.string.select_date_range)
         }
     }
-    
+
     private fun filterCategoriesByDateRange() {
         // Reload categories with the new date range
         loadCategoriesWithSubcategoriesFromDatabase()
-        
+
         // Log the selected dates for debugging
         if (startDate != null && endDate != null) {
             val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
             val startDateStr = dateFormat.format(Date(startDate!!))
             val endDateStr = dateFormat.format(Date(endDate!!))
-            
+
             println("Filtering categories from $startDateStr to $endDateStr")
             Toast.makeText(this, "Filtering from $startDateStr to $endDateStr", Toast.LENGTH_SHORT).show()
         }
