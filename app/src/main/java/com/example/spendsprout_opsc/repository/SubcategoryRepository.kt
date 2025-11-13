@@ -83,4 +83,15 @@ class SubcategoryRepository @Inject constructor(
             .maxOrNull() ?: 0
         return maxId + 1
     }
+
+    suspend fun getSubcategoriesByCategoryId(categoryId: Int): List<Subcategory_Entity> {
+        val snapshot = subcategoriesReference.get().await()
+        return snapshot.children.mapNotNull { child ->
+            child.getValue(Subcategory_Entity::class.java)?.apply {
+                if (id == 0) {
+                    id = child.key?.toIntOrNull() ?: id
+                }
+            }?.takeIf { it.categoryId == categoryId }
+        }
+    }
 }

@@ -1,16 +1,20 @@
 package com.example.spendsprout_opsc.reports
 
-import com.example.spendsprout_opsc.BudgetApp
+import com.example.spendsprout_opsc.ExpenseType
+import com.example.spendsprout_opsc.firebase.FirebaseRepositoryProvider
 import com.example.spendsprout_opsc.overview.model.ChartDataPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.*
 
 class ReportsViewModel {
     
-    // Total spent this month from DB (expenses only)
+    private val transactionRepository = FirebaseRepositoryProvider.transactionRepository
+    
     fun loadMonthlySpent(
         startDate: Long = getStartOfMonth(),
         endDate: Long = getEndOfMonth(),
@@ -18,18 +22,22 @@ class ReportsViewModel {
     ) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val expenses = BudgetApp.db.expenseDao().getBetweenDates(startDate, endDate)
+                val expenses = transactionRepository.getTransactionsBetweenDates(startDate, endDate)
                 val total = expenses
-                    .filter { it.expenseType == com.example.spendsprout_opsc.ExpenseType.Expense }
+                    .filter { it.expenseType == ExpenseType.Expense }
                     .sumOf { it.expenseAmount }
-                CoroutineScope(Dispatchers.Main).launch { callback(total) }
+                withContext(Dispatchers.Main) {
+                    callback(total)
+                }
             } catch (e: Exception) {
-                CoroutineScope(Dispatchers.Main).launch { callback(0.0) }
+                android.util.Log.e("ReportsViewModel", "Error loading monthly spent: ${e.message}", e)
+                withContext(Dispatchers.Main) {
+                    callback(0.0)
+                }
             }
         }
     }
 
-    // Daily spend series for the chart (revenue = daily spent; target = daily target if provided)
     fun loadDailySpendSeries(
         startDate: Long = getStartOfMonth(),
         endDate: Long = getEndOfMonth(),
@@ -39,8 +47,8 @@ class ReportsViewModel {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-                val expenses = BudgetApp.db.expenseDao().getBetweenDates(startDate, endDate)
-                    .filter { it.expenseType == com.example.spendsprout_opsc.ExpenseType.Expense }
+                val expenses = transactionRepository.getTransactionsBetweenDates(startDate, endDate)
+                    .filter { it.expenseType == ExpenseType.Expense }
 
                 val days = getDaysInRange(startDate, endDate)
                 val perDayTarget = if (days.isNotEmpty() && monthlyTarget > 0) monthlyTarget / days.size else 0.0
@@ -57,25 +65,41 @@ class ReportsViewModel {
                         target = perDayTarget
                     )
                 }
-                CoroutineScope(Dispatchers.Main).launch { callback(series) }
+                withContext(Dispatchers.Main) {
+                    callback(series)
+                }
             } catch (e: Exception) {
-                CoroutineScope(Dispatchers.Main).launch { callback(emptyList()) }
+                android.util.Log.e("ReportsViewModel", "Error loading daily spend series: ${e.message}", e)
+                withContext(Dispatchers.Main) {
+                    callback(emptyList())
+                }
             }
         }
     }
 
-    // Existing: category totals (kept)
     fun loadCategoryTotals(
         startDate: Long = getStartOfMonth(),
         endDate: Long = getEndOfMonth(),
-        callback: (List<com.example.spendsprout_opsc.roomdb.CategoryTotal>) -> Unit
+        callback: (List<CategoryTotal>) -> Unit
     ) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val totals = BudgetApp.db.expenseDao().totalsByCategory(startDate, endDate)
-                CoroutineScope(Dispatchers.Main).launch { callback(totals) }
+                val expenses = transactionRepository.getTransactionsBetweenDates(startDate, endDate)
+                val totals = expenses
+                    .filter { it.expenseType == ExpenseType.Expense }
+                    .groupBy { it.expenseCategory }
+                    .map { (category, list) ->
+                        CategoryTotal(category, list.sumOf { it.expenseAmount })
+                    }
+                    .sortedByDescending { it.total }
+                withContext(Dispatchers.Main) {
+                    callback(totals)
+                }
             } catch (e: Exception) {
-                CoroutineScope(Dispatchers.Main).launch { callback(emptyList()) }
+                android.util.Log.e("ReportsViewModel", "Error loading category totals: ${e.message}", e)
+                withContext(Dispatchers.Main) {
+                    callback(emptyList())
+                }
             }
         }
     }
@@ -85,7 +109,6 @@ class ReportsViewModel {
         val cal = Calendar.getInstance()
         cal.timeInMillis = start
         while (cal.timeInMillis <= end) {
-            // normalize to midnight
             cal.set(Calendar.HOUR_OF_DAY, 0)
             cal.set(Calendar.MINUTE, 0)
             cal.set(Calendar.SECOND, 0)
@@ -117,3 +140,4 @@ class ReportsViewModel {
     }
 }
 
+data class CategoryTotal(val category: String, val total: Double)

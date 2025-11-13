@@ -23,6 +23,8 @@ import com.example.spendsprout_opsc.categories.CategoriesActivity
 import com.example.spendsprout_opsc.edit.EditBudgetActivity
 import com.example.spendsprout_opsc.reports.ReportsActivity
 import com.example.spendsprout_opsc.settings.SettingsActivity
+import com.example.spendsprout_opsc.login.LoginActivity
+import com.google.firebase.auth.FirebaseAuth
 import com.example.spendsprout_opsc.transactions.TransactionsActivity
 import com.google.android.material.navigation.NavigationView
 
@@ -67,6 +69,7 @@ class OverviewActivity : AppCompatActivity() {
      */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         // Load the scene layout - like Unity's SceneManager.LoadScene()
         setContentView(R.layout.activity_overview)
         
@@ -240,7 +243,8 @@ class OverviewActivity : AppCompatActivity() {
             // Pass current budget data if it exists
             val currentBudget = overviewViewModel.getCurrentBudget()
             if (currentBudget != null) {
-                intent.putExtra("budget", currentBudget)
+                // Budget_Entity is Serializable, so we can pass it directly
+                intent.putExtra("budget", currentBudget as java.io.Serializable)
             }
             
             startActivityForResult(intent, BUDGET_EDIT_REQUEST_CODE)

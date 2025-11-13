@@ -75,14 +75,14 @@ class CategoryRepository @Inject constructor(
             .removeValue()
             .await()
     }
-
+    
     suspend fun getTotalAllocation(): Double {
         val snapshot = categoriesReference.get().await()
         return snapshot.children.sumOf { child ->
             child.child("categoryAllocation").getValue(Double::class.java) ?: 0.0
         }
     }
-
+    
     suspend fun getTotalSpent(): Double {
         val snapshot = categoriesReference.get().await()
         return snapshot.children.sumOf { child ->

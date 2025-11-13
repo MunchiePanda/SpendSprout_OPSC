@@ -8,5 +8,7 @@ plugins {
     
     // Hilt dependency injection
     id("com.google.dagger.hilt.android") version "2.52" apply false
+    
+    // Google services for Firebase
     id("com.google.gms.google-services") version "4.4.2" apply false
 }

@@ -16,21 +16,24 @@ class CategoriesViewModel {
                 name = "Needs",
                 spent = "R 8,900",
                 allocation = "R 10,000",
-                color = "#BD804A"
+                color = "#BD804A",
+                categoryType = "Needs"
             ),
             Category(
                 id = "2", 
                 name = "Wants",
                 spent = "- R 120",
                 allocation = "R 6,000",
-                color = "#88618E"
+                color = "#88618E",
+                categoryType = "Wants"
             ),
             Category(
                 id = "3",
                 name = "Savings", 
                 spent = "R 4,000",
                 allocation = "R 4,000",
-                color = "#6EA19E"
+                color = "#6EA19E",
+                categoryType = "Savings"
             )
         )
     }
@@ -143,4 +146,3 @@ class CategoriesViewModel {
         return String.format("#%06X", 0xFFFFFF and colorInt)
     }
 }
-

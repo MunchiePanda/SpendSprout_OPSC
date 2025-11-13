@@ -2,6 +2,7 @@ package com.example.spendsprout_opsc.edit
 
 import android.app.DatePickerDialog
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
@@ -12,26 +13,25 @@ import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.Spinner
-import android.net.Uri
-import java.text.SimpleDateFormat
-import java.util.Date
-import android.widget.Switch
 import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.lifecycleScope
-import com.example.spendsprout_opsc.BudgetApp
 import com.example.spendsprout_opsc.R
 import com.example.spendsprout_opsc.accounts.AccountsActivity
+import com.example.spendsprout_opsc.firebase.FirebaseRepositoryProvider
 import com.example.spendsprout_opsc.settings.SettingsActivity
 import com.example.spendsprout_opsc.transactions.TransactionsActivity
 import com.google.android.material.navigation.NavigationView
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.util.Calendar
+import java.text.SimpleDateFormat
+import java.util.*
 
 class EditTransactionActivity : AppCompatActivity() {
 
@@ -42,81 +42,22 @@ class EditTransactionActivity : AppCompatActivity() {
     lateinit var btnCloseMenu: ImageButton
 
     private lateinit var editTransactionViewModel: EditTransactionViewModel
-    private var editingTransactionId: Long? = null
+    private var editingTransactionId: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_edit_transaction)
 
-        //MENU DRAWER SETUP
-        //MenuDrawer: Drawer Layout/ Menu Code and connections
-        drawerLayout = findViewById(R.id.drawer_layout)
-        navigationView = findViewById(R.id.nav_view)
-        
-        // Set up the toolbar from the included layout
-        val headerBar = findViewById<View>(R.id.header_bar)
-        val toolbar: androidx.appcompat.widget.Toolbar = headerBar.findViewById(R.id.toolbar)
-        setSupportActionBar(toolbar)
-
-        // Enable back button functionality
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        supportActionBar?.setHomeButtonEnabled(true)
-        
-        // Set up menu button click listener
-        val btnMenu = headerBar.findViewById<ImageButton>(R.id.btn_Menu)
-        btnMenu.setOnClickListener {
-            drawerLayout.openDrawer(GravityCompat.START)
-        }
-
-        //MenuDrawer: Access the close button from the navigation view header
-        val headerView = navigationView.getHeaderView(0)
-        btnCloseMenu = headerView.findViewById(R.id.btn_CloseMenu)
-
-        //MenuDrawer: Close menu button click listener to close drawer
-        btnCloseMenu.setOnClickListener {
-            drawerLayout.closeDrawer(navigationView)
-        }
-
-        //MenuDrawer: respond to menu item clicks - using lambda like OverviewActivity
-        navigationView.setNavigationItemSelectedListener { item ->
-            when (item.itemId) {
-                R.id.nav_overview -> {
-                    Toast.makeText(this, "Navigating to Overview", Toast.LENGTH_SHORT).show()
-                    startActivity(Intent(this, com.example.spendsprout_opsc.overview.OverviewActivity::class.java))
-                }
-                R.id.nav_categories -> {
-                    Toast.makeText(this, "Navigating to Categories", Toast.LENGTH_SHORT).show()
-                    startActivity(Intent(this, com.example.spendsprout_opsc.CategoryOverviewActivity::class.java))
-                }
-                R.id.nav_transactions -> {
-                    Toast.makeText(this, "Navigating to Transactions", Toast.LENGTH_SHORT).show()
-                    startActivity(Intent(this, TransactionsActivity::class.java))
-                }
-                R.id.nav_accounts -> {
-                    Toast.makeText(this, "Navigating to Accounts", Toast.LENGTH_SHORT).show()
-                    startActivity(Intent(this, AccountsActivity::class.java))
-                }
-                R.id.nav_reports -> {
-                    Toast.makeText(this, "Reports coming soon!", Toast.LENGTH_SHORT).show()
-                }
-                R.id.nav_settings -> {
-                    Toast.makeText(this, "Navigating to Settings", Toast.LENGTH_SHORT).show()
-                    startActivity(Intent(this, SettingsActivity::class.java))
-                }
-                R.id.nav_exit -> {
-                    Toast.makeText(this, "Exiting app", Toast.LENGTH_SHORT).show()
-                    finishAffinity()
-                }
-            }
-            drawerLayout.closeDrawer(GravityCompat.START)
-            true
-        }
-
         // Initialize ViewModel
         editTransactionViewModel = EditTransactionViewModel()
 
+        // Check if we're editing an existing transaction
+        editingTransactionId = intent.getStringExtra("transactionId")
+
         setupUI()
-        prefillIfEditing()
+        if (editingTransactionId != null) {
+            prefillIfEditing()
+        }
 
         // Save FAB triggers same save method
         findViewById<com.google.android.material.floatingactionbutton.FloatingActionButton>(R.id.fab_SaveTransaction)
@@ -134,28 +75,46 @@ class EditTransactionActivity : AppCompatActivity() {
 
     private fun setupCategorySpinner() {
         val spinnerCategory = findViewById<Spinner>(R.id.spinner_Category)
+        val firebaseAuth = FirebaseAuth.getInstance()
+        val currentUser = firebaseAuth.currentUser
+        if (currentUser == null) {
+            Toast.makeText(this, "User not logged in", Toast.LENGTH_SHORT).show()
+            return
+        }
 
-        // launch a coroutine to fetch data safely
+        // Load categories from Firebase
         lifecycleScope.launch {
-            // run the database query on a background thread
-            val categories = withContext(Dispatchers.IO) {
-                BudgetApp.db.subcategoryDao().getAll()
+            try {
+                val subcategories = withContext(Dispatchers.IO) {
+                    FirebaseRepositoryProvider.subcategoryRepository.getAllSubcategories().first()
+                }
+                val categoryNames = subcategories.map { it.subcategoryName }.toTypedArray()
+                
+                withContext(Dispatchers.Main) {
+                    val adapter = ArrayAdapter(
+                        this@EditTransactionActivity,
+                        android.R.layout.simple_spinner_item,
+                        categoryNames
+                    )
+                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                    spinnerCategory.adapter = adapter
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("EditTransactionActivity", "Error loading categories: ${e.message}", e)
+                // Fallback to default list
+                withContext(Dispatchers.Main) {
+                    val categoryNames = arrayOf("Groceries", "Transport", "Utilities", "Rent", "Entertainment", "Dining Out", "Shopping", "Emergency Fund", "Investment")
+                    val adapter = ArrayAdapter(
+                        this@EditTransactionActivity,
+                        android.R.layout.simple_spinner_item,
+                        categoryNames
+                    )
+                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                    spinnerCategory.adapter = adapter
+                }
             }
-
-            // extract subcategory names
-            val categoryNames = categories.map { it.subcategoryName }.toTypedArray()
-
-            // update UI on the main thread
-            val adapter = ArrayAdapter(
-                this@EditTransactionActivity,          // replace with your activity name
-                android.R.layout.simple_spinner_item,
-                categoryNames
-            )
-            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            spinnerCategory.adapter = adapter
         }
     }
-
 
     private fun setupAccountSpinner() {
         val spinnerAccount = findViewById<Spinner>(R.id.spinner_Account)
@@ -175,14 +134,16 @@ class EditTransactionActivity : AppCompatActivity() {
 
     private fun setupDateButton() {
         val btnDate = findViewById<Button>(R.id.btn_Date)
-        btnDate.text = "12 September 2025"
-        
+        btnDate.text = SimpleDateFormat("d MMMM yyyy", Locale.getDefault()).format(Date())
+
         btnDate.setOnClickListener {
             val calendar = Calendar.getInstance()
             val datePickerDialog = DatePickerDialog(
                 this,
                 { _, year, month, dayOfMonth ->
-                    btnDate.text = "$dayOfMonth ${getMonthName(month)} $year"
+                    val selectedDate = Calendar.getInstance()
+                    selectedDate.set(year, month, dayOfMonth)
+                    btnDate.text = SimpleDateFormat("d MMMM yyyy", Locale.getDefault()).format(selectedDate.time)
                 },
                 calendar.get(Calendar.YEAR),
                 calendar.get(Calendar.MONTH),
@@ -190,12 +151,6 @@ class EditTransactionActivity : AppCompatActivity() {
             )
             datePickerDialog.show()
         }
-    }
-
-    private fun getMonthName(month: Int): String {
-        val months = arrayOf("January", "February", "March", "April", "May", "June",
-            "July", "August", "September", "October", "November", "December")
-        return months[month]
     }
 
     private fun setupButtons() {
@@ -212,28 +167,36 @@ class EditTransactionActivity : AppCompatActivity() {
     }
 
     private fun prefillIfEditing() {
-        val idStr = intent.getStringExtra("transactionId")
-        val id = idStr?.toLongOrNull() ?: return
-        editingTransactionId = id
-        // Load from DB
-        editTransactionViewModel.loadTransactionById(id) { expense ->
+        if (editingTransactionId == null) return
+
+        editTransactionViewModel.loadTransactionById(editingTransactionId!!) { expense ->
             if (expense != null) {
                 val edtDescription = findViewById<EditText>(R.id.edt_Description)
                 val edtAmount = findViewById<EditText>(R.id.edt_Amount)
                 val btnDate = findViewById<Button>(R.id.btn_Date)
+                val spinnerCategory = findViewById<Spinner>(R.id.spinner_Category)
                 val edtNotes = findViewById<EditText>(R.id.edt_Notes)
+
                 edtDescription.setText(expense.expenseName)
                 edtAmount.setText(expense.expenseAmount.toString())
-                btnDate.setText(SimpleDateFormat("d MMMM yyyy", java.util.Locale.getDefault()).format(java.util.Date(expense.expenseDate)))
+                btnDate.text = SimpleDateFormat("d MMMM yyyy", Locale.getDefault()).format(Date(expense.expenseDate))
                 edtNotes.setText(expense.expenseNotes ?: "")
-                selectedImageUri = expense.expenseImage?.let { android.net.Uri.parse(it) }
+
+                // Try to select the correct category in the spinner
+                val adapter = spinnerCategory.adapter as ArrayAdapter<String>
+                val position = adapter.getPosition(expense.expenseCategory)
+                if (position >= 0) {
+                    spinnerCategory.setSelection(position)
+                }
+
+                selectedImageUri = expense.expenseImage?.let { Uri.parse(it) }
 
                 // Show image preview at bottom if exists
                 val container = findViewById<android.widget.LinearLayout>(R.id.bottomPreviewContainer)
                 val img = findViewById<ImageView>(R.id.img_EditPreview)
                 if (expense.expenseImage != null) {
                     img.visibility = View.VISIBLE
-                    img.setImageURI(android.net.Uri.parse(expense.expenseImage))
+                    img.setImageURI(Uri.parse(expense.expenseImage))
                     container.visibility = View.VISIBLE
                 } else {
                     img.visibility = View.GONE
@@ -261,7 +224,7 @@ class EditTransactionActivity : AppCompatActivity() {
         val repeat = spinnerRepeat.selectedItem.toString()
         val oweOwed = checkBoxOweOwed.isChecked
         val notes = edtNotes.text.toString()
-        
+
         // Convert date string to Long
         val date = editTransactionViewModel.parseUiDateToMillis(dateString)
 
@@ -285,31 +248,45 @@ class EditTransactionActivity : AppCompatActivity() {
                 editTransactionViewModel.updateTransaction(
                     editingTransactionId!!, description, amountVal, category, date, account, repeat, oweOwed, notes,
                     imagePath = selectedImageUri?.toString()
-                )
-                Toast.makeText(this, "Transaction updated successfully", Toast.LENGTH_SHORT).show()
+                ) { success, error ->
+                    if (success) {
+                        Toast.makeText(this, "Transaction updated successfully", Toast.LENGTH_SHORT).show()
+                        finishWithResult(description, formattedAmount, category, date, true)
+                    } else {
+                        Toast.makeText(this, "Failed to update transaction: ${error ?: "Unknown error"}", Toast.LENGTH_LONG).show()
+                    }
+                }
             } else {
                 // Create new transaction
                 editTransactionViewModel.saveTransaction(
                     description, amountVal, category, date, account, repeat, oweOwed, notes,
                     imagePath = selectedImageUri?.toString()
-                )
-                Toast.makeText(this, "Transaction saved successfully", Toast.LENGTH_SHORT).show()
+                ) { success, error ->
+                    if (success) {
+                        Toast.makeText(this, "Transaction saved successfully", Toast.LENGTH_SHORT).show()
+                        finishWithResult(description, formattedAmount, category, date, false)
+                    } else {
+                        Toast.makeText(this, "Failed to save transaction: ${error ?: "Unknown error"}", Toast.LENGTH_LONG).show()
+                    }
+                }
             }
-
-            // Return data
-            val resultIntent = Intent().apply {
-                putExtra("description", description)
-                putExtra("amount", formattedAmount)
-                putExtra("category", category)
-                putExtra("date", date)
-                putExtra("updated", editingTransactionId != null)
-            }
-            setResult(RESULT_OK, resultIntent)
-            finish()
         } catch (e: Exception) {
             Toast.makeText(this, "Error saving transaction: ${e.message}", Toast.LENGTH_LONG).show()
             android.util.Log.e("EditTransactionActivity", "Error saving transaction", e)
         }
+    }
+
+    private fun finishWithResult(description: String, amount: String, category: String, date: Long, updated: Boolean) {
+        // Return data
+        val resultIntent = Intent().apply {
+            putExtra("description", description)
+            putExtra("amount", amount)
+            putExtra("category", category)
+            putExtra("date", date)
+            putExtra("updated", updated)
+        }
+        setResult(RESULT_OK, resultIntent)
+        finish()
     }
 
     private val pickImageRequestCode = 5011
@@ -337,7 +314,7 @@ class EditTransactionActivity : AppCompatActivity() {
         }
     }
 
-    //MenuDrawer: Drawer Layout/ Menu Code
+    // Menu handling
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             android.R.id.home -> {

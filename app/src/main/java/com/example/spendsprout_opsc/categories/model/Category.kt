@@ -5,5 +5,6 @@ data class Category(
     val name: String,
     val spent: String,
     val allocation: String,
-    val color: String
+    val color: String,
+    val categoryType: String
 )

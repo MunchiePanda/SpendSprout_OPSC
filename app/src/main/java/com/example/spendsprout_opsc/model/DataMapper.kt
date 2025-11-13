@@ -58,7 +58,8 @@ fun Category_Entity.toCategory(): Category {
         name = this.categoryName,
         spent = "R ${String.format("%.0f", this.categoryBalance)}",
         allocation = "R ${String.format("%.0f", this.categoryAllocation)}",
-        color = getColorFromInt(this.categoryColor)
+        color = getColorFromInt(this.categoryColor),
+        categoryType = this.categoryName // Use category name as type for now
     )
 }
 
@@ -128,11 +129,10 @@ fun Expense_Entity.toUiTransaction(): UiTransaction {
     )
 }
 
-fun UiTransaction.toExpenseEntity(): Expense_Entity {
+fun UiTransaction.toExpenseEntity(category: String = "Misc"): Expense_Entity {
     val parsedAmount = this.amount.replace("R", "").replace("+", "").replace("-", "").replace(",", "").trim().toDoubleOrNull() ?: 0.0
     val isIncome = this.amount.trim().startsWith("+")
     val type = if (isIncome) com.example.spendsprout_opsc.ExpenseType.Income else com.example.spendsprout_opsc.ExpenseType.Expense
-    // Note: category, start/end are not provided by UI model; using placeholders
     return Expense_Entity(
         expenseName = this.description,
         expenseDate = java.util.Date().time,
@@ -142,7 +142,7 @@ fun UiTransaction.toExpenseEntity(): Expense_Entity {
         expenseRepeat = com.example.spendsprout_opsc.RepeatType.None,
         expenseNotes = null,
         expenseImage = this.imagePath,
-        expenseCategory = "Misc",
+        expenseCategory = category,
         expenseStart = null,
         expenseEnd = null
     )

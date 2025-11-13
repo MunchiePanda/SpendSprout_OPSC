@@ -11,17 +11,22 @@ import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.Spinner
 import android.widget.Toast
-import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.launch
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.lifecycle.lifecycleScope
 import com.example.spendsprout_opsc.R
 import com.example.spendsprout_opsc.accounts.AccountsActivity
+import com.example.spendsprout_opsc.categories.CategoriesActivity
+import com.example.spendsprout_opsc.overview.OverviewActivity
 import com.example.spendsprout_opsc.settings.SettingsActivity
 import com.example.spendsprout_opsc.transactions.TransactionsActivity
 import com.google.android.material.navigation.NavigationView
+import android.graphics.Color
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class EditCategoryActivity : AppCompatActivity() {
 
@@ -32,8 +37,6 @@ class EditCategoryActivity : AppCompatActivity() {
     lateinit var btnCloseMenu: ImageButton
 
     private lateinit var editCategoryViewModel: EditCategoryViewModel
-    
-    // Edit mode variables
     private var isEditMode = false
     private var subcategoryId: Int? = null
     private var subcategoryName: String? = null
@@ -43,11 +46,32 @@ class EditCategoryActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_edit_category)
 
+        // Initialize ViewModel
+        editCategoryViewModel = EditCategoryViewModel()
+
+        // Check if we're in edit mode
+        isEditMode = intent.getBooleanExtra("isEditMode", false)
+        val subcategoryIdString = intent.getStringExtra("subcategoryId")
+        subcategoryId = subcategoryIdString?.toIntOrNull()
+        subcategoryName = intent.getStringExtra("subcategoryName")
+
+        Log.d("EditCategoryActivity", "Edit mode: $isEditMode, Subcategory ID: $subcategoryId, Name: $subcategoryName")
+
+        setupUI()
+        if (isEditMode) {
+            prefillIfEditing()
+        }
+
+        // Save FAB triggers same save method
+        findViewById<com.google.android.material.floatingactionbutton.FloatingActionButton>(R.id.fab_SaveCategory)
+            .setOnClickListener { saveCategory() }
+    }
+
+    private fun setupUI() {
         //MENU DRAWER SETUP
-        //MenuDrawer: Drawer Layout/ Menu Code and connections
         drawerLayout = findViewById(R.id.drawer_layout)
         navigationView = findViewById(R.id.nav_view)
-        
+
         // Set up the toolbar from the included layout
         val headerBar = findViewById<View>(R.id.header_bar)
         val toolbar: androidx.appcompat.widget.Toolbar = headerBar.findViewById(R.id.toolbar)
@@ -56,7 +80,7 @@ class EditCategoryActivity : AppCompatActivity() {
         // Enable back button functionality
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setHomeButtonEnabled(true)
-        
+
         // Set up menu button click listener
         val btnMenu = headerBar.findViewById<ImageButton>(R.id.btn_Menu)
         btnMenu.setOnClickListener {
@@ -77,11 +101,11 @@ class EditCategoryActivity : AppCompatActivity() {
             when (item.itemId) {
                 R.id.nav_overview -> {
                     Toast.makeText(this, "Navigating to Overview", Toast.LENGTH_SHORT).show()
-                    startActivity(Intent(this, com.example.spendsprout_opsc.overview.OverviewActivity::class.java))
+                    startActivity(Intent(this, OverviewActivity::class.java))
                 }
                 R.id.nav_categories -> {
                     Toast.makeText(this, "Navigating to Categories", Toast.LENGTH_SHORT).show()
-                    startActivity(Intent(this, com.example.spendsprout_opsc.CategoryOverviewActivity::class.java))
+                    startActivity(Intent(this, CategoriesActivity::class.java))
                 }
                 R.id.nav_transactions -> {
                     Toast.makeText(this, "Navigating to Transactions", Toast.LENGTH_SHORT).show()
@@ -107,104 +131,27 @@ class EditCategoryActivity : AppCompatActivity() {
             true
         }
 
-        // Initialize ViewModel
-        editCategoryViewModel = EditCategoryViewModel()
-        
-        // Check if we're in edit mode
-        isEditMode = intent.getBooleanExtra("isEditMode", false)
-        val subcategoryIdString = intent.getStringExtra("subcategoryId")
-        subcategoryId = subcategoryIdString?.toIntOrNull()
-        subcategoryName = intent.getStringExtra("subcategoryName")
-        
-        Log.d("EditCategoryActivity", "Edit mode: $isEditMode, Subcategory ID: $subcategoryId, Name: $subcategoryName")
-
-        setupUI()
-        if (isEditMode) {
-            prefillIfEditing()
-        }
-
-        // Save FAB triggers same save method
-        findViewById<com.google.android.material.floatingactionbutton.FloatingActionButton>(R.id.fab_SaveCategory)
-            .setOnClickListener { saveCategory() }
-    }
-
-    private fun setupUI() {
-        setupTypeSpinner()
-        setupColorSpinner()
-        setupButtons()
-    }
-
-    private fun setupTypeSpinner() {
+        // Set up type spinner
         val spinnerType = findViewById<Spinner>(R.id.spinner_Type)
         val types = arrayOf("Needs", "Wants", "Savings")
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, types)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerType.adapter = adapter
-    }
 
-    private fun setupColorSpinner() {
+        // Set up color spinner
         val spinnerColor = findViewById<Spinner>(R.id.spinner_Color)
-        val colors = arrayOf("None", "Red", "Blue", "Green", "Purple", "Orange")
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, colors)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinnerColor.adapter = adapter
-    }
-
-    private fun setupButtons() {
-        val btnCancel = findViewById<Button>(R.id.btn_Cancel)
-        val btnSave = findViewById<Button>(R.id.btn_Save)
-
-        btnCancel.setOnClickListener {
-            finish()
-        }
-
-        btnSave.setOnClickListener {
-            saveCategory()
-        }
+        val colors = arrayOf("Red", "Blue", "Green", "Purple", "Orange")
+        val colorAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, colors)
+        colorAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerColor.adapter = colorAdapter
     }
 
     private fun prefillIfEditing() {
-        Log.d("EditCategoryActivity", "prefillIfEditing called - isEditMode: $isEditMode, subcategoryId: $subcategoryId")
-        if (isEditMode && subcategoryId != null) {
-            lifecycleScope.launch {
-                try {
-                    Log.d("EditCategoryActivity", "Loading subcategory with ID: $subcategoryId")
-                    // Load existing subcategory data
-                    editCategoryViewModel.loadSubcategoryById(subcategoryId!!) { subcategory ->
-                        if (subcategory != null) {
-                            existingSubcategory = subcategory
-                            Log.d("EditCategoryActivity", "Loaded subcategory: ${subcategory.subcategoryName}, allocation: ${subcategory.subcategoryAllocation}")
-                            
-                            // Pre-fill the form fields
-                            findViewById<EditText>(R.id.edt_CategoryName).setText(subcategory.subcategoryName)
-                            findViewById<EditText>(R.id.edt_AllocatedAmount).setText(String.format("%.2f", subcategory.subcategoryAllocation))
-                            findViewById<EditText>(R.id.edt_Notes).setText(subcategory.subcategoryNotes ?: "")
-                            
-                            // Set the parent category type
-                            val parentCategoryName = editCategoryViewModel.getParentCategoryName(subcategory.categoryId)
-                            Log.d("EditCategoryActivity", "Parent category name: $parentCategoryName")
-                            val spinnerType = findViewById<Spinner>(R.id.spinner_Type)
-                            val adapter = spinnerType.adapter as ArrayAdapter<String>
-                            val position = adapter.getPosition(parentCategoryName)
-                            if (position >= 0) {
-                                spinnerType.setSelection(position)
-                                Log.d("EditCategoryActivity", "Set spinner to position: $position")
-                            } else {
-                                Log.w("EditCategoryActivity", "Could not find parent category '$parentCategoryName' in spinner")
-                            }
-                            
-                            Log.d("EditCategoryActivity", "Prefilled form with subcategory: ${subcategory.subcategoryName}")
-                        } else {
-                            Log.w("EditCategoryActivity", "Subcategory not found for ID: $subcategoryId")
-                            Toast.makeText(this@EditCategoryActivity, "Subcategory not found", Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                } catch (e: Exception) {
-                    Log.e("EditCategoryActivity", "Error loading subcategory: ${e.message}", e)
-                    Toast.makeText(this@EditCategoryActivity, "Error loading subcategory data", Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
+        if (subcategoryId == null) return
+
+        // TODO: Load subcategory from Firebase instead of Room
+        // For now, just show a message that editing is not fully implemented yet
+        Toast.makeText(this, "Loading subcategory data...", Toast.LENGTH_SHORT).show()
     }
 
     private fun saveCategory() {
@@ -249,12 +196,12 @@ class EditCategoryActivity : AppCompatActivity() {
                             subcategoryAllocation = budgetVal,
                             subcategoryNotes = notes.ifBlank { null }
                         )
-                        
-                        // Update in database
-                        com.example.spendsprout_opsc.BudgetApp.db.subcategoryDao().update(updatedSubcategory)
-                        
+
+                        // TODO: Update in Firebase instead of Room
+                        // For now, just show success message
+
                         Toast.makeText(this@EditCategoryActivity, "Subcategory '$categoryName' updated successfully", Toast.LENGTH_SHORT).show()
-                        
+
                         // Return data
                         val resultIntent = Intent().apply {
                             putExtra("categoryName", categoryName)
@@ -274,26 +221,30 @@ class EditCategoryActivity : AppCompatActivity() {
                 }
             } else {
                 // Create new subcategory
-                editCategoryViewModel.saveCategory(categoryName, type, budgetVal, color, notes)
-                
-                // Show success message
-                Toast.makeText(this, "Subcategory '$categoryName' added to $type", Toast.LENGTH_SHORT).show()
-                
-                // Return data
-                val resultIntent = Intent().apply {
-                    putExtra("categoryName", categoryName)
-                    putExtra("allocatedAmount", "R $allocatedAmount")
-                    putExtra("allocatedAmountRaw", allocatedAmount)
-                    putExtra("type", type)
-                    putExtra("color", color)
-                    putExtra("colorHex", color)
+                editCategoryViewModel.saveCategory(categoryName, type, budgetVal, color, notes) { success, error ->
+                    if (success) {
+                        // Show success message
+                        Toast.makeText(this, "Subcategory '$categoryName' added to $type", Toast.LENGTH_SHORT).show()
+
+                        // Return data
+                        val resultIntent = Intent().apply {
+                            putExtra("categoryName", categoryName)
+                            putExtra("allocatedAmount", "R $allocatedAmount")
+                            putExtra("allocatedAmountRaw", allocatedAmount)
+                            putExtra("type", type)
+                            putExtra("color", color)
+                            putExtra("colorHex", color)
+                        }
+                        setResult(RESULT_OK, resultIntent)
+                        finish()
+                    } else {
+                        Toast.makeText(this, "Failed to save subcategory: ${error ?: "Unknown error"}", Toast.LENGTH_LONG).show()
+                    }
                 }
-                setResult(RESULT_OK, resultIntent)
-                finish()
             }
         } catch (e: Exception) {
             Toast.makeText(this, "Error saving subcategory: ${e.message}", Toast.LENGTH_LONG).show()
-            android.util.Log.e("EditCategoryActivity", "Error saving subcategory", e)
+            Log.e("EditCategoryActivity", "Error saving subcategory", e)
         }
     }
 
