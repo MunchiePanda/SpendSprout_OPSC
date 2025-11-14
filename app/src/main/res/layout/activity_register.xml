@@ -20,13 +20,13 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Login to your account"
+        android:text="Create a new account"
         android:textSize="18sp"
         android:textColor="@color/MainTextColor"
         android:layout_marginBottom="32dp" />
 
     <EditText
-        android:id="@+id/edt_Username"
+        android:id="@+id/edt_RegisterUsername"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Username"
@@ -38,10 +38,22 @@
         android:textColorHint="@color/SubTextColor" />
 
     <EditText
-        android:id="@+id/edt_Password"
+        android:id="@+id/edt_RegisterPassword"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Password"
+        android:inputType="textPassword"
+        android:layout_marginBottom="16dp"
+        android:padding="16dp"
+        android:background="@drawable/edit_text_background"
+        android:textColor="@color/MainTextColor"
+        android:textColorHint="@color/SubTextColor" />
+
+    <EditText
+        android:id="@+id/edt_RegisterConfirmPassword"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Confirm Password"
         android:inputType="textPassword"
         android:layout_marginBottom="32dp"
         android:padding="16dp"
@@ -50,35 +62,14 @@
         android:textColorHint="@color/SubTextColor" />
 
     <Button
-        android:id="@+id/btn_Login"
+        android:id="@+id/btn_Register"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/button_background"
         android:backgroundTint="@color/ButtonColor"
         android:padding="16dp"
-        android:text="Login"
+        android:text="Register"
         android:textColor="@color/MainTextColor"
         android:textSize="16sp" />
-
-    <TextView
-        android:id="@+id/tvSignUp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Don't have an account? Sign Up"
-        android:textSize="14sp"
-        android:textColor="@color/primary_color"
-        android:layout_marginTop="16dp"
-        android:gravity="center"
-        android:clickable="true"
-        android:focusable="true" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Default credentials:\nUsername: user\nPassword: password"
-        android:textSize="12sp"
-        android:textColor="@color/SubTextColor"
-        android:layout_marginTop="24dp"
-        android:gravity="center" />
 
 </LinearLayout>

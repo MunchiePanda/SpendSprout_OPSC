@@ -178,6 +178,7 @@ class OverviewActivity : AppCompatActivity() {
     }
 
     private fun setupUI() {
+        setupSwipeRefresh()
         setupBudgetInfo()
         setupBudgetOverviewClickListener()
         setupTransactionRecyclerView()
@@ -270,6 +271,15 @@ class OverviewActivity : AppCompatActivity() {
         //chartView.setData(chartData) // TODO: Implement chart data setting
     }
 
+    private fun setupSwipeRefresh() {
+        val swipeRefreshLayout = findViewById<androidx.swiperefreshlayout.widget.SwipeRefreshLayout>(R.id.swipeRefreshLayout)
+        swipeRefreshLayout.setOnRefreshListener {
+            // Refresh data when user pulls to refresh
+            overviewViewModel.refreshData()
+            swipeRefreshLayout.isRefreshing = false
+        }
+    }
+
     private fun observeData() {
         // Observe ViewModel data changes
         lifecycleScope.launch {
@@ -285,7 +295,7 @@ class OverviewActivity : AppCompatActivity() {
                 }
             }
         }
-        
+
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

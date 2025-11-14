@@ -29,7 +29,7 @@ object DatabaseModule {
             "budget_database"
         )
                 .addMigrations(*DatabaseMigration.ALL_MIGRATIONS)
-                .fallbackToDestructiveMigration(true)
+                .fallbackToDestructiveMigration()
         .build()
     }
 

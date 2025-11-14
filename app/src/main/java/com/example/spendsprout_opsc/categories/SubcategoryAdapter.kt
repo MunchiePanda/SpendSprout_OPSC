@@ -24,7 +24,7 @@ class SubcategoryAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SubcategoryViewHolder {
         val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.subcategory_layout, parent, false)
+            .inflate(R.layout.item_category, parent, false)
         return SubcategoryViewHolder(view)
     }
 
@@ -34,17 +34,25 @@ class SubcategoryAdapter(
         holder.balanceTextView.text = subcategory.spent
         holder.allocationTextView.text = subcategory.allocation
         holder.spentTextView.text = "" // Clear spent text
-        
-        // Set subcategory color
+
+        // Set subcategory background color
+        try {
+            holder.view.setBackgroundColor(android.graphics.Color.parseColor(subcategory.color))
+        } catch (e: Exception) {
+            // Fallback to default color if parsing fails
+            holder.view.setBackgroundColor(android.graphics.Color.parseColor("#2E2F34"))
+        }
+
+        // Set subcategory icon color
         holder.imageView.setColorFilter(android.graphics.Color.parseColor(subcategory.color))
-        
+
         // Set amount color based on positive/negative
         if (subcategory.spent.startsWith("+") || !subcategory.spent.startsWith("-")) {
             holder.balanceTextView.setTextColor(android.graphics.Color.parseColor("#77B950"))
         } else {
             holder.balanceTextView.setTextColor(android.graphics.Color.parseColor("#E94444"))
         }
-        
+
         // Set click listener
         holder.view.setOnClickListener { onItemClick(subcategory) }
     }

@@ -49,70 +49,81 @@ class OverviewViewModel : ViewModel() {
         viewModelScope.launch {
             // Load real data from database
             loadBudgets()
-            
-            // Use real budget data instead of mock data
-            // _totalBalance will be calculated from actual budget data
+            loadRecentTransactions()
+            loadCategorySummary()
+            loadAccountSummary()
+            loadChartData()
+        }
+    }
 
-            // Mock recent transactions
-            _recentTransactions.value = listOf(
-                Transaction(
-                    date = "02 October 2025",
-                    description = "Petrol",
-                    amount = "- R 1,500",
-                    color = "#87CEEB"
-                ),
-                Transaction(
-                    date = "30 September 2025",
-                    description = "Mug 'n Bean",
-                    amount = "- R 360",
-                    color = "#4169E1"
-                ),
-                Transaction(
-                    date = "25 September 2025",
-                    description = "Salary",
-                    amount = "+ R 20,000",
-                    color = "#32CD32"
-                )
-            )
+    private fun loadRecentTransactions() {
+        viewModelScope.launch {
+            try {
+                val transactionRepository = TransactionRepository()
+                transactionRepository.getAllTransactions().collect { transactions ->
+                    _recentTransactions.value = transactions.map { transaction ->
+                        Transaction(
+                            date = formatDate(transaction.date),
+                            description = transaction.description,
+                            amount = formatAmount(transaction.amount, transaction.type),
+                            color = getCategoryColor(transaction.subcategoryId)
+                        )
+                    }
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("OverviewViewModel", "Error loading transactions: ${e.message}", e)
+            }
+        }
+    }
 
-            // Mock category summary
-            _categorySummary.value = listOf(
-                CategorySummary(
-                    name = "Needs",
-                    spent = "R 8,900",
-                    allocated = "R 10,000",
-                    color = "#BD804A"
-                ),
-                CategorySummary(
-                    name = "Wants",
-                    spent = "R 120",
-                    allocated = "R 6,000",
-                    color = "#88618E"
-                ),
-                CategorySummary(
-                    name = "Savings",
-                    spent = "R 4,000",
-                    allocated = "R 4,000",
-                    color = "#6EA19E"
-                )
-            )
+    private fun loadCategorySummary() {
+        viewModelScope.launch {
+            try {
+                val categoryRepository = CategoryRepository()
+                categoryRepository.getAllCategories().collect { categories ->
+                    _categorySummary.value = categories.map { category ->
+                        CategorySummary(
+                            name = category.name,
+                            spent = "R ${category.spent}",
+                            allocated = "R ${category.allocation}",
+                            color = category.color
+                        )
+                    }
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("OverviewViewModel", "Error loading categories: ${e.message}", e)
+            }
+        }
+    }
 
-            // Mock account summary
-            _accountSummary.value = listOf(
-                AccountSummary(
-                    name = "Cash",
-                    balance = "R 160",
-                    limit = "R 240"
-                ),
-                AccountSummary(
-                    name = "FNB Next Transact",
-                    balance = "R 1,720",
-                    limit = "R 2,580"
-                )
-            )
+    private fun loadAccountSummary() {
+        viewModelScope.launch {
+            try {
+                val accountRepository = AccountRepository()
+                accountRepository.getAllAccounts().collect { accounts ->
+                    _accountSummary.value = accounts.map { account ->
+                        AccountSummary(
+                            name = account.name,
+                            balance = "R ${account.balance}",
+                            limit = "R ${account.limit}"
+                        )
+                    }
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("OverviewViewModel", "Error loading accounts: ${e.message}", e)
+            }
+        }
+    }
 
-            // Load chart data (mock for now)
-            _chartData.value = generateMockChartData()
+    private fun loadChartData() {
+        viewModelScope.launch {
+            try {
+                // Load real chart data from database
+                // For now, use mock data until real data is available
+                _chartData.value = generateMockChartData()
+            } catch (e: Exception) {
+                android.util.Log.e("OverviewViewModel", "Error loading chart data: ${e.message}", e)
+            }
         }
     }
     

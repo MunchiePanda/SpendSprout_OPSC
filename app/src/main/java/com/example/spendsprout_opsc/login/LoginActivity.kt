@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.spendsprout_opsc.R
@@ -34,19 +35,19 @@ class LoginActivity : AppCompatActivity() {
         val edtUsername = findViewById<EditText>(R.id.edt_Username)
         val edtPassword = findViewById<EditText>(R.id.edt_Password)
         val btnLogin = findViewById<Button>(R.id.btn_Login)
-        
+        val tvSignUp = findViewById<TextView>(R.id.tvSignUp)
+
         btnLogin.setOnClickListener {
             val username = edtUsername.text.toString().trim()
             val password = edtPassword.text.toString().trim()
-            
+
             if (username.isEmpty() || password.isEmpty()) {
                 Toast.makeText(this, "Please enter username and password", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
-            
-            // Check if user exists
+
+            // Only allow login for existing users
             if (userExists(username)) {
-                // Try to login
                 if (validateLogin(username, password)) {
                     saveLoginStatus(username)
                     Toast.makeText(this, "Login successful! Welcome back, $username", Toast.LENGTH_SHORT).show()
@@ -56,13 +57,12 @@ class LoginActivity : AppCompatActivity() {
                     Toast.makeText(this, "Invalid password. Please try again.", Toast.LENGTH_SHORT).show()
                 }
             } else {
-                // Register new user
-                registerUser(username, password)
-                saveLoginStatus(username)
-                Toast.makeText(this, "Account created! Welcome, $username", Toast.LENGTH_SHORT).show()
-                startActivity(Intent(this, OverviewActivity::class.java))
-                finish()
+                Toast.makeText(this, "User does not exist. Please sign up.", Toast.LENGTH_SHORT).show()
             }
+        }
+
+        tvSignUp.setOnClickListener {
+            startActivity(Intent(this, RegisterActivity::class.java))
         }
     }
     

@@ -1,8 +1,9 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
     <style name="Base.Theme.SpendSprout_OPSC" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <!-- Customize your theme here. -->
+        <item name="android:statusBarColor">@color/TopBarColor</item>
+        <item name="android:windowLightStatusBar">false</item> <!-- Dark icons for light status bar -->
     </style>
 
     <style name="Theme.SpendSprout_OPSC" parent="Base.Theme.SpendSprout_OPSC" />

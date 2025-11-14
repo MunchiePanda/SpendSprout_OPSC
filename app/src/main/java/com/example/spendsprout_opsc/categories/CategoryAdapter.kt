@@ -22,7 +22,7 @@ class CategoryAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CategoryViewHolder {
         val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.category_layout, parent, false)
+            .inflate(R.layout.item_category, parent, false)
         return CategoryViewHolder(view)
     }
 
@@ -32,14 +32,22 @@ class CategoryAdapter(
         holder.balanceTextView.text = category.spent
         holder.allocationTextView.text = category.allocation
         holder.spentTextView.text = "" // Clear the spent text
-        
+
+        // Set category background color
+        try {
+            holder.view.setBackgroundColor(android.graphics.Color.parseColor(category.color))
+        } catch (e: Exception) {
+            // Fallback to default color if parsing fails
+            holder.view.setBackgroundColor(android.graphics.Color.parseColor("#2E2F34"))
+        }
+
         // Set amount color based on positive/negative
         if (category.spent.startsWith("+")) {
             holder.balanceTextView.setTextColor(android.graphics.Color.parseColor("#77B950"))
         } else {
             holder.balanceTextView.setTextColor(android.graphics.Color.parseColor("#E94444"))
         }
-        
+
         // Set click listener
         holder.view.setOnClickListener { onItemClick(category) }
     }

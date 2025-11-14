@@ -14,14 +14,14 @@
 
     <!-- Text  -->
     <color name="MainTextColor">#FFFFFF</color>
-    <color name="SubTextColor">#505359</color>
+    <color name="SubTextColor">#A0A0A0</color> <!-- Lighter gray for better contrast -->
     <color name="HighlightTextColor">#BAE655</color>
     <color name="PositiveBalanceColor">#77B950</color>
     <color name="NegativeBalanceColor">#E94444</color>
 
     <!-- Buttons & Icons -->
     <color name="ButtonColor">#B9D5A1</color>
-    <color name="IconColor">#212327</color>
+    <color name="IconColor">#2E2F34</color> <!-- Darker for better contrast on buttons -->
     <color name="primary_color">#BAE655</color>
 
     <!-- Categories -->
@@ -31,4 +31,16 @@
     <color name="WantsSubCategoryColor">#8A80BC</color>
     <color name="SavingsCategoryColor">#6EA19E</color>
     <color name="SavingsSubCategoryColor">#8BD0C7</color>
+
+    <!-- Custom Category Colors -->
+    <color name="CustomCategoryColor1">#FF6B6B</color>
+    <color name="CustomCategoryColor2">#4ECDC4</color>
+    <color name="CustomCategoryColor3">#45B7D1</color>
+    <color name="CustomCategoryColor4">#FFBE0B</color>
+    <color name="CustomCategoryColor5">#FB5607</color>
+    <color name="CustomCategoryColor6">#8338EC</color>
+    <color name="CustomCategoryColor7">#3A86FF</color>
+    <color name="CustomCategoryColor8">#FF006E</color>
+    <color name="CustomCategoryColor9">#A5DD9B</color>
+    <color name="CustomCategoryColor10">#F9C74F</color>
 </resources>
