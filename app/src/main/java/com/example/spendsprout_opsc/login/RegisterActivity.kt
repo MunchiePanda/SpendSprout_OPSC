@@ -1,67 +1,56 @@
 package com.example.spendsprout_opsc.login
 
 import android.content.Intent
-import android.content.SharedPreferences
 import android.os.Bundle
-import android.widget.Button
-import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.example.spendsprout_opsc.R
+import com.example.spendsprout_opsc.MainActivity
+import com.example.spendsprout_opsc.databinding.ActivityRegisterBinding
+import com.google.firebase.auth.FirebaseAuth
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class RegisterActivity : AppCompatActivity() {
 
-    private lateinit var sharedPreferences: SharedPreferences
+    private lateinit var binding: ActivityRegisterBinding
+
+    @Inject
+    lateinit var firebaseAuth: FirebaseAuth
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_register)
+        binding = ActivityRegisterBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        sharedPreferences = getSharedPreferences("login_prefs", MODE_PRIVATE)
+        binding.btnRegister.setOnClickListener {
+            val email = binding.edtRegisterUsername.text.toString()
+            val password = binding.edtRegisterPassword.text.toString()
+            val confirmPassword = binding.edtRegisterConfirmPassword.text.toString()
 
-        setupUI()
-    }
-
-    private fun setupUI() {
-        val edtUsername = findViewById<EditText>(R.id.edt_RegisterUsername)
-        val edtPassword = findViewById<EditText>(R.id.edt_RegisterPassword)
-        val edtConfirmPassword = findViewById<EditText>(R.id.edt_RegisterConfirmPassword)
-        val btnRegister = findViewById<Button>(R.id.btn_Register)
-
-        btnRegister.setOnClickListener {
-            val username = edtUsername.text.toString().trim()
-            val password = edtPassword.text.toString().trim()
-            val confirmPassword = edtConfirmPassword.text.toString().trim()
-
-            if (username.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
-                Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
+            if (email.isNotEmpty() && password.isNotEmpty() && confirmPassword.isNotEmpty()) {
+                if (password == confirmPassword) {
+                    firebaseAuth.createUserWithEmailAndPassword(email, password)
+                        .addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+                                goToMainActivity()
+                            } else {
+                                Toast.makeText(this, "Registration failed: ${task.exception?.message}", Toast.LENGTH_LONG).show()
+                            }
+                        }
+                } else {
+                    Toast.makeText(this, "Passwords do not match.", Toast.LENGTH_SHORT).show()
+                }
+            } else {
+                Toast.makeText(this, "All fields are required.", Toast.LENGTH_SHORT).show()
             }
-
-            if (password != confirmPassword) {
-                Toast.makeText(this, "Passwords do not match", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            if (userExists(username)) {
-                Toast.makeText(this, "Username already exists", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            registerUser(username, password)
-            Toast.makeText(this, "Account created! Please log in.", Toast.LENGTH_SHORT).show()
-            startActivity(Intent(this, LoginActivity::class.java))
-            finish()
         }
     }
 
-    private fun userExists(username: String): Boolean {
-        return sharedPreferences.getString("user_$username", null) != null
-    }
-
-    private fun registerUser(username: String, password: String) {
-        sharedPreferences.edit()
-            .putString("user_$username", password)
-            .apply()
+    private fun goToMainActivity() {
+        val intent = Intent(this, MainActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
+        finish()
     }
 }

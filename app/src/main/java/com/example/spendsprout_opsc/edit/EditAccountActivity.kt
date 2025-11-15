@@ -11,18 +11,20 @@ import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.Spinner
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
-import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.launch
 import com.example.spendsprout_opsc.R
 import com.example.spendsprout_opsc.accounts.AccountsActivity
+import com.example.spendsprout_opsc.model.Account
 import com.example.spendsprout_opsc.settings.SettingsActivity
 import com.example.spendsprout_opsc.transactions.TransactionsActivity
 import com.google.android.material.navigation.NavigationView
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class EditAccountActivity : AppCompatActivity() {
 
     //Drawer Layout/ Menu variables
@@ -31,25 +33,24 @@ class EditAccountActivity : AppCompatActivity() {
     lateinit var navigationView: NavigationView
     lateinit var btnCloseMenu: ImageButton
 
-    private lateinit var editAccountViewModel: EditAccountViewModel
-    private var existingAccount: com.example.spendsprout_opsc.roomdb.Account_Entity? = null
+    companion object {
+        const val EXTRA_ACCOUNT_ID = "EXTRA_ACCOUNT_ID"
+    }
+
+    private val editAccountViewModel: EditAccountViewModel by viewModels()
+    private var existingAccount: Account? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_edit_account)
-        
-        // Get account data from intent if editing existing account
-        existingAccount = intent.getSerializableExtra("account") as? com.example.spendsprout_opsc.roomdb.Account_Entity
-        
-        // If no account object but we have an accountId, we'll load it later
-        val accountId = intent.getIntExtra("accountId", -1)
-        val isEdit = intent.getBooleanExtra("isEdit", false)
+
+        val accountId = intent.getStringExtra(EXTRA_ACCOUNT_ID)
 
         //MENU DRAWER SETUP
         //MenuDrawer: Drawer Layout/ Menu Code and connections
         drawerLayout = findViewById(R.id.drawer_layout)
         navigationView = findViewById(R.id.nav_view)
-        
+
         // Set up the toolbar from the included layout
         val headerBar = findViewById<View>(R.id.header_bar)
         val toolbar: androidx.appcompat.widget.Toolbar = headerBar.findViewById(R.id.toolbar)
@@ -58,7 +59,7 @@ class EditAccountActivity : AppCompatActivity() {
         // Enable back button functionality
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setHomeButtonEnabled(true)
-        
+
         // Set up menu button click listener
         val btnMenu = headerBar.findViewById<ImageButton>(R.id.btn_Menu)
         btnMenu.setOnClickListener {
@@ -73,6 +74,7 @@ class EditAccountActivity : AppCompatActivity() {
         btnCloseMenu.setOnClickListener {
             drawerLayout.closeDrawer(navigationView)
         }
+
 
         //MenuDrawer: respond to menu item clicks - using lambda like OverviewActivity
         navigationView.setNavigationItemSelectedListener { item ->
@@ -109,10 +111,8 @@ class EditAccountActivity : AppCompatActivity() {
             true
         }
 
-        // Initialize ViewModel
-        editAccountViewModel = EditAccountViewModel()
-
         setupUI()
+        loadAccountIfNeeded(accountId)
 
         // Save FAB triggers same save method
         findViewById<com.google.android.material.floatingactionbutton.FloatingActionButton>(R.id.fab_SaveAccount)
@@ -121,28 +121,19 @@ class EditAccountActivity : AppCompatActivity() {
 
     private fun setupUI() {
         setupAccountTypeSpinner()
-        loadAccountIfNeeded()
         setupButtons()
     }
-    
-    private fun loadAccountIfNeeded() {
-        val accountId = intent.getIntExtra("accountId", -1)
-        val isEdit = intent.getBooleanExtra("isEdit", false)
-        
-        if (existingAccount == null && isEdit && accountId != -1) {
-            // Load account from database
-            lifecycleScope.launch {
-                try {
-                    existingAccount = com.example.spendsprout_opsc.BudgetApp.db.accountDao().getById(accountId)
+
+    private fun loadAccountIfNeeded(accountId: String?) {
+        if (accountId != null) {
+            editAccountViewModel.getAccount(accountId) { account ->
+                if (account != null) {
+                    existingAccount = account
                     populateFields()
-                } catch (e: Exception) {
-                    Log.e("EditAccountActivity", "Error loading account: ${e.message}", e)
-                    Toast.makeText(this@EditAccountActivity, "Error loading account data", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(this, "Error loading account data", Toast.LENGTH_SHORT).show()
                 }
             }
-        } else {
-            // Either we have the account object or we're creating new
-            populateFields()
         }
     }
 
@@ -153,32 +144,18 @@ class EditAccountActivity : AppCompatActivity() {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerAccountType.adapter = adapter
     }
-    
+
     private fun populateFields() {
-        if (existingAccount != null) {
-            // Populate fields with existing account data
-            findViewById<EditText>(R.id.edt_AccountName).setText(existingAccount!!.accountName)
-            findViewById<EditText>(R.id.edt_Balance).setText(String.format("%.2f", existingAccount!!.accountBalance))
-            existingAccount!!.accountNotes?.let { notes ->
-                findViewById<EditText>(R.id.edt_Notes).setText(notes)
-            }
-            
-            // Set spinner selection based on account type
+        existingAccount?.let {
+            findViewById<EditText>(R.id.edt_AccountName).setText(it.accountName)
+            findViewById<EditText>(R.id.edt_Balance).setText(String.format("%.2f", it.accountBalance))
+
             val spinnerAccountType = findViewById<Spinner>(R.id.spinner_AccountType)
-            val accountTypeString = mapAccountTypeToString(existingAccount!!.accountType)
             val adapter = spinnerAccountType.adapter as ArrayAdapter<String>
-            val position = adapter.getPosition(accountTypeString)
+            val position = adapter.getPosition(it.accountType)
             if (position >= 0) {
                 spinnerAccountType.setSelection(position)
             }
-        }
-    }
-    
-    private fun mapAccountTypeToString(accountType: com.example.spendsprout_opsc.AccountType): String {
-        return when (accountType) {
-            com.example.spendsprout_opsc.AccountType.Cash -> "Cash"
-            com.example.spendsprout_opsc.AccountType.Debit -> "Bank"
-            com.example.spendsprout_opsc.AccountType.Credit -> "Card"
         }
     }
 
@@ -199,12 +176,10 @@ class EditAccountActivity : AppCompatActivity() {
         val edtAccountName = findViewById<EditText>(R.id.edt_AccountName)
         val spinnerAccountType = findViewById<Spinner>(R.id.spinner_AccountType)
         val edtBalance = findViewById<EditText>(R.id.edt_Balance)
-        val edtNotes = findViewById<EditText>(R.id.edt_Notes)
 
         val accountName = edtAccountName.text.toString()
         val accountType = spinnerAccountType.selectedItem.toString()
         val balance = edtBalance.text.toString()
-        val notes = edtNotes.text.toString()
 
         if (accountName.isEmpty() || balance.isEmpty()) {
             Toast.makeText(this, "Please fill in all required fields", Toast.LENGTH_SHORT).show()
@@ -217,33 +192,26 @@ class EditAccountActivity : AppCompatActivity() {
             return
         }
 
-        // Save account using ViewModel with coroutine to wait for completion
-        lifecycleScope.launch {
-            try {
-                if (existingAccount != null) {
-                    // Update existing account
-                    editAccountViewModel.updateAccount(existingAccount!!.id, accountName, accountType, balanceVal, notes)
-                    Toast.makeText(this@EditAccountActivity, "Account updated successfully", Toast.LENGTH_SHORT).show()
-                } else {
-                    // Create new account
-                    editAccountViewModel.saveAccount(accountName, accountType, balanceVal, notes)
-                    Toast.makeText(this@EditAccountActivity, "Account created successfully", Toast.LENGTH_SHORT).show()
-                }
-
-                // Return data
-                val resultIntent = Intent().apply {
-                    putExtra("accountName", accountName)
-                    putExtra("accountType", accountType)
-                    putExtra("balance", balance)
-                    putExtra("notes", notes)
-                }
-                setResult(RESULT_OK, resultIntent)
-                finish()
-            } catch (e: Exception) {
-                Toast.makeText(this@EditAccountActivity, "Error saving account: ${e.message}", Toast.LENGTH_LONG).show()
-                Log.e("EditAccountActivity", "Error saving account", e)
-            }
+        if (existingAccount != null) {
+            val updatedAccount = existingAccount!!.copy(
+                accountName = accountName,
+                accountType = accountType,
+                accountBalance = balanceVal
+            )
+            editAccountViewModel.updateAccount(updatedAccount)
+            Toast.makeText(this@EditAccountActivity, "Account updated successfully", Toast.LENGTH_SHORT).show()
+        } else {
+            editAccountViewModel.saveAccount(accountName, balanceVal, accountType)
+            Toast.makeText(this@EditAccountActivity, "Account created successfully", Toast.LENGTH_SHORT).show()
         }
+
+        val resultIntent = Intent().apply {
+            putExtra("accountName", accountName)
+            putExtra("accountType", accountType)
+            putExtra("balance", balance)
+        }
+        setResult(RESULT_OK, resultIntent)
+        finish()
     }
 
     //MenuDrawer: Drawer Layout/ Menu Code

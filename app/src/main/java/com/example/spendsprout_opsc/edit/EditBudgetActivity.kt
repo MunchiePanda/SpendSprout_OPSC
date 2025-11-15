@@ -2,43 +2,46 @@ package com.example.spendsprout_opsc.edit
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.MenuItem
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
-import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.launch
 import com.example.spendsprout_opsc.R
 import com.example.spendsprout_opsc.accounts.AccountsActivity
-import com.example.spendsprout_opsc.categories.CategoriesActivity
-import com.example.spendsprout_opsc.reports.ReportsActivity
+import com.example.spendsprout_opsc.model.Budget
 import com.example.spendsprout_opsc.settings.SettingsActivity
 import com.example.spendsprout_opsc.transactions.TransactionsActivity
 import com.google.android.material.navigation.NavigationView
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class EditBudgetActivity : AppCompatActivity() {
+
     //Drawer Layout/ Menu variables
     lateinit var toggle: ActionBarDrawerToggle
     lateinit var drawerLayout: DrawerLayout
     lateinit var navigationView: NavigationView
     lateinit var btnCloseMenu: ImageButton
 
-    private lateinit var editBudgetViewModel: EditBudgetViewModel
-    private var existingBudget: com.example.spendsprout_opsc.roomdb.Budget_Entity? = null
+    companion object {
+        const val EXTRA_BUDGET_ID = "EXTRA_BUDGET_ID"
+    }
+
+    private val editBudgetViewModel: EditBudgetViewModel by viewModels()
+    private var existingBudget: Budget? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_edit_budget)
-        
-        // Get budget data from intent if editing existing budget
-        existingBudget = intent.getSerializableExtra("budget") as? com.example.spendsprout_opsc.roomdb.Budget_Entity
+
+        val budgetId = intent.getStringExtra(EXTRA_BUDGET_ID)
 
         //MENU DRAWER SETUP
         //MenuDrawer: Drawer Layout/ Menu Code and connections
@@ -53,7 +56,7 @@ class EditBudgetActivity : AppCompatActivity() {
         // Enable back button functionality
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setHomeButtonEnabled(true)
-        
+
         // Set up menu button click listener
         val btnMenu = headerBar.findViewById<ImageButton>(R.id.btn_Menu)
         btnMenu.setOnClickListener {
@@ -69,6 +72,7 @@ class EditBudgetActivity : AppCompatActivity() {
             drawerLayout.closeDrawer(navigationView)
         }
 
+
         //MenuDrawer: respond to menu item clicks - using lambda like OverviewActivity
         navigationView.setNavigationItemSelectedListener { item ->
             when (item.itemId) {
@@ -78,7 +82,7 @@ class EditBudgetActivity : AppCompatActivity() {
                 }
                 R.id.nav_categories -> {
                     Toast.makeText(this, "Navigating to Categories", Toast.LENGTH_SHORT).show()
-                    startActivity(Intent(this, CategoriesActivity::class.java))
+                    startActivity(Intent(this, com.example.spendsprout_opsc.CategoryOverviewActivity::class.java))
                 }
                 R.id.nav_transactions -> {
                     Toast.makeText(this, "Navigating to Transactions", Toast.LENGTH_SHORT).show()
@@ -104,10 +108,8 @@ class EditBudgetActivity : AppCompatActivity() {
             true
         }
 
-        // Initialize ViewModel
-        editBudgetViewModel = EditBudgetViewModel()
-
         setupUI()
+        loadBudgetIfNeeded(budgetId)
 
         // Save FAB triggers same save method
         findViewById<com.google.android.material.floatingactionbutton.FloatingActionButton>(R.id.fab_SaveBudget)
@@ -115,20 +117,26 @@ class EditBudgetActivity : AppCompatActivity() {
     }
 
     private fun setupUI() {
-        populateFields()
         setupButtons()
     }
-    
-    private fun populateFields() {
-        if (existingBudget != null) {
-            // Populate fields with existing budget data
-            findViewById<EditText>(R.id.edt_BudgetName).setText(existingBudget!!.budgetName)
-            findViewById<EditText>(R.id.edt_OpeningBalance).setText(String.format("%.2f", existingBudget!!.openingBalance))
-            findViewById<EditText>(R.id.edt_MinGoal).setText(String.format("%.2f", existingBudget!!.budgetMinGoal))
-            findViewById<EditText>(R.id.edt_MaxGoal).setText(String.format("%.2f", existingBudget!!.budgetMaxGoal))
-            existingBudget!!.budgetNotes?.let { notes ->
-                findViewById<EditText>(R.id.edt_Notes).setText(notes)
+
+    private fun loadBudgetIfNeeded(budgetId: String?) {
+        if (budgetId != null) {
+            editBudgetViewModel.getBudget(budgetId) { budget ->
+                if (budget != null) {
+                    existingBudget = budget
+                    populateFields()
+                } else {
+                    Toast.makeText(this, "Error loading budget data", Toast.LENGTH_SHORT).show()
+                }
             }
+        }
+    }
+
+    private fun populateFields() {
+        existingBudget?.let {
+            findViewById<EditText>(R.id.edt_BudgetName).setText(it.budgetName)
+            findViewById<EditText>(R.id.edt_OpeningBalance).setText(String.format("%.2f", it.budgetAmount))
         }
     }
 
@@ -147,70 +155,40 @@ class EditBudgetActivity : AppCompatActivity() {
 
     private fun saveBudget() {
         val edtBudgetName = findViewById<EditText>(R.id.edt_BudgetName)
-        val edtOpeningBalance = findViewById<EditText>(R.id.edt_OpeningBalance)
-        val edtMinGoal = findViewById<EditText>(R.id.edt_MinGoal)
-        val edtMaxGoal = findViewById<EditText>(R.id.edt_MaxGoal)
-        val edtNotes = findViewById<EditText>(R.id.edt_Notes)
+        val edtBudgetAmount = findViewById<EditText>(R.id.edt_OpeningBalance)
 
         val budgetName = edtBudgetName.text.toString()
-        val openingBalance = edtOpeningBalance.text.toString()
-        val minGoal = edtMinGoal.text.toString()
-        val maxGoal = edtMaxGoal.text.toString()
-        val notes = edtNotes.text.toString()
+        val budgetAmount = edtBudgetAmount.text.toString()
 
-        if (budgetName.isEmpty() || openingBalance.isEmpty() || minGoal.isEmpty() || maxGoal.isEmpty()) {
+        if (budgetName.isEmpty() || budgetAmount.isEmpty()) {
             Toast.makeText(this, "Please fill in all required fields", Toast.LENGTH_SHORT).show()
             return
         }
 
-        val openingBalanceVal = openingBalance.toDoubleOrNull()
-        val minGoalVal = minGoal.toDoubleOrNull()
-        val maxGoalVal = maxGoal.toDoubleOrNull()
-        
-        if (openingBalanceVal == null || minGoalVal == null || maxGoalVal == null) {
-            Toast.makeText(this, "All numeric fields must contain valid numbers", Toast.LENGTH_SHORT).show()
-            return
-        }
-        
-        // Validate goal ranges
-        if (minGoalVal >= maxGoalVal) {
-            Toast.makeText(this, "Minimum goal must be less than maximum goal", Toast.LENGTH_SHORT).show()
-            return
-        }
-        
-        if (minGoalVal > openingBalanceVal || maxGoalVal > openingBalanceVal) {
-            Toast.makeText(this, "Goals cannot exceed opening balance", Toast.LENGTH_SHORT).show()
+        val budgetAmountVal = budgetAmount.toDoubleOrNull()
+        if (budgetAmountVal == null) {
+            Toast.makeText(this, "Budget amount must be numeric", Toast.LENGTH_SHORT).show()
             return
         }
 
-        // Save budget using ViewModel with coroutine to wait for completion
-        lifecycleScope.launch {
-            try {
-                if (existingBudget != null) {
-                    // Update existing budget
-                    editBudgetViewModel.updateBudget(existingBudget!!.id, budgetName, openingBalanceVal, minGoalVal, maxGoalVal, notes)
-                    Toast.makeText(this@EditBudgetActivity, "Budget updated successfully", Toast.LENGTH_SHORT).show()
-                } else {
-                    // Create new budget
-                    editBudgetViewModel.saveBudget(budgetName, openingBalanceVal, minGoalVal, maxGoalVal, notes)
-                    Toast.makeText(this@EditBudgetActivity, "Budget created successfully", Toast.LENGTH_SHORT).show()
-                }
-
-                // Return data
-                val resultIntent = Intent().apply {
-                    putExtra("budgetName", budgetName)
-                    putExtra("openingBalance", openingBalance)
-                    putExtra("minGoal", minGoal)
-                    putExtra("maxGoal", maxGoal)
-                    putExtra("notes", notes)
-                }
-                setResult(RESULT_OK, resultIntent)
-                finish()
-            } catch (e: Exception) {
-                Toast.makeText(this@EditBudgetActivity, "Error saving budget: ${e.message}", Toast.LENGTH_LONG).show()
-                Log.e("EditBudgetActivity", "Error saving budget", e)
-            }
+        if (existingBudget != null) {
+            val updatedBudget = existingBudget!!.copy(
+                budgetName = budgetName,
+                budgetAmount = budgetAmountVal
+            )
+            editBudgetViewModel.updateBudget(updatedBudget)
+            Toast.makeText(this@EditBudgetActivity, "Budget updated successfully", Toast.LENGTH_SHORT).show()
+        } else {
+            editBudgetViewModel.saveBudget(budgetName, budgetAmountVal)
+            Toast.makeText(this@EditBudgetActivity, "Budget created successfully", Toast.LENGTH_SHORT).show()
         }
+
+        val resultIntent = Intent().apply {
+            putExtra("budgetName", budgetName)
+            putExtra("budgetAmount", budgetAmount)
+        }
+        setResult(RESULT_OK, resultIntent)
+        finish()
     }
 
     //MenuDrawer: Drawer Layout/ Menu Code

@@ -1,82 +1,77 @@
 package com.example.spendsprout_opsc.categories
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.spendsprout_opsc.R
-import com.example.spendsprout_opsc.categories.model.Category
-import com.example.spendsprout_opsc.categories.model.Subcategory
+import com.example.spendsprout_opsc.databinding.ItemCategoryBinding
+import com.example.spendsprout_opsc.databinding.ItemSubcategoryBinding
+import com.example.spendsprout_opsc.model.Category
+import com.example.spendsprout_opsc.model.Subcategory
 
 class HierarchicalCategoryAdapter(
-    private var categories: List<CategoryWithSubcategories>,
+    private var categories: List<CategoriesViewModel.CategoryWithSubcategories>,
     private val onCategoryClick: (Category) -> Unit,
-    private val onSubcategoryClick: (Subcategory) -> Unit
+    private val onSubcategoryClick: (Category, Subcategory) -> Unit
 ) : RecyclerView.Adapter<HierarchicalCategoryAdapter.CategoryViewHolder>() {
 
-    data class CategoryWithSubcategories(
-        val category: Category,
-        val subcategories: List<Subcategory>
-    )
-
-    class CategoryViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
-        val categoryNameTextView: TextView = view.findViewById(R.id.txt_Name)
-        val categoryBalanceTextView: TextView = view.findViewById(R.id.txt_Balance)
-        val categoryAllocationTextView: TextView = view.findViewById(R.id.txt_Allocation)
-        val categorySpentTextView: TextView = view.findViewById(R.id.txt_Spent)
-        val categoryImageView: ImageView = view.findViewById(R.id.img_Category)
-        val subcategoriesRecyclerView: RecyclerView = view.findViewById(R.id.recyclerView_Subcategories)
-    }
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CategoryViewHolder {
-        val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.category_with_subcategories_layout, parent, false)
-        return CategoryViewHolder(view)
+        val binding = ItemCategoryBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return CategoryViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: CategoryViewHolder, position: Int) {
-        val categoryWithSubcategories = categories[position]
-        val category = categoryWithSubcategories.category
-        val subcategories = categoryWithSubcategories.subcategories
-
-        // Set category data
-        holder.categoryNameTextView.text = category.name
-        holder.categoryBalanceTextView.text = category.spent
-        holder.categoryAllocationTextView.text = category.allocation
-        holder.categorySpentTextView.text = "" // Clear spent text for main category
-        
-        // Set category color
-        holder.categoryImageView.setColorFilter(android.graphics.Color.parseColor(category.color))
-        
-        // Set amount color based on positive/negative
-        if (category.spent.startsWith("+") || !category.spent.startsWith("-")) {
-            holder.categoryBalanceTextView.setTextColor(android.graphics.Color.parseColor("#77B950"))
-        } else {
-            holder.categoryBalanceTextView.setTextColor(android.graphics.Color.parseColor("#E94444"))
-        }
-        
-        // Setup subcategories RecyclerView
-        setupSubcategoriesRecyclerView(holder.subcategoriesRecyclerView, subcategories)
-        
-        // Set click listener for main category
-        holder.view.setOnClickListener { onCategoryClick(category) }
-    }
-
-    private fun setupSubcategoriesRecyclerView(recyclerView: RecyclerView, subcategories: List<Subcategory>) {
-        recyclerView.layoutManager = LinearLayoutManager(recyclerView.context)
-        val subcategoryAdapter = SubcategoryAdapter(subcategories) { subcategory ->
-            onSubcategoryClick(subcategory)
-        }
-        recyclerView.adapter = subcategoryAdapter
+        holder.bind(categories[position])
     }
 
     override fun getItemCount(): Int = categories.size
-    
-    fun updateData(newCategories: List<CategoryWithSubcategories>) {
-        categories = newCategories
+
+    fun updateData(newCategories: List<CategoriesViewModel.CategoryWithSubcategories>) {
+        this.categories = newCategories
         notifyDataSetChanged()
+    }
+
+    inner class CategoryViewHolder(private val binding: ItemCategoryBinding) : RecyclerView.ViewHolder(binding.root) {
+        fun bind(categoryWithSubcategories: CategoriesViewModel.CategoryWithSubcategories) {
+            binding.categoryName.text = categoryWithSubcategories.category.name
+
+            binding.root.setOnClickListener {
+                onCategoryClick(categoryWithSubcategories.category)
+            }
+
+            val subcategoryAdapter = SubcategoryAdapter(categoryWithSubcategories.subcategories) { subcategory ->
+                onSubcategoryClick(categoryWithSubcategories.category, subcategory)
+            }
+            binding.subcategoriesRecyclerView.apply {
+                layoutManager = LinearLayoutManager(itemView.context)
+                adapter = subcategoryAdapter
+            }
+        }
+    }
+}
+
+class SubcategoryAdapter(
+    private var subcategories: List<Subcategory>,
+    private val onSubcategoryClick: (Subcategory) -> Unit
+) : RecyclerView.Adapter<SubcategoryAdapter.SubcategoryViewHolder>() {
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SubcategoryViewHolder {
+        val binding = ItemSubcategoryBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return SubcategoryViewHolder(binding)
+    }
+
+    override fun onBindViewHolder(holder: SubcategoryViewHolder, position: Int) {
+        holder.bind(subcategories[position])
+    }
+
+    override fun getItemCount(): Int = subcategories.size
+
+    inner class SubcategoryViewHolder(private val binding: ItemSubcategoryBinding) : RecyclerView.ViewHolder(binding.root) {
+        fun bind(subcategory: Subcategory) {
+            binding.subcategoryName.text = subcategory.name
+            binding.root.setOnClickListener {
+                onSubcategoryClick(subcategory)
+            }
+        }
     }
 }

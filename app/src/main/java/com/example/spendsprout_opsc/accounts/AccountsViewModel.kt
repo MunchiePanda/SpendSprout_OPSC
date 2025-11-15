@@ -1,35 +1,34 @@
 package com.example.spendsprout_opsc.accounts
 
-import com.example.spendsprout_opsc.BudgetApp
-import com.example.spendsprout_opsc.accounts.model.Account
-import com.example.spendsprout_opsc.model.toAccount
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.spendsprout_opsc.model.Account
+import com.example.spendsprout_opsc.repository.AccountRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.flow.first
+import javax.inject.Inject
 
-class AccountsViewModel {
-    
-    fun getAllAccounts(): List<Account> {
-        // For now, return empty list - will be populated by database queries
-        return emptyList()
+@HiltViewModel
+class AccountsViewModel @Inject constructor(
+    private val accountRepository: AccountRepository
+) : ViewModel() {
+
+    // Expose an immutable StateFlow for the UI to observe
+    private val _accounts = MutableStateFlow<List<Account>>(emptyList())
+    val accounts: StateFlow<List<Account>> = _accounts
+
+    init {
+        // Start listening for account changes as soon as the ViewModel is created
+        loadAccounts()
     }
-    
-    // New method to load accounts from database
-    fun loadAccountsFromDatabase(callback: (List<Account>) -> Unit) {
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                val entities = BudgetApp.db.accountDao().getAll().first()
-                val accountList = entities.map { it.toAccount() }
-                CoroutineScope(Dispatchers.Main).launch {
-                    callback(accountList)
-                }
-            } catch (e: Exception) {
-                CoroutineScope(Dispatchers.Main).launch {
-                    callback(emptyList())
-                }
+
+    private fun loadAccounts() {
+        viewModelScope.launch {
+            accountRepository.getAllAccounts().collect { accountList ->
+                _accounts.value = accountList
             }
         }
     }
 }
-

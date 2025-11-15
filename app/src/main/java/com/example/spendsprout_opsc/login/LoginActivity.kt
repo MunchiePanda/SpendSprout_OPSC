@@ -1,101 +1,60 @@
 package com.example.spendsprout_opsc.login
 
 import android.content.Intent
-import android.content.SharedPreferences
 import android.os.Bundle
-import android.widget.Button
-import android.widget.EditText
-import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.example.spendsprout_opsc.R
-import com.example.spendsprout_opsc.overview.OverviewActivity
+import com.example.spendsprout_opsc.MainActivity
+import com.example.spendsprout_opsc.databinding.ActivityLoginBinding
+import com.google.firebase.auth.FirebaseAuth
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class LoginActivity : AppCompatActivity() {
-    
-    private lateinit var sharedPreferences: SharedPreferences
-    
+
+    private lateinit var binding: ActivityLoginBinding
+
+    @Inject
+    lateinit var firebaseAuth: FirebaseAuth
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_login)
-        
-        sharedPreferences = getSharedPreferences("login_prefs", MODE_PRIVATE)
-        
-        // Check if user is already logged in
-        if (isLoggedIn()) {
-            startActivity(Intent(this, OverviewActivity::class.java))
-            finish()
-            return
+        binding = ActivityLoginBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        if (firebaseAuth.currentUser != null) {
+            goToMainActivity()
         }
-        
-        setupUI()
-    }
-    
-    private fun setupUI() {
-        val edtUsername = findViewById<EditText>(R.id.edt_Username)
-        val edtPassword = findViewById<EditText>(R.id.edt_Password)
-        val btnLogin = findViewById<Button>(R.id.btn_Login)
-        val tvSignUp = findViewById<TextView>(R.id.tvSignUp)
 
-        btnLogin.setOnClickListener {
-            val username = edtUsername.text.toString().trim()
-            val password = edtPassword.text.toString().trim()
+        binding.btnLogin.setOnClickListener {
+            val email = binding.edtUsername.text.toString()
+            val password = binding.edtPassword.text.toString()
 
-            if (username.isEmpty() || password.isEmpty()) {
-                Toast.makeText(this, "Please enter username and password", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            // Only allow login for existing users
-            if (userExists(username)) {
-                if (validateLogin(username, password)) {
-                    saveLoginStatus(username)
-                    Toast.makeText(this, "Login successful! Welcome back, $username", Toast.LENGTH_SHORT).show()
-                    startActivity(Intent(this, OverviewActivity::class.java))
-                    finish()
-                } else {
-                    Toast.makeText(this, "Invalid password. Please try again.", Toast.LENGTH_SHORT).show()
-                }
+            if (email.isNotEmpty() && password.isNotEmpty()) {
+                firebaseAuth.signInWithEmailAndPassword(email, password)
+                    .addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            goToMainActivity()
+                        } else {
+                            Toast.makeText(this, "Authentication failed: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
+                        }
+                    }
             } else {
-                Toast.makeText(this, "User does not exist. Please sign up.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Email and password cannot be empty.", Toast.LENGTH_SHORT).show()
             }
         }
 
-        tvSignUp.setOnClickListener {
-            startActivity(Intent(this, RegisterActivity::class.java))
+        binding.tvSignUp.setOnClickListener {
+            val intent = Intent(this, RegisterActivity::class.java)
+            startActivity(intent)
         }
     }
-    
-    private fun isLoggedIn(): Boolean {
-        return sharedPreferences.getBoolean("is_logged_in", false)
-    }
-    
-    private fun saveLoginStatus(username: String) {
-        sharedPreferences.edit()
-            .putBoolean("is_logged_in", true)
-            .putString("username", username)
-            .apply()
-    }
-    
-    private fun userExists(username: String): Boolean {
-        return sharedPreferences.getString("user_$username", null) != null
-    }
-    
-    private fun validateLogin(username: String, password: String): Boolean {
-        val storedPassword = sharedPreferences.getString("user_$username", null)
-        return storedPassword == password
-    }
-    
-    private fun registerUser(username: String, password: String) {
-        sharedPreferences.edit()
-            .putString("user_$username", password)
-            .apply()
-    }
-    
-    fun logout() {
-        sharedPreferences.edit()
-            .putBoolean("is_logged_in", false)
-            .remove("username")
-            .apply()
+
+    private fun goToMainActivity() {
+        val intent = Intent(this, MainActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
+        finish()
     }
 }

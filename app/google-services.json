@@ -8,9 +8,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:481728876021:android:5c10bf7ee4e916ec0f64bc",
+        "mobilesdk_app_id": "1:481728876021:android:6628e7bd233c04750f64bc",
         "android_client_info": {
-          "package_name": "com.SBMH.SpendSprout"
+          "package_name": "com.example.spendsprout_opsc"
         }
       },
       "oauth_client": [],

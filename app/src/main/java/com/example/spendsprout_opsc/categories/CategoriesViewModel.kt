@@ -1,192 +1,66 @@
 package com.example.spendsprout_opsc.categories
 
-import com.example.spendsprout_opsc.categories.model.Category
-import com.example.spendsprout_opsc.BudgetApp
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.spendsprout_opsc.model.Category
+import com.example.spendsprout_opsc.model.Subcategory
+import com.example.spendsprout_opsc.model.Transaction
+import com.example.spendsprout_opsc.repository.CategoryRepository
+import com.example.spendsprout_opsc.repository.SubcategoryRepository
+import com.example.spendsprout_opsc.repository.TransactionRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.flow.first
+import javax.inject.Inject
 
-class CategoriesViewModel {
-    
-    fun getAllCategories(): List<Category> {
-        return listOf(
-            Category(
-                id = "1",
-                name = "Needs",
-                spent = "R 8,900",
-                allocation = "R 10,000",
-                color = "#BD804A"
-            ),
-            Category(
-                id = "2", 
-                name = "Wants",
-                spent = "- R 120",
-                allocation = "R 6,000",
-                color = "#88618E"
-            ),
-            Category(
-                id = "3",
-                name = "Savings", 
-                spent = "R 4,000",
-                allocation = "R 4,000",
-                color = "#6EA19E"
-            )
-        )
-    }
-    
-    fun getFilteredCategories(type: String): List<Category> {
-        val allCategories = getAllCategories()
-        return when (type) {
-            "Needs" -> allCategories.filter { it.name == "Needs" }
-            "Wants" -> allCategories.filter { it.name == "Wants" }
-            "Savings" -> allCategories.filter { it.name == "Savings" }
-            else -> allCategories
+@HiltViewModel
+class CategoriesViewModel @Inject constructor(
+    private val categoryRepository: CategoryRepository,
+    private val subcategoryRepository: SubcategoryRepository,
+    private val transactionRepository: TransactionRepository
+) : ViewModel() {
+
+    data class CategoryWithSubcategories(
+        val category: Category,
+        val subcategories: List<Subcategory>
+    )
+
+    init {
+        viewModelScope.launch {
+            categoryRepository.addDefaultCategoriesIfEmpty()
         }
     }
-    
-    fun loadMainCategoriesFromDatabase(callback: (List<Category>) -> Unit) {
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                val categories = BudgetApp.db.categoryDao().getAll().first()
-                val categoryList = mutableListOf<Category>()
-                for (category in categories) {
-                    val spent = getCategorySpent(category.id.toLong())
-                    categoryList.add(
-                        Category(
-                            id = category.id.toString(),
-                            name = category.categoryName,
-                            spent = formatAmount(spent),
-                            allocation = formatAmount(category.categoryAllocation),
-                            color = getCategoryColor(category.categoryName)
-                        )
-                    )
-                }
-                CoroutineScope(Dispatchers.Main).launch {
-                    callback(categoryList)
-                }
-            } catch (e: Exception) {
-                CoroutineScope(Dispatchers.Main).launch {
-                    callback(emptyList())
-                }
-            }
-        }
-    }
-    
-    private suspend fun getCategorySpent(categoryId: Long): Double {
-        return try {
-            val expenses = BudgetApp.db.expenseDao().getAll()
-            val categoryName = BudgetApp.db.categoryDao().getById(categoryId.toInt())?.categoryName
-            if (categoryName != null) {
-                expenses.filter { it.expenseCategory == categoryName }
-                    .sumOf { expense ->
-                        // Expenses should be negative values (decreases)
-                        if (expense.expenseType.name == "Expense") {
-                            -expense.expenseAmount  // Negative for expenses
-                        } else {
-                            expense.expenseAmount   // Positive for income
-                        }
-                    }
-            } else {
-                0.0
-            }
-        } catch (e: Exception) {
-            0.0
-        }
-    }
-    
-    private fun getCategoryColor(categoryName: String): String {
-        return when (categoryName.lowercase()) {
-            "groceries" -> "#87CEEB"
-            "needs" -> "#4169E1"
-            "wants" -> "#9370DB"
-            "savings" -> "#32CD32"
-            else -> "#D3D3D3"
-        }
-    }
-    
-    fun loadSubcategoriesForCategory(categoryName: String, callback: (List<com.example.spendsprout_opsc.wants.model.Subcategory>) -> Unit) {
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                // Find the category by name
-                val categories = BudgetApp.db.categoryDao().getAll().first()
-                val category = categories.find { it.categoryName.equals(categoryName, ignoreCase = true) }
-                
-                if (category != null) {
-                    // Only get subcategories that actually belong to this category
-                    val subcategories = getSubcategoriesForCategory(category.id.toLong())
-                    CoroutineScope(Dispatchers.Main).launch {
-                        callback(subcategories)
-                    }
-                } else {
-                    // If category not found, return empty list
-                    CoroutineScope(Dispatchers.Main).launch {
-                        callback(emptyList())
-                    }
-                }
-            } catch (e: Exception) {
-                CoroutineScope(Dispatchers.Main).launch {
-                    callback(emptyList())
-                }
-            }
-        }
-    }
-    
-    private suspend fun getSubcategoriesForCategory(categoryId: Long): List<com.example.spendsprout_opsc.wants.model.Subcategory> {
-        return try {
-            val subcategoryEntities = BudgetApp.db.subcategoryDao().getByCategoryId(categoryId)
-            android.util.Log.d("CategoriesViewModel", "Found ${subcategoryEntities.size} subcategories for categoryId: $categoryId")
-            
-            subcategoryEntities.map { subcategory ->
-                // Calculate actual spent amount from transactions for this subcategory
-                val actualSpent = getSubcategorySpent(subcategory.id.toLong())
-                android.util.Log.d("CategoriesViewModel", "Subcategory: ${subcategory.subcategoryName}, Spent: $actualSpent")
-                
-                com.example.spendsprout_opsc.wants.model.Subcategory(
-                    id = subcategory.id.toString(),
-                    name = subcategory.subcategoryName,
-                    spent = formatAmount(actualSpent),
-                    allocation = formatAmount(subcategory.subcategoryAllocation),
-                    color = getSubcategoryColor(subcategory.subcategoryColor)
+
+    val categoriesWithSubcategories: Flow<List<CategoryWithSubcategories>> =
+        combine(
+            categoryRepository.getAllCategories(),
+            subcategoryRepository.getAllSubcategories(),
+            transactionRepository.getAllTransactions()
+        ) { categories, allSubcategories, allTransactions ->
+            val spentPerCategory = allTransactions
+                .groupBy { it.categoryId }
+                .mapValues { (_, transactions) -> transactions.sumOf { it.amount } }
+
+            categories.map { category ->
+                val subcategoriesForThisCategory = allSubcategories.filter { it.categoryId == category.categoryId }
+
+                CategoryWithSubcategories(
+                    category = category,
+                    subcategories = subcategoriesForThisCategory
                 )
             }
-        } catch (e: Exception) {
-            android.util.Log.e("CategoriesViewModel", "Error getting subcategories: ${e.message}", e)
-            emptyList()
+        }
+
+    fun addCategory(name: String) {
+        viewModelScope.launch {
+            categoryRepository.addCategory(Category(name = name))
         }
     }
-    
-    private suspend fun getSubcategorySpent(subcategoryId: Long): Double {
-        return try {
-            val expenses = BudgetApp.db.expenseDao().getAll()
-            val subcategoryName = BudgetApp.db.subcategoryDao().getById(subcategoryId.toInt())?.subcategoryName
-            if (subcategoryName != null) {
-                expenses.filter { it.expenseCategory == subcategoryName }
-                    .sumOf { expense ->
-                        // Expenses should be negative values (decreases)
-                        if (expense.expenseType.name == "Expense") {
-                            -expense.expenseAmount  // Negative for expenses
-                        } else {
-                            expense.expenseAmount   // Positive for income
-                        }
-                    }
-            } else {
-                0.0
-            }
-        } catch (e: Exception) {
-            0.0
+
+    fun addSubcategory(name: String, parentCategoryId: String) {
+        viewModelScope.launch {
+            categoryRepository.addSubcategory(parentCategoryId, Subcategory(name = name, categoryId = parentCategoryId))
         }
-    }
-    
-    private fun formatAmount(amount: Double): String {
-        val sign = if (amount < 0) "-" else ""
-        val absoluteAmount = kotlin.math.abs(amount)
-        return "$sign R ${String.format("%.2f", absoluteAmount)}"
-    }
-    
-    private fun getSubcategoryColor(colorInt: Int): String {
-        // Convert integer color to hex string
-        return String.format("#%06X", 0xFFFFFF and colorInt)
     }
 }
-
