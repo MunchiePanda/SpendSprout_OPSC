@@ -1,3 +1,4 @@
+/*
 package com.example.spendsprout_opsc.database
 
 import com.example.spendsprout_opsc.roomdb.BudgetDatabase
@@ -23,3 +24,4 @@ class DatabaseSetup @Inject constructor(
         return database.isOpen
     }
 }
+*/

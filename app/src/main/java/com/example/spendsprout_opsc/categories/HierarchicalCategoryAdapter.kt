@@ -12,22 +12,13 @@ import com.example.spendsprout_opsc.categories.model.Category
 import com.example.spendsprout_opsc.categories.model.Subcategory
 
 class HierarchicalCategoryAdapter(
-    private var categories: List<CategoryWithSubcategories>,
+    private var categories: List<Pair<Category, List<Subcategory>>>,
     private val onCategoryClick: (Category) -> Unit,
     private val onSubcategoryClick: (Subcategory) -> Unit
 ) : RecyclerView.Adapter<HierarchicalCategoryAdapter.CategoryViewHolder>() {
 
-    data class CategoryWithSubcategories(
-        val category: Category,
-        val subcategories: List<Subcategory>
-    )
-
     class CategoryViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
         val categoryNameTextView: TextView = view.findViewById(R.id.txt_Name)
-        val categoryBalanceTextView: TextView = view.findViewById(R.id.txt_Balance)
-        val categoryAllocationTextView: TextView = view.findViewById(R.id.txt_Allocation)
-        val categorySpentTextView: TextView = view.findViewById(R.id.txt_Spent)
-        val categoryImageView: ImageView = view.findViewById(R.id.img_Category)
         val subcategoriesRecyclerView: RecyclerView = view.findViewById(R.id.recyclerView_Subcategories)
     }
 
@@ -38,25 +29,10 @@ class HierarchicalCategoryAdapter(
     }
 
     override fun onBindViewHolder(holder: CategoryViewHolder, position: Int) {
-        val categoryWithSubcategories = categories[position]
-        val category = categoryWithSubcategories.category
-        val subcategories = categoryWithSubcategories.subcategories
+        val (category, subcategories) = categories[position]
 
         // Set category data
         holder.categoryNameTextView.text = category.name
-        holder.categoryBalanceTextView.text = category.spent
-        holder.categoryAllocationTextView.text = category.allocation
-        holder.categorySpentTextView.text = "" // Clear spent text for main category
-        
-        // Set category color
-        holder.categoryImageView.setColorFilter(android.graphics.Color.parseColor(category.color))
-        
-        // Set amount color based on positive/negative
-        if (category.spent.startsWith("+") || !category.spent.startsWith("-")) {
-            holder.categoryBalanceTextView.setTextColor(android.graphics.Color.parseColor("#77B950"))
-        } else {
-            holder.categoryBalanceTextView.setTextColor(android.graphics.Color.parseColor("#E94444"))
-        }
         
         // Setup subcategories RecyclerView
         setupSubcategoriesRecyclerView(holder.subcategoriesRecyclerView, subcategories)
@@ -75,7 +51,7 @@ class HierarchicalCategoryAdapter(
 
     override fun getItemCount(): Int = categories.size
     
-    fun updateData(newCategories: List<CategoryWithSubcategories>) {
+    fun updateData(newCategories: List<Pair<Category, List<Subcategory>>>) {
         categories = newCategories
         notifyDataSetChanged()
     }

@@ -1,84 +1,52 @@
 package com.example.spendsprout_opsc.edit
 
 import android.util.Log
-import com.example.spendsprout_opsc.BudgetApp
+import androidx.lifecycle.ViewModel
+import com.SBMH.SpendSprout.model.Account
 import com.example.spendsprout_opsc.AccountType
-import com.example.spendsprout_opsc.roomdb.Account_Entity
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
 
-class EditAccountViewModel {
-    
-    suspend fun saveAccount(name: String, type: String, balance: Double, notes: String) {
+class EditAccountViewModel : ViewModel() {
+
+    private val database = FirebaseDatabase.getInstance()
+    private val accountsRef = database.getReference("accounts")
+    private val currentUser = FirebaseAuth.getInstance().currentUser
+
+    fun saveAccount(name: String, type: String, balance: Double, notes: String) {
         // Validate
         require(name.isNotBlank()) { "Account name is required" }
 
-        // Map UI type to enum
-        val accountType = mapToAccountType(type)
-
-        // Write to DB synchronously
-        try {
-            val entity = Account_Entity(
-                id = getNextAccountId(),
-                accountName = name,
-                accountType = accountType,
-                accountBalance = balance,
-                accountNotes = notes.ifBlank { null }
-            )
-            BudgetApp.db.accountDao().insert(entity)
-            Log.d("EditAccountViewModel", "Account saved: $name ($accountType) balance=$balance")
-        } catch (e: Exception) {
-            Log.e("EditAccountViewModel", "Error saving account: ${e.message}", e)
-            throw e // Re-throw to handle in Activity
+        currentUser?.let { user ->
+            val userId = user.uid
+            val accountId = accountsRef.child(userId).push().key
+            accountId?.let {
+                val account = Account(it, name, type, balance, notes.ifBlank { null }, userId)
+                accountsRef.child(userId).child(it).setValue(account)
+                    .addOnSuccessListener {
+                        Log.d("EditAccountViewModel", "Account saved: $name ($type) balance=$balance")
+                    }
+                    .addOnFailureListener { e ->
+                        Log.e("EditAccountViewModel", "Error saving account: ${e.message}", e)
+                    }
+            }
         }
     }
 
-    private fun mapToAccountType(type: String): AccountType {
-        return when (type.trim().lowercase()) {
-            "cash" -> AccountType.Cash
-            "card" -> AccountType.Credit
-            "bank" -> AccountType.Debit
-            else -> AccountType.Cash
-        }
-    }
-
-    suspend fun updateAccount(id: Int, name: String, type: String, balance: Double, notes: String) {
+    fun updateAccount(id: String, name: String, type: String, balance: Double, notes: String) {
         // Validate
         require(name.isNotBlank()) { "Account name is required" }
 
-        // Map UI type to enum
-        val accountType = mapToAccountType(type)
-
-        Log.d("EditAccountViewModel", "Starting account update for ID: $id, name: $name")
-
-        // Write to DB synchronously
-        try {
-            val entity = Account_Entity(
-                id = id,
-                accountName = name,
-                accountType = accountType,
-                accountBalance = balance,
-                accountNotes = notes.ifBlank { null }
-            )
-            
-            Log.d("EditAccountViewModel", "Updating with entity: $entity")
-            val result = BudgetApp.db.accountDao().update(entity)
-            Log.d("EditAccountViewModel", "Update result: $result")
-            Log.d("EditAccountViewModel", "Account updated successfully: $name ($accountType) balance=$balance")
-        } catch (e: Exception) {
-            Log.e("EditAccountViewModel", "Error updating account: ${e.message}", e)
-            throw e // Re-throw to handle in Activity
-        }
-    }
-
-    private suspend fun getNextAccountId(): Int {
-        return try {
-            val count = BudgetApp.db.accountDao().getCount()
-            count + 1
-        } catch (e: Exception) {
-            1
+        currentUser?.let { user ->
+            val userId = user.uid
+            val account = Account(id, name, type, balance, notes.ifBlank { null }, userId)
+            accountsRef.child(userId).child(id).setValue(account)
+                .addOnSuccessListener {
+                    Log.d("EditAccountViewModel", "Account updated successfully: $name ($type) balance=$balance")
+                }
+                .addOnFailureListener { e ->
+                    Log.e("EditAccountViewModel", "Error updating account: ${e.message}", e)
+                }
         }
     }
 }
-

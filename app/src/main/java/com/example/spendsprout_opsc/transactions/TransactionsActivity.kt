@@ -13,11 +13,12 @@ import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.spendsprout_opsc.R
+import com.SBMH.SpendSprout.R
+import com.SBMH.SpendSprout.model.Expense
 import com.example.spendsprout_opsc.accounts.AccountsActivity
-import com.example.spendsprout_opsc.categories.CategoriesActivity
 import com.example.spendsprout_opsc.overview.OverviewActivity
 import com.example.spendsprout_opsc.settings.SettingsActivity
 import com.google.android.material.button.MaterialButton
@@ -33,7 +34,7 @@ class TransactionsActivity : AppCompatActivity(), NavigationView.OnNavigationIte
     private lateinit var navView: NavigationView
     private lateinit var transactionsViewModel: TransactionsViewModel
     private lateinit var transactionAdapter: TransactionAdapter
-    
+
     // Date range picker components
     private lateinit var btnSelectDateRange: MaterialButton
     private lateinit var txtDateRange: TextView
@@ -57,7 +58,7 @@ class TransactionsActivity : AppCompatActivity(), NavigationView.OnNavigationIte
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setHomeButtonEnabled(true)
         supportActionBar?.title = "Transactions"
-        
+
         // Set up menu button click listener
         val btnMenu = headerBar.findViewById<ImageButton>(R.id.btn_Menu)
         btnMenu.setOnClickListener {
@@ -65,10 +66,10 @@ class TransactionsActivity : AppCompatActivity(), NavigationView.OnNavigationIte
         }
 
         navView.setNavigationItemSelectedListener(this)
-        
+
         // Initialize SharedPreferences for login management
         sharedPreferences = getSharedPreferences("login_prefs", MODE_PRIVATE)
-        
+
         // Set the username in the navigation header
         val headerView = navView.getHeaderView(0)
         val txtUsername = headerView.findViewById<TextView>(R.id.txt_Username)
@@ -76,7 +77,7 @@ class TransactionsActivity : AppCompatActivity(), NavigationView.OnNavigationIte
         txtUsername.text = currentUsername
 
         // Initialize ViewModel
-        transactionsViewModel = TransactionsViewModel()
+        transactionsViewModel = ViewModelProvider(this).get(TransactionsViewModel::class.java)
 
         setupUI()
         observeData()
@@ -100,7 +101,7 @@ class TransactionsActivity : AppCompatActivity(), NavigationView.OnNavigationIte
             startActivity(intent)
         }
         recyclerView.adapter = transactionAdapter
-        
+
         // Load transactions from database
         loadTransactionsFromDatabase()
     }
@@ -108,15 +109,15 @@ class TransactionsActivity : AppCompatActivity(), NavigationView.OnNavigationIte
     private fun setupDateRangePicker() {
         btnSelectDateRange = findViewById(R.id.btn_selectDateRange)
         txtDateRange = findViewById(R.id.txt_dateRange)
-        
+
         // Set default to show all transactions
         updateDateRangeDisplay()
-        
+
         btnSelectDateRange.setOnClickListener {
             showDateRangePicker()
         }
     }
-    
+
     private fun showDateRangePicker() {
         // Create date range picker
         val dateRangePicker = MaterialDatePicker.Builder.dateRangePicker()
@@ -128,32 +129,32 @@ class TransactionsActivity : AppCompatActivity(), NavigationView.OnNavigationIte
                 )
             )
             .build()
-        
+
         // Show the picker
         dateRangePicker.show(supportFragmentManager, "DATE_RANGE_PICKER")
-        
+
         // Handle the selection
         dateRangePicker.addOnPositiveButtonClickListener { selection ->
             startDate = selection.first
             endDate = selection.second
-            
+
             // Update display
             updateDateRangeDisplay()
-            
+
             // Filter transactions based on date range
             filterTransactionsByDateRange()
         }
     }
-    
+
     private fun updateDateRangeDisplay() {
         if (startDate != null && endDate != null) {
             val dateFormat = SimpleDateFormat("MMM dd - MMM dd, yyyy", Locale.getDefault())
             val startDateStr = dateFormat.format(Date(startDate!!))
             val endDateStr = dateFormat.format(Date(endDate!!))
-            
+
             // Calculate days difference for a more user-friendly display
             val daysDifference = ((endDate!! - startDate!!) / (1000 * 60 * 60 * 24)).toInt()
-            
+
             when {
                 daysDifference == 0 -> txtDateRange.text = "Today"
                 daysDifference == 1 -> txtDateRange.text = "Yesterday"
@@ -166,17 +167,17 @@ class TransactionsActivity : AppCompatActivity(), NavigationView.OnNavigationIte
             txtDateRange.text = "All Time"
         }
     }
-    
+
     private fun filterTransactionsByDateRange() {
         // Reload transactions with the new date range
         loadTransactionsFromDatabase()
-        
+
         // Log the selected dates for debugging
         if (startDate != null && endDate != null) {
             val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
             val startDateStr = dateFormat.format(Date(startDate!!))
             val endDateStr = dateFormat.format(Date(endDate!!))
-            
+
             println("Filtering transactions from $startDateStr to $endDateStr")
             Toast.makeText(this, "Filtering from $startDateStr to $endDateStr", Toast.LENGTH_SHORT).show()
         }
@@ -197,23 +198,21 @@ class TransactionsActivity : AppCompatActivity(), NavigationView.OnNavigationIte
     }
 
     private fun observeData() {
-        // Observe ViewModel data changes
+        transactionsViewModel.transactions.observe(this) { transactions ->
+            transactionAdapter.submitList(transactions)
+        }
     }
-    
+
     private fun loadTransactionsFromDatabase() {
         if (startDate != null && endDate != null) {
             // Load transactions with date filtering
-            transactionsViewModel.loadTransactionsFromDatabase(startDate!!, endDate!!) { transactions ->
-                transactionAdapter.updateData(transactions)
-            }
+            transactionsViewModel.loadTransactionsByDateRange(startDate!!, endDate!!)
         } else {
             // Load all transactions when no date range is selected
-            transactionsViewModel.loadAllTransactionsFromDatabase { transactions ->
-                transactionAdapter.updateData(transactions)
-            }
+            transactionsViewModel.loadAllTransactions()
         }
     }
-    
+
     override fun onResume() {
         super.onResume()
         // Reload transactions when returning to this activity
@@ -254,7 +253,7 @@ class TransactionsActivity : AppCompatActivity(), NavigationView.OnNavigationIte
             }
             .show()
     }
-    
+
     private fun clearDateFilter() {
         startDate = null
         endDate = null
@@ -264,8 +263,7 @@ class TransactionsActivity : AppCompatActivity(), NavigationView.OnNavigationIte
     }
 
     private fun applyFilter(filter: String) {
-        val filteredTransactions = transactionsViewModel.getFilteredTransactions(filter)
-        transactionAdapter.updateData(filteredTransactions)
+        // The filtering logic is now handled in the ViewModel
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
@@ -305,4 +303,3 @@ class TransactionsActivity : AppCompatActivity(), NavigationView.OnNavigationIte
         }
     }
 }
-

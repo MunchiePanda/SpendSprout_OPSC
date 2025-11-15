@@ -1,124 +1,77 @@
+
 package com.example.spendsprout_opsc.edit
 
-import com.example.spendsprout_opsc.BudgetApp
-import com.example.spendsprout_opsc.ExpenseType
-import com.example.spendsprout_opsc.RepeatType
-import com.example.spendsprout_opsc.roomdb.Expense_Entity
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.util.*
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import com.example.spendsprout_opsc.accounts.Account
+import com.example.spendsprout_opsc.categories.model.Category
+import com.example.spendsprout_opsc.transactions.model.Transaction
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.*
 
-class EditTransactionViewModel {
-    
-    fun saveTransaction(
-        description: String,
-        amount: Double,
-        category: String,
-        date: Long,
-        account: String,
-        repeat: String,
-        oweOwed: Boolean,
-        notes: String,
-        imagePath: String? = null
-    ) {
-        // Save transaction logic - for now just validate
-        require(description.isNotBlank()) { "Description is required" }
-        require(amount > 0) { "Amount must be greater than 0" }
-        require(category.isNotBlank()) { "Category is required" }
-        
-        // Save to database
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                val entity = Expense_Entity(
-                    expenseName = description,
-                    expenseDate = date,
-                    expenseAmount = amount,
-                    expenseType = if (oweOwed) ExpenseType.Income else ExpenseType.Expense,
-                    expenseIsOwed = oweOwed,
-                    expenseRepeat = parseRepeatType(repeat),
-                    expenseNotes = notes.ifBlank { null },
-                    expenseImage = imagePath,
-                    expenseCategory = category,
-                    expenseStart = null, // TODO: Add time picker support
-                    expenseEnd = null    // TODO: Add time picker support
-                )
-                BudgetApp.db.expenseDao().insert(entity)
-                android.util.Log.d("EditTransactionViewModel", "Transaction saved: $description, $amount, $category")
-            } catch (e: Exception) {
-                android.util.Log.e("EditTransactionViewModel", "Error saving transaction: ${e.message}", e)
+class EditTransactionViewModel : ViewModel() {
+
+    private val _accounts = MutableLiveData<List<Account>>()
+    val accounts: LiveData<List<Account>> = _accounts
+
+    private val _categories = MutableLiveData<List<Category>>()
+    val categories: LiveData<List<Category>> = _categories
+
+    private val _transaction = MutableLiveData<Transaction?>()
+    val transaction: LiveData<Transaction?> = _transaction
+
+    private val database = FirebaseDatabase.getInstance()
+    private val userId = FirebaseAuth.getInstance().currentUser?.uid
+
+    fun loadSpinnerData() {
+        if (userId == null) return
+
+        val accountsRef = database.getReference("users/$userId/accounts")
+        accountsRef.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val accountList = snapshot.children.mapNotNull { it.getValue(Account::class.java) }
+                _accounts.postValue(accountList)
             }
-        }
+
+            override fun onCancelled(error: DatabaseError) {
+                // Handle error
+            }
+        })
+
+        val categoriesRef = database.getReference("users/$userId/categories")
+        categoriesRef.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val categoryList = snapshot.children.mapNotNull { it.getValue(Category::class.java) }
+                _categories.postValue(categoryList)
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                // Handle error
+            }
+        })
     }
 
-    fun parseUiDateToMillis(ui: String): Long {
-        return try {
-            SimpleDateFormat("d MMMM yyyy", Locale.getDefault()).parse(ui)?.time ?: System.currentTimeMillis()
-        } catch (e: Exception) {
-            System.currentTimeMillis()
-        }
-    }
-    
-    private fun parseRepeatType(repeat: String): RepeatType {
-        return when (repeat.lowercase()) {
-            "daily" -> RepeatType.Daily
-            "weekly" -> RepeatType.Weekly
-            "monthly" -> RepeatType.Monthly
-            else -> RepeatType.None
-        }
-    }
-    
-    fun loadTransactionById(transactionId: Long, callback: (Expense_Entity?) -> Unit) {
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                val expense = BudgetApp.db.expenseDao().getById(transactionId)
-                CoroutineScope(Dispatchers.Main).launch {
-                    callback(expense)
-                }
-            } catch (e: Exception) {
-                CoroutineScope(Dispatchers.Main).launch {
-                    callback(null)
-                }
+    fun loadTransaction(transactionId: String) {
+        if (userId == null) return
+
+        val transactionRef = database.getReference("users/$userId/expenses/$transactionId")
+        transactionRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                _transaction.postValue(snapshot.getValue(Transaction::class.java))
             }
-        }
-    }
-    
-    fun updateTransaction(
-        transactionId: Long,
-        name: String,
-        amount: Double,
-        category: String,
-        date: Long,
-        account: String,
-        repeat: String,
-        oweOwed: Boolean,
-        notes: String,
-        imagePath: String? = null
-    ) {
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                val expense = Expense_Entity(
-                    id = transactionId,
-                    expenseName = name,
-                    expenseAmount = amount,
-                    expenseCategory = category,
-                    expenseDate = date,
-                    expenseIsOwed = oweOwed,
-                    expenseRepeat = parseRepeatType(repeat),
-                    expenseType = if (oweOwed) ExpenseType.Income else ExpenseType.Expense,
-                    expenseNotes = notes.ifBlank { null },
-                    expenseImage = imagePath,
-                    expenseStart = null,
-                    expenseEnd = null
-                )
-                
-                BudgetApp.db.expenseDao().update(expense)
-                android.util.Log.d("EditTransactionViewModel", "Transaction updated: $name")
-            } catch (e: Exception) {
-                android.util.Log.e("EditTransactionViewModel", "Error updating transaction: ${e.message}", e)
+
+            override fun onCancelled(error: DatabaseError) {
+                _transaction.postValue(null)
             }
-        }
+        })
+    }
+
+    fun saveTransaction(transaction: Transaction) {
+        if (userId == null) return
+
+        val transactionsRef = database.getReference("users/$userId/expenses")
+        val transactionId = transaction.id ?: transactionsRef.push().key!!
+        transactionsRef.child(transactionId).setValue(transaction.copy(id = transactionId))
     }
 }
-

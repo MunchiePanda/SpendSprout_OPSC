@@ -7,9 +7,11 @@ import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.spendsprout_opsc.R
+import com.SBMH.SpendSprout.R
+import com.SBMH.SpendSprout.model.Subcategory
 import com.example.spendsprout_opsc.accounts.AccountsActivity
 import com.example.spendsprout_opsc.overview.OverviewActivity
 import com.example.spendsprout_opsc.settings.SettingsActivity
@@ -49,7 +51,7 @@ class WantsCategoryActivity : AppCompatActivity(), NavigationView.OnNavigationIt
         navView.setNavigationItemSelectedListener(this)
 
         // Initialize ViewModel
-        wantsViewModel = WantsViewModel()
+        wantsViewModel = ViewModelProvider(this).get(WantsViewModel::class.java)
 
         setupUI()
         observeData()
@@ -65,8 +67,7 @@ class WantsCategoryActivity : AppCompatActivity(), NavigationView.OnNavigationIt
         val recyclerView = findViewById<RecyclerView>(R.id.recyclerView_Subcategories)
         recyclerView.layoutManager = LinearLayoutManager(this)
 
-        val subcategories = wantsViewModel.getSubcategories()
-        subcategoryAdapter = SubcategoryAdapter(subcategories) { subcategory ->
+        subcategoryAdapter = SubcategoryAdapter(emptyList()) { subcategory ->
             // Handle subcategory click - open edit screen
             val intent = Intent(this, com.example.spendsprout_opsc.edit.EditCategoryActivity::class.java)
             intent.putExtra("subcategoryId", subcategory.id)
@@ -90,7 +91,9 @@ class WantsCategoryActivity : AppCompatActivity(), NavigationView.OnNavigationIt
     }
 
     private fun observeData() {
-        // Observe ViewModel data changes
+        wantsViewModel.subcategories.observe(this) { subcategories ->
+            subcategoryAdapter.submitList(subcategories)
+        }
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
@@ -141,4 +144,3 @@ class WantsCategoryActivity : AppCompatActivity(), NavigationView.OnNavigationIt
         return super.onOptionsItemSelected(item)
     }
 }
-

@@ -1,83 +1,109 @@
 package com.example.spendsprout_opsc.reports
 
-import com.example.spendsprout_opsc.BudgetApp
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import com.SBMH.SpendSprout.model.Category
+import com.SBMH.SpendSprout.model.Expense
 import com.example.spendsprout_opsc.overview.model.ChartDataPoint
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.*
 import java.text.SimpleDateFormat
 import java.util.*
 
-class ReportsViewModel {
-    
-    // Total spent this month from DB (expenses only)
-    fun loadMonthlySpent(
-        startDate: Long = getStartOfMonth(),
-        endDate: Long = getEndOfMonth(),
-        callback: (Double) -> Unit
-    ) {
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                val expenses = BudgetApp.db.expenseDao().getBetweenDates(startDate, endDate)
-                val total = expenses
-                    .filter { it.expenseType == com.example.spendsprout_opsc.ExpenseType.Expense }
-                    .sumOf { it.expenseAmount }
-                CoroutineScope(Dispatchers.Main).launch { callback(total) }
-            } catch (e: Exception) {
-                CoroutineScope(Dispatchers.Main).launch { callback(0.0) }
-            }
-        }
-    }
+class ReportsViewModel : ViewModel() {
 
-    // Daily spend series for the chart (revenue = daily spent; target = daily target if provided)
-    fun loadDailySpendSeries(
-        startDate: Long = getStartOfMonth(),
-        endDate: Long = getEndOfMonth(),
-        monthlyTarget: Double = 0.0,
-        callback: (List<ChartDataPoint>) -> Unit
-    ) {
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-                val expenses = BudgetApp.db.expenseDao().getBetweenDates(startDate, endDate)
-                    .filter { it.expenseType == com.example.spendsprout_opsc.ExpenseType.Expense }
+    private val _monthlySpent = MutableLiveData<Double>()
+    val monthlySpent: LiveData<Double> = _monthlySpent
 
-                val days = getDaysInRange(startDate, endDate)
-                val perDayTarget = if (days.isNotEmpty() && monthlyTarget > 0) monthlyTarget / days.size else 0.0
+    private val _dailySpendSeries = MutableLiveData<List<ChartDataPoint>>()
+    val dailySpendSeries: LiveData<List<ChartDataPoint>> = _dailySpendSeries
 
-                val dailySum = expenses.groupBy { sdf.format(Date(it.expenseDate)) }
-                    .mapValues { (_, list) -> list.sumOf { it.expenseAmount } }
+    private val _categoryTotals = MutableLiveData<List<Pair<Category, Double>>>()
+    val categoryTotals: LiveData<List<Pair<Category, Double>>> = _categoryTotals
 
-                val series = days.map { dayMillis ->
-                    val key = sdf.format(Date(dayMillis))
-                    val spent = dailySum[key] ?: 0.0
-                    ChartDataPoint(
-                        month = key,
-                        revenue = spent,
-                        target = perDayTarget
-                    )
+    private val database = FirebaseDatabase.getInstance()
+    private val userId = FirebaseAuth.getInstance().currentUser?.uid
+
+    fun loadMonthlySpent(startDate: Long, endDate: Long) {
+        if (userId == null) return
+
+        val expensesRef = database.getReference("users/$userId/expenses")
+        expensesRef.orderByChild("date").startAt(startDate.toDouble()).endAt(endDate.toDouble())
+            .addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val total = snapshot.children.sumOf { it.child("amount").getValue(Double::class.java) ?: 0.0 }
+                    _monthlySpent.postValue(total)
                 }
-                CoroutineScope(Dispatchers.Main).launch { callback(series) }
-            } catch (e: Exception) {
-                CoroutineScope(Dispatchers.Main).launch { callback(emptyList()) }
-            }
-        }
+
+                override fun onCancelled(error: DatabaseError) {
+                    // Handle error
+                }
+            })
     }
 
-    // Existing: category totals (kept)
-    fun loadCategoryTotals(
-        startDate: Long = getStartOfMonth(),
-        endDate: Long = getEndOfMonth(),
-        callback: (List<com.example.spendsprout_opsc.roomdb.CategoryTotal>) -> Unit
-    ) {
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                val totals = BudgetApp.db.expenseDao().totalsByCategory(startDate, endDate)
-                CoroutineScope(Dispatchers.Main).launch { callback(totals) }
-            } catch (e: Exception) {
-                CoroutineScope(Dispatchers.Main).launch { callback(emptyList()) }
+    fun loadDailySpendSeries(startDate: Long, endDate: Long, monthlyTarget: Double) {
+        if (userId == null) return
+
+        val expensesRef = database.getReference("users/$userId/expenses")
+        expensesRef.orderByChild("date").startAt(startDate.toDouble()).endAt(endDate.toDouble())
+            .addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val expenses = snapshot.children.mapNotNull { it.getValue(Expense::class.java) }
+                    val days = getDaysInRange(startDate, endDate)
+                    val perDayTarget = if (days.isNotEmpty() && monthlyTarget > 0) monthlyTarget / days.size else 0.0
+
+                    val dailySum = expenses.groupBy { SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date(it.date)) }
+                        .mapValues { (_, list) -> list.sumOf { it.amount } }
+
+                    val series = days.map { dayMillis ->
+                        val key = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date(dayMillis))
+                        val spent = dailySum[key] ?: 0.0
+                        ChartDataPoint(
+                            month = key,
+                            revenue = spent,
+                            target = perDayTarget
+                        )
+                    }
+                    _dailySpendSeries.postValue(series)
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    // Handle error
+                }
+            })
+    }
+
+    fun loadCategoryTotals(startDate: Long, endDate: Long) {
+        if (userId == null) return
+
+        val expensesRef = database.getReference("users/$userId/expenses")
+        val categoriesRef = database.getReference("users/$userId/categories")
+
+        categoriesRef.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(categorySnapshot: DataSnapshot) {
+                val categories = categorySnapshot.children.mapNotNull { it.getValue(Category::class.java) }
+                expensesRef.orderByChild("date").startAt(startDate.toDouble()).endAt(endDate.toDouble())
+                    .addValueEventListener(object : ValueEventListener {
+                        override fun onDataChange(expenseSnapshot: DataSnapshot) {
+                            val expenses = expenseSnapshot.children.mapNotNull { it.getValue(Expense::class.java) }
+                            val categoryTotals = categories.map { category ->
+                                val total = expenses.filter { it.category == category.name }.sumOf { it.amount }
+                                Pair(category, total)
+                            }
+                            _categoryTotals.postValue(categoryTotals)
+                        }
+
+                        override fun onCancelled(error: DatabaseError) {
+                            // Handle error
+                        }
+                    })
             }
-        }
+
+            override fun onCancelled(error: DatabaseError) {
+                // Handle error
+            }
+        })
     }
 
     private fun getDaysInRange(start: Long, end: Long): List<Long> {
@@ -95,25 +121,4 @@ class ReportsViewModel {
         }
         return days
     }
-
-    fun getStartOfMonth(): Long {
-        val calendar = Calendar.getInstance()
-        calendar.set(Calendar.DAY_OF_MONTH, 1)
-        calendar.set(Calendar.HOUR_OF_DAY, 0)
-        calendar.set(Calendar.MINUTE, 0)
-        calendar.set(Calendar.SECOND, 0)
-        calendar.set(Calendar.MILLISECOND, 0)
-        return calendar.timeInMillis
-    }
-    
-    fun getEndOfMonth(): Long {
-        val calendar = Calendar.getInstance()
-        calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
-        calendar.set(Calendar.HOUR_OF_DAY, 23)
-        calendar.set(Calendar.MINUTE, 59)
-        calendar.set(Calendar.SECOND, 59)
-        calendar.set(Calendar.MILLISECOND, 999)
-        return calendar.timeInMillis
-    }
 }
-

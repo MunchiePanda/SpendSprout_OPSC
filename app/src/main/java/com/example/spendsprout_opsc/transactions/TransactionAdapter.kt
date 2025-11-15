@@ -4,24 +4,21 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import android.widget.ImageView
-import android.view.ViewGroup.LayoutParams
-import android.graphics.BitmapFactory
 import androidx.recyclerview.widget.RecyclerView
-import com.example.spendsprout_opsc.R
-import com.example.spendsprout_opsc.transactions.model.Transaction
+import com.SBMH.SpendSprout.R
+import com.SBMH.SpendSprout.model.Expense
+import java.text.SimpleDateFormat
+import java.util.*
 
 class TransactionAdapter(
-    private var transactions: List<Transaction>,
-    private val onItemClick: (Transaction) -> Unit
+    private var transactions: List<Expense>,
+    private val onItemClick: (Expense) -> Unit
 ) : RecyclerView.Adapter<TransactionAdapter.TransactionViewHolder>() {
 
     class TransactionViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
         val dateTextView: TextView = view.findViewById(R.id.txt_Date)
         val nameTextView: TextView = view.findViewById(R.id.txt_Name)
         val amountTextView: TextView = view.findViewById(R.id.txt_Amount)
-        val spentTextView: TextView = view.findViewById(R.id.txt_Spent)
-        val receiptImageView: ImageView = view.findViewById(R.id.img_Receipt)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TransactionViewHolder {
@@ -32,31 +29,12 @@ class TransactionAdapter(
 
     override fun onBindViewHolder(holder: TransactionViewHolder, position: Int) {
         val transaction = transactions[position]
-        holder.dateTextView.text = transaction.date
-        holder.nameTextView.text = transaction.description
-        holder.amountTextView.text = transaction.amount
-        holder.spentTextView.text = ""
+        holder.dateTextView.text = SimpleDateFormat("d MMMM yyyy", Locale.getDefault()).format(Date(transaction.date))
+        holder.nameTextView.text = transaction.notes
+        holder.amountTextView.text = String.format("R %.2f", transaction.amount)
 
-        // Show receipt image if present (from file path/URI string)
-        if (!transaction.imagePath.isNullOrBlank()) {
-            try {
-                val bmp = BitmapFactory.decodeFile(transaction.imagePath)
-                if (bmp != null) {
-                    holder.receiptImageView.setImageBitmap(bmp)
-                    holder.receiptImageView.visibility = View.VISIBLE
-                    holder.receiptImageView.layoutParams.height = LayoutParams.WRAP_CONTENT
-                } else {
-                    holder.receiptImageView.visibility = View.GONE
-                }
-            } catch (e: Exception) {
-                holder.receiptImageView.visibility = View.GONE
-            }
-        } else {
-            holder.receiptImageView.visibility = View.GONE
-        }
-        
         // Set amount color based on positive/negative
-        if (transaction.amount.startsWith("+")) {
+        if (transaction.amount >= 0) {
             holder.amountTextView.setTextColor(android.graphics.Color.parseColor("#77B950"))
         } else {
             holder.amountTextView.setTextColor(android.graphics.Color.parseColor("#E94444"))
@@ -68,9 +46,8 @@ class TransactionAdapter(
 
     override fun getItemCount(): Int = transactions.size
     
-    fun updateData(newTransactions: List<Transaction>) {
+    fun submitList(newTransactions: List<Expense>) {
         transactions = newTransactions
         notifyDataSetChanged()
     }
 }
-

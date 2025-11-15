@@ -14,13 +14,15 @@ import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
-import com.example.spendsprout_opsc.R
+import androidx.lifecycle.ViewModelProvider
+import com.SBMH.SpendSprout.R
 import com.example.spendsprout_opsc.accounts.AccountsActivity
 import com.example.spendsprout_opsc.categories.CategoriesActivity
 import com.example.spendsprout_opsc.overview.OverviewActivity
 import com.example.spendsprout_opsc.settings.SettingsActivity
 import com.example.spendsprout_opsc.transactions.TransactionsActivity
 import com.google.android.material.navigation.NavigationView
+import java.util.*
 
 class ReportsActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
@@ -46,7 +48,7 @@ class ReportsActivity : AppCompatActivity(), NavigationView.OnNavigationItemSele
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setHomeButtonEnabled(true)
         supportActionBar?.title = "Reports"
-        
+
         // Set up menu button click listener
         val btnMenu = headerBar.findViewById<ImageButton>(R.id.btn_Menu)
         btnMenu.setOnClickListener {
@@ -56,7 +58,7 @@ class ReportsActivity : AppCompatActivity(), NavigationView.OnNavigationItemSele
         navView.setNavigationItemSelectedListener(this)
 
         // Initialize ViewModel
-        reportsViewModel = ReportsViewModel()
+        reportsViewModel = ViewModelProvider(this).get(ReportsViewModel::class.java)
 
         setupUI()
         observeData()
@@ -97,10 +99,11 @@ class ReportsActivity : AppCompatActivity(), NavigationView.OnNavigationItemSele
         val prefs = getSharedPreferences("Settings", MODE_PRIVATE)
         val monthlyTarget = prefs.getFloat("MaxMonthlyGoal", 0f).toDouble()
         reportsViewModel.loadDailySpendSeries(
-            reportsViewModel.getStartOfMonth(),
-            reportsViewModel.getEndOfMonth(),
+            getStartOfMonth(),
+            getEndOfMonth(),
             monthlyTarget
-        ) { points ->
+        )
+        reportsViewModel.dailySpendSeries.observe(this) { points ->
             chartView.setData(points)
         }
     }
@@ -109,9 +112,10 @@ class ReportsActivity : AppCompatActivity(), NavigationView.OnNavigationItemSele
         val prefs = getSharedPreferences("Settings", MODE_PRIVATE)
         val maxGoal = prefs.getFloat("MaxMonthlyGoal", 0f).toDouble()
         reportsViewModel.loadMonthlySpent(
-            reportsViewModel.getStartOfMonth(),
-            reportsViewModel.getEndOfMonth()
-        ) { totalSpent ->
+            getStartOfMonth(),
+            getEndOfMonth()
+        )
+        reportsViewModel.monthlySpent.observe(this) { totalSpent ->
             val percent = if (maxGoal > 0) ((totalSpent / maxGoal) * 100).toInt().coerceIn(0, 100) else 0
             progressBarSpending.progress = percent
         }
@@ -160,6 +164,26 @@ class ReportsActivity : AppCompatActivity(), NavigationView.OnNavigationItemSele
         return super.onOptionsItemSelected(item)
     }
 
+    private fun getStartOfMonth(): Long {
+        val calendar = Calendar.getInstance()
+        calendar.set(Calendar.DAY_OF_MONTH, 1)
+        calendar.set(Calendar.HOUR_OF_DAY, 0)
+        calendar.set(Calendar.MINUTE, 0)
+        calendar.set(Calendar.SECOND, 0)
+        calendar.set(Calendar.MILLISECOND, 0)
+        return calendar.timeInMillis
+    }
+
+    private fun getEndOfMonth(): Long {
+        val calendar = Calendar.getInstance()
+        calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
+        calendar.set(Calendar.HOUR_OF_DAY, 23)
+        calendar.set(Calendar.MINUTE, 59)
+        calendar.set(Calendar.SECOND, 59)
+        calendar.set(Calendar.MILLISECOND, 999)
+        return calendar.timeInMillis
+    }
+
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
@@ -169,4 +193,3 @@ class ReportsActivity : AppCompatActivity(), NavigationView.OnNavigationItemSele
         }
     }
 }
-

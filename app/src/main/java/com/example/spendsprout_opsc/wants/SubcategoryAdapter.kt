@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.spendsprout_opsc.R
-import com.example.spendsprout_opsc.wants.model.Subcategory
+import com.example.spendsprout_opsc.categories.model.Subcategory
 
 class SubcategoryAdapter(
     private val subcategories: List<Subcategory>,
@@ -15,10 +15,8 @@ class SubcategoryAdapter(
 
     class SubcategoryViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
         val nameTextView: TextView = view.findViewById(R.id.txt_Name)
-        val spentTextView: TextView = view.findViewById(R.id.txt_Spent)
         val balanceTextView: TextView = view.findViewById(R.id.txt_Balance)
         val allocationTextView: TextView = view.findViewById(R.id.txt_Allocation)
-        //val colorIndicator: View = view.findViewById(R.id.color_indicator)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SubcategoryViewHolder {
@@ -29,65 +27,12 @@ class SubcategoryAdapter(
 
     override fun onBindViewHolder(holder: SubcategoryViewHolder, position: Int) {
         val subcategory = subcategories[position]
-        holder.nameTextView.text = subcategory.name
-        holder.spentTextView.text = subcategory.spent
-        holder.allocationTextView.text = subcategory.allocation
-        
-        // Calculate balance (allocation - spent)
-        // Note: spent is already negative in display, so we need to treat it as positive expense
-        val spentValue = kotlin.math.abs(parseMoney(subcategory.spent)) // Make spent positive
-        val allocationValue = parseMoney(subcategory.allocation)
-        val balanceValue = allocationValue - spentValue // Now: allocation - positive_spent
-        
-        // Debug logging (remove in production)
-        android.util.Log.d("SubcategoryAdapter", "Subcategory: ${subcategory.name}")
-        android.util.Log.d("SubcategoryAdapter", "Spent: '${subcategory.spent}' -> $spentValue")
-        android.util.Log.d("SubcategoryAdapter", "Allocation: '${subcategory.allocation}' -> $allocationValue")
-        android.util.Log.d("SubcategoryAdapter", "Balance: $allocationValue - $spentValue = $balanceValue")
-        
-        // Format balance with proper sign
-        val balanceText = if (balanceValue >= 0) {
-            "R ${String.format("%.2f", balanceValue)}"
-        } else {
-            "-R ${String.format("%.2f", kotlin.math.abs(balanceValue))}"
-        }
-        holder.balanceTextView.text = balanceText
-        
-        // Set spent amount color based on negative values (expenses)
-        if (subcategory.spent.trim().startsWith("-") || spentValue < 0) {
-            // Red for expenses (negative values)
-            holder.spentTextView.setTextColor(android.graphics.Color.parseColor("#E94444"))
-        } else if (spentValue > allocationValue) {
-            // Red for overspending
-            holder.spentTextView.setTextColor(android.graphics.Color.parseColor("#E94444"))
-        } else {
-            // Green for positive values within budget
-            holder.spentTextView.setTextColor(android.graphics.Color.parseColor("#77B950"))
-        }
-        
-        // Set balance color
-        if (balanceValue < 0) {
-            holder.balanceTextView.setTextColor(android.graphics.Color.parseColor("#E94444"))
-        } else {
-            holder.balanceTextView.setTextColor(android.graphics.Color.parseColor("#77B950"))
-        }
-        
-        // Set click listener
+        holder.nameTextView.text = subcategory.subcategoryName
+        holder.balanceTextView.text = "R ${String.format("%.2f", subcategory.subcategoryBalance)}"
+        holder.allocationTextView.text = "R ${String.format("%.2f", subcategory.subcategoryAllocation)}"
+
         holder.view.setOnClickListener { onItemClick(subcategory) }
     }
 
     override fun getItemCount(): Int = subcategories.size
-
-    private fun parseMoney(text: String): Double {
-        // Remove currency symbol, commas, and extra spaces
-        val cleanedText = text.replace("R", "").replace(",", "").replace(" ", "").trim()
-        
-        // Handle negative values properly
-        val isNegative = cleanedText.startsWith("-")
-        val absoluteValue = if (isNegative) cleanedText.substring(1) else cleanedText
-        
-        val value = absoluteValue.toDoubleOrNull() ?: 0.0
-        return if (isNegative) -value else value
-    }
 }
-

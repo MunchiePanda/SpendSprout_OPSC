@@ -1,122 +1,62 @@
 package com.example.spendsprout_opsc.transactions
 
-import com.example.spendsprout_opsc.BudgetApp
-import com.example.spendsprout_opsc.transactions.model.Transaction
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import com.example.spendsprout_opsc.transactions.model.Expense
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import java.text.SimpleDateFormat
 import java.util.*
 
-class TransactionsViewModel {
-    
+class TransactionsViewModel(application: Application) : AndroidViewModel(application) {
+
     private val dateFormat = SimpleDateFormat("d MMMM yyyy", Locale.getDefault())
-    
-    fun getAllTransactions(): List<Transaction> {
-        // For now, return empty list - will be populated by database queries
-        return emptyList()
-    }
-    
-    fun getFilteredTransactions(filter: String): List<Transaction> {
-        // For now, return empty list - will be populated by database queries
-        return emptyList()
-    }
-    
-    // New method to load transactions from database with date filtering
-    fun loadTransactionsFromDatabase(
-        startDate: Long,
-        endDate: Long,
-        callback: (List<Transaction>) -> Unit
-    ) {
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                android.util.Log.d("TransactionsViewModel", "Loading transactions from $startDate to $endDate")
-                val expenses = BudgetApp.db.expenseDao().getBetweenDates(startDate, endDate)
-                val transactions = expenses.sortedByDescending { it.expenseDate }.map { expense ->
-                    Transaction(
-                        id = expense.id.toString(),
-                        date = dateFormat.format(Date(expense.expenseDate)),
-                        description = expense.expenseName,
-                        amount = formatAmount(expense.expenseAmount, expense.expenseType),
-                        color = getCategoryColor(expense.expenseCategory),
-                        imagePath = expense.expenseImage
-                    )
+
+    private val _transactions = MutableLiveData<List<Expense>>()
+    val transactions: LiveData<List<Expense>> = _transactions
+
+    private val userId = FirebaseAuth.getInstance().currentUser?.uid
+    private val database = FirebaseDatabase.getInstance().getReference("users/$userId/expenses")
+
+    fun loadAllTransactions() {
+        database.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val expenseList = mutableListOf<Expense>()
+                for (expenseSnapshot in snapshot.children) {
+                    val expense = expenseSnapshot.getValue(Expense::class.java)
+                    expense?.id = expenseSnapshot.key
+                    expense?.let { expenseList.add(it) }
                 }
-                android.util.Log.d("TransactionsViewModel", "Found ${transactions.size} transactions in date range")
-                CoroutineScope(Dispatchers.Main).launch {
-                    callback(transactions)
-                }
-            } catch (e: Exception) {
-                android.util.Log.e("TransactionsViewModel", "Error loading transactions: ${e.message}", e)
-                CoroutineScope(Dispatchers.Main).launch {
-                    callback(emptyList())
-                }
+                _transactions.value = expenseList.sortedByDescending { it.expenseDate }
             }
-        }
+
+            override fun onCancelled(error: DatabaseError) {
+                // Handle error
+            }
+        })
     }
 
-    // Load all transactions regardless of date (useful if user dates vary)
-    fun loadAllTransactionsFromDatabase(callback: (List<Transaction>) -> Unit) {
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                android.util.Log.d("TransactionsViewModel", "Loading all transactions")
-                val expenses = BudgetApp.db.expenseDao().getAll()
-                val transactions = expenses.sortedByDescending { it.expenseDate }.map { expense ->
-                    Transaction(
-                        id = expense.id.toString(),
-                        date = dateFormat.format(Date(expense.expenseDate)),
-                        description = expense.expenseName,
-                        amount = formatAmount(expense.expenseAmount, expense.expenseType),
-                        color = getCategoryColor(expense.expenseCategory),
-                        imagePath = expense.expenseImage
-                    )
+    fun loadTransactionsByDateRange(startDate: Long, endDate: Long) {
+        database.orderByChild("expenseDate").startAt(startDate.toDouble()).endAt(endDate.toDouble())
+            .addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val expenseList = mutableListOf<Expense>()
+                    for (expenseSnapshot in snapshot.children) {
+                        val expense = expenseSnapshot.getValue(Expense::class.java)
+                        expense?.id = expenseSnapshot.key
+                        expense?.let { expenseList.add(it) }
+                    }
+                    _transactions.value = expenseList.sortedByDescending { it.expenseDate }
                 }
-                android.util.Log.d("TransactionsViewModel", "Found ${transactions.size} total transactions")
-                CoroutineScope(Dispatchers.Main).launch { callback(transactions) }
-            } catch (e: Exception) {
-                android.util.Log.e("TransactionsViewModel", "Error loading all transactions: ${e.message}", e)
-                CoroutineScope(Dispatchers.Main).launch { callback(emptyList()) }
-            }
-        }
-    }
-    
-    private fun formatAmount(amount: Double, expenseType: com.example.spendsprout_opsc.ExpenseType): String {
-        val formattedAmount = "R ${String.format("%.2f", amount)}"
-        return if (expenseType == com.example.spendsprout_opsc.ExpenseType.Expense) {
-            "- $formattedAmount"
-        } else {
-            "+ $formattedAmount"
-        }
-    }
-    
-    private fun getCategoryColor(category: String): String {
-        return when (category.lowercase()) {
-            "groceries" -> "#87CEEB"
-            "needs" -> "#4169E1"
-            "wants" -> "#9370DB"
-            "savings" -> "#32CD32"
-            else -> "#D3D3D3"
-        }
-    }
-    
-    private fun getStartOfMonth(): Long {
-        val calendar = Calendar.getInstance()
-        calendar.set(Calendar.DAY_OF_MONTH, 1)
-        calendar.set(Calendar.HOUR_OF_DAY, 0)
-        calendar.set(Calendar.MINUTE, 0)
-        calendar.set(Calendar.SECOND, 0)
-        calendar.set(Calendar.MILLISECOND, 0)
-        return calendar.timeInMillis
-    }
-    
-    private fun getEndOfMonth(): Long {
-        val calendar = Calendar.getInstance()
-        calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
-        calendar.set(Calendar.HOUR_OF_DAY, 23)
-        calendar.set(Calendar.MINUTE, 59)
-        calendar.set(Calendar.SECOND, 59)
-        calendar.set(Calendar.MILLISECOND, 999)
-        return calendar.timeInMillis
+
+                override fun onCancelled(error: DatabaseError) {
+                    // Handle error
+                }
+            })
     }
 }
-

@@ -3,15 +3,15 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt.android)
-    id("com.google.gms.google-services") // Add this line
+    alias(libs.plugins.google.services)
 }
 
 android {
-    namespace = "com.example.spendsprout_opsc"
+    namespace = "com.SBMH.SpendSprout"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.example.spendsprout_opsc"
+        applicationId = "com.SBMH.SpendSprout"
         minSdk = 26
         targetSdk = 36
         versionCode = 1
@@ -49,11 +49,6 @@ dependencies {
     implementation(libs.androidx.navigation.fragment.ktx)
     implementation(libs.androidx.navigation.ui.ktx)
 
-    // Room
-    implementation(libs.room.runtime)
-    ksp(libs.room.compiler)
-    implementation(libs.room.ktx)
-
     // Coroutines and Lifecycle
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
@@ -73,15 +68,10 @@ dependencies {
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 
-  // Firebase Realtime Database
-    implementation("com.google.firebase:firebase-database-ktx:20.3.0")
+    // Firebase
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.analytics.ktx)
+    implementation(libs.firebase.auth.ktx)
+    implementation(libs.firebase.database.ktx)
 
-    // Firebase Authentication
-    implementation("com.google.firebase:firebase-auth-ktx:22.3.0")
-
-    // SwipeRefreshLayout
-    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
-
-    // Google Services Plugin
-    apply(plugin = "com.google.gms.google-services")
 }

@@ -1,79 +1,64 @@
 package com.example.spendsprout_opsc.edit
 
 import android.util.Log
-import com.example.spendsprout_opsc.BudgetApp
-import com.example.spendsprout_opsc.roomdb.Budget_Entity
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import androidx.lifecycle.ViewModel
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
 
-class EditBudgetViewModel {
-    
-    suspend fun saveBudget(name: String, openingBalance: Double, minGoal: Double, maxGoal: Double, notes: String) {
+class EditBudgetViewModel : ViewModel() {
+
+    private val database = FirebaseDatabase.getInstance()
+    private val budgetsRef = database.getReference("budgets")
+    private val currentUser = FirebaseAuth.getInstance().currentUser
+
+    fun saveBudget(name: String, openingBalance: Double, minGoal: Double, maxGoal: Double, notes: String) {
         // Validate
         require(name.isNotBlank()) { "Budget name is required" }
         require(minGoal < maxGoal) { "Minimum goal must be less than maximum goal" }
         require(minGoal <= openingBalance && maxGoal <= openingBalance) { "Goals cannot exceed opening balance" }
 
-        // Write to DB synchronously
-        try {
-            val entity = Budget_Entity(
-                id = getNextBudgetId(),
-                budgetName = name,
-                openingBalance = openingBalance,
-                budgetMinGoal = minGoal,
-                budgetMaxGoal = maxGoal,
-                budgetBalance = openingBalance, // Initially equals opening balance
-                budgetNotes = notes.ifBlank { null }
-            )
-            BudgetApp.db.budgetDao().insert(entity)
-            Log.d("EditBudgetViewModel", "Budget saved: $name opening=$openingBalance min=$minGoal max=$maxGoal")
-        } catch (e: Exception) {
-            Log.e("EditBudgetViewModel", "Error saving budget: ${e.message}", e)
-            throw e // Re-throw to handle in Activity
+        currentUser?.let { user ->
+            val userId = user.uid
+            val budgetId = budgetsRef.child(userId).push().key
+            budgetId?.let {
+                val budget = Budget(it, name, openingBalance, minGoal, maxGoal, openingBalance, notes.ifBlank { null })
+                budgetsRef.child(userId).child(it).setValue(budget)
+                    .addOnSuccessListener {
+                        Log.d("EditBudgetViewModel", "Budget saved: $name opening=$openingBalance min=$minGoal max=$maxGoal")
+                    }
+                    .addOnFailureListener { e ->
+                        Log.e("EditBudgetViewModel", "Error saving budget: ${e.message}", e)
+                    }
+            }
         }
     }
 
-    suspend fun updateBudget(id: Int, name: String, openingBalance: Double, minGoal: Double, maxGoal: Double, notes: String) {
+    fun updateBudget(id: String, name: String, openingBalance: Double, minGoal: Double, maxGoal: Double, notes: String) {
         // Validate
         require(name.isNotBlank()) { "Budget name is required" }
         require(minGoal < maxGoal) { "Minimum goal must be less than maximum goal" }
         require(minGoal <= openingBalance && maxGoal <= openingBalance) { "Goals cannot exceed opening balance" }
 
-        Log.d("EditBudgetViewModel", "Starting budget update for ID: $id, name: $name")
-
-        // Write to DB synchronously
-        try {
-            // Get the existing budget to preserve the current balance
-            val existingBudget = BudgetApp.db.budgetDao().getById(id)
-            Log.d("EditBudgetViewModel", "Found existing budget: $existingBudget")
-            
-            val entity = Budget_Entity(
-                id = id,
-                budgetName = name,
-                openingBalance = openingBalance,
-                budgetMinGoal = minGoal,
-                budgetMaxGoal = maxGoal,
-                budgetBalance = existingBudget?.budgetBalance ?: openingBalance, // Preserve current balance or use opening balance if not found
-                budgetNotes = notes.ifBlank { null }
-            )
-            
-            Log.d("EditBudgetViewModel", "Updating with entity: $entity")
-            val result = BudgetApp.db.budgetDao().update(entity)
-            Log.d("EditBudgetViewModel", "Update result: $result")
-            Log.d("EditBudgetViewModel", "Budget updated successfully: $name opening=$openingBalance min=$minGoal max=$maxGoal balance=${entity.budgetBalance}")
-        } catch (e: Exception) {
-            Log.e("EditBudgetViewModel", "Error updating budget: ${e.message}", e)
-            throw e // Re-throw to handle in Activity
-        }
-    }
-
-    private suspend fun getNextBudgetId(): Int {
-        return try {
-            val count = BudgetApp.db.budgetDao().getCount()
-            count + 1
-        } catch (e: Exception) {
-            1
+        currentUser?.let { user ->
+            val userId = user.uid
+            val budget = Budget(id, name, openingBalance, minGoal, maxGoal, openingBalance, notes.ifBlank { null })
+            budgetsRef.child(userId).child(id).setValue(budget)
+                .addOnSuccessListener {
+                    Log.d("EditBudgetViewModel", "Budget updated successfully: $name opening=$openingBalance min=$minGoal max=$maxGoal")
+                }
+                .addOnFailureListener { e ->
+                    Log.e("EditBudgetViewModel", "Error updating budget: ${e.message}", e)
+                }
         }
     }
 }
+
+data class Budget(
+    val id: String = "",
+    val budgetName: String = "",
+    val openingBalance: Double = 0.0,
+    val budgetMinGoal: Double = 0.0,
+    val budgetMaxGoal: Double = 0.0,
+    val budgetBalance: Double = 0.0,
+    val budgetNotes: String? = null
+)

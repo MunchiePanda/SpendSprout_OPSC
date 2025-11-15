@@ -1,42 +1,18 @@
+/*
 package com.example.spendsprout_opsc.di
 
-import com.example.spendsprout_opsc.manager.DataFlowManager
+import com.example.spendsprout_opsc.repository.AccountRepository
+import com.example.spendsprout_opsc.repository.CategoryRepository
+import com.example.spendsprout_opsc.repository.SubcategoryRepository
+import com.example.spendsprout_opsc.repository.TransactionRepository
 import com.example.spendsprout_opsc.service.DataService
-import dagger.Module
-import dagger.Provides
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
-import javax.inject.Singleton
+import org.koin.dsl.module
 
-/**
- * DataFlowModule - Essential Data Flow Configuration
- * 
- * This module provides the essential data flow connections between
- * Room database and application logic components.
- */
-@Module
-@InstallIn(SingletonComponent::class)
-object DataFlowModule {
-
-    @Provides
-    @Singleton
-    fun provideDataService(
-        accountRepository: com.example.spendsprout_opsc.repository.AccountRepository,
-        categoryRepository: com.example.spendsprout_opsc.repository.CategoryRepository,
-        subcategoryRepository: com.example.spendsprout_opsc.repository.SubcategoryRepository,
-        transactionRepository: com.example.spendsprout_opsc.repository.TransactionRepository
-    ): DataService {
-        return DataService(
-            accountRepository = accountRepository,
-            categoryRepository = categoryRepository,
-            subcategoryRepository = subcategoryRepository,
-            transactionRepository = transactionRepository
-        )
-    }
-
-    @Provides
-    @Singleton
-    fun provideDataFlowManager(dataService: DataService): DataFlowManager {
-        return DataFlowManager(dataService)
-    }
+val dataFlowModule = module {
+    single { AccountRepository(get()) }
+    single { CategoryRepository(get()) }
+    single { SubcategoryRepository(get()) }
+    single { TransactionRepository(get()) }
+    single { DataService(get(), get(), get(), get()) }
 }
+*/

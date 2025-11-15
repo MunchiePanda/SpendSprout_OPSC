@@ -1,3 +1,4 @@
+/*
 package com.example.spendsprout_opsc.manager
 
 import com.example.spendsprout_opsc.service.DataService
@@ -245,3 +246,4 @@ class DataFlowManager @Inject constructor(
         return transaction.description.isNotBlank()
     }
 }
+*/
