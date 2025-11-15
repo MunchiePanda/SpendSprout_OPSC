@@ -1,3 +1,4 @@
+
 package com.SBMH.SpendSprout.edit
 
 import androidx.lifecycle.LiveData
@@ -69,7 +70,7 @@ class EditTransactionViewModel : ViewModel() {
             if (currentUser != null) {
                 val transactionsRef = database.getReference("users/${currentUser.uid}/expenses")
                 val transactionId = transactionsRef.push().key!!
-                val expense = Expense(transactionId, amount, categoryId, accountId, date, description)
+                val expense = Expense(transactionId, amount, date, categoryId, accountId, "", description, false, currentUser.uid)
                 transactionsRef.child(transactionId).setValue(expense)
             }
         }
@@ -80,9 +81,30 @@ class EditTransactionViewModel : ViewModel() {
             val currentUser = auth.currentUser
             if (currentUser != null) {
                 val transactionRef = database.getReference("users/${currentUser.uid}/expenses/$transactionId")
-                val expense = Expense(transactionId, amount, categoryId, accountId, date, description)
+                val expense = Expense(transactionId, amount, date, categoryId, accountId, "", description, false, currentUser.uid)
                 transactionRef.setValue(expense)
             }
         }
+    }
+
+    fun getTransaction(transactionId: String): LiveData<Expense> {
+        val transaction = MutableLiveData<Expense>()
+        val currentUser = auth.currentUser
+        if (currentUser != null) {
+            val transactionRef = database.getReference("users/${currentUser.uid}/expenses/$transactionId")
+            transactionRef.addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val transactionData = snapshot.getValue(Expense::class.java)
+                    if (transactionData != null) {
+                        transaction.value = transactionData!!
+                    }
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    // Handle error
+                }
+            })
+        }
+        return transaction
     }
 }
