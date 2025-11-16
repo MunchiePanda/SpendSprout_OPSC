@@ -4,20 +4,20 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.spendsprout_opsc.model.Category
 import com.example.spendsprout_opsc.model.Subcategory
-import com.example.spendsprout_opsc.model.Transaction
 import com.example.spendsprout_opsc.repository.CategoryRepository
-import com.example.spendsprout_opsc.repository.SubcategoryRepository
 import com.example.spendsprout_opsc.repository.TransactionRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class CategoriesViewModel @Inject constructor(
     private val categoryRepository: CategoryRepository,
-    private val subcategoryRepository: SubcategoryRepository,
     private val transactionRepository: TransactionRepository
 ) : ViewModel() {
 
@@ -32,11 +32,20 @@ class CategoriesViewModel @Inject constructor(
         }
     }
 
+    private val categories: StateFlow<List<Category>> = categoryRepository.getAllCategories()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    private val subcategories: StateFlow<List<Subcategory>> = categoryRepository.getAllSubcategories()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    private val transactions: StateFlow<List<com.example.spendsprout_opsc.model.Transaction>> = transactionRepository.getAllTransactions()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
     val categoriesWithSubcategories: Flow<List<CategoryWithSubcategories>> =
         combine(
-            categoryRepository.getAllCategories(),
-            subcategoryRepository.getAllSubcategories(),
-            transactionRepository.getAllTransactions()
+            categories,
+            subcategories,
+            transactions
         ) { categories, allSubcategories, allTransactions ->
             val spentPerCategory = allTransactions
                 .groupBy { it.categoryId }
