@@ -2,6 +2,7 @@ package com.example.spendsprout_opsc.overview
 
 import android.content.Intent
 import android.content.SharedPreferences
+import android.graphics.Color
 import android.os.Bundle
 import android.view.MenuItem
 import android.widget.ImageButton
@@ -16,11 +17,11 @@ import com.example.spendsprout_opsc.R
 import com.example.spendsprout_opsc.accounts.AccountsActivity
 import com.example.spendsprout_opsc.categories.CategoriesActivity
 import com.example.spendsprout_opsc.databinding.ActivityOverviewBinding
+import com.example.spendsprout_opsc.model.SpendingType
 import com.example.spendsprout_opsc.transactions.TransactionsActivity
 import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
-import com.github.mikephil.charting.utils.ColorTemplate
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -101,18 +102,22 @@ class OverviewActivity : AppCompatActivity() {
                 transactionAdapter.submitList(uiState.transactions)
 
                 // Update Pie Chart
-                updatePieChart(uiState.categorySpends)
+                updatePieChart(uiState.spendingByType)
             }
         }
     }
 
-    private fun updatePieChart(categorySpends: Map<String, Double>) {
-        val entries = categorySpends.map { (category, amount) ->
-            PieEntry(amount.toFloat(), category)
+    private fun updatePieChart(spendingByType: Map<SpendingType, Double>) {
+        val entries = spendingByType.map { (spendingType, amount) ->
+            PieEntry(amount.toFloat(), spendingType.name)
         }
 
-        val dataSet = PieDataSet(entries, "Category Spends")
-        dataSet.colors = ColorTemplate.MATERIAL_COLORS.toList()
+        val dataSet = PieDataSet(entries, "Spending by Type")
+        dataSet.colors = listOf(
+            Color.parseColor("#FF6384"), // Needs - Red
+            Color.parseColor("#36A2EB"), // Wants - Blue
+            Color.parseColor("#FFCE56")  // Savings - Yellow
+        )
 
         val pieData = PieData(dataSet)
         binding.pieChart.data = pieData

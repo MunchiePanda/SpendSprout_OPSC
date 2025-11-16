@@ -4,8 +4,8 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.example.spendsprout_opsc.MainActivity
 import com.example.spendsprout_opsc.databinding.ActivityLoginBinding
+import com.example.spendsprout_opsc.overview.OverviewActivity
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -23,10 +23,6 @@ class LoginActivity : AppCompatActivity() {
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        if (firebaseAuth.currentUser != null) {
-            goToMainActivity()
-        }
-
         binding.btnLogin.setOnClickListener {
             val email = binding.edtUsername.text.toString()
             val password = binding.edtPassword.text.toString()
@@ -35,7 +31,7 @@ class LoginActivity : AppCompatActivity() {
                 firebaseAuth.signInWithEmailAndPassword(email, password)
                     .addOnCompleteListener { task ->
                         if (task.isSuccessful) {
-                            goToMainActivity()
+                            goToOverviewActivity()
                         } else {
                             Toast.makeText(this, "Authentication failed: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
                         }
@@ -51,8 +47,8 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
-    private fun goToMainActivity() {
-        val intent = Intent(this, MainActivity::class.java)
+    private fun goToOverviewActivity() {
+        val intent = Intent(this, OverviewActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)
         finish()

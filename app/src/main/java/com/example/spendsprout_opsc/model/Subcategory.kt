@@ -7,5 +7,7 @@ data class Subcategory(
     var subcategoryId: String = "",
     var categoryId: String = "", // Link back to the parent Category
     var name: String = "",
-    var allocated: Double = 0.0
+    var allocated: Double = 0.0,
+    var color: Int = 0,
+    var spendingType: SpendingType = SpendingType.NEEDS
 )

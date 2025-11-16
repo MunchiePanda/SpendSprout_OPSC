@@ -3,6 +3,7 @@ package com.example.spendsprout_opsc.edit
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.spendsprout_opsc.model.Category
+import com.example.spendsprout_opsc.model.SpendingType
 import com.example.spendsprout_opsc.model.Subcategory
 import com.example.spendsprout_opsc.repository.CategoryRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -35,11 +36,12 @@ class EditCategoryViewModel @Inject constructor(
 
     // Function to save a new category or subcategory
     fun save(
-        parentCategory: Category?, // Can be null if creating a new parent
+        parentCategory: Category?,
         isEditing: Boolean,
         name: String,
         allocation: Double,
-        // Add other fields like color, notes if they are in your model
+        color: Int,
+        spendingType: SpendingType, // Add spendingType parameter
         existingSubcategory: Subcategory?
     ) {
         viewModelScope.launch {
@@ -48,8 +50,9 @@ class EditCategoryViewModel @Inject constructor(
                 if (parentCategory != null && existingSubcategory != null) {
                     val updatedSubcategory = existingSubcategory.copy(
                         name = name,
-                        allocated = allocation
-                        // update other fields
+                        allocated = allocation,
+                        color = color, // Update color
+                        spendingType = spendingType // Update spendingType
                     )
                     categoryRepository.updateSubcategory(parentCategory.categoryId, updatedSubcategory)
                 }
@@ -59,14 +62,18 @@ class EditCategoryViewModel @Inject constructor(
                     // This means we are creating a new SUBCATEGORY under an existing category
                     val newSubcategory = Subcategory(
                         name = name,
-                        allocated = allocation
+                        allocated = allocation,
+                        color = color, // Set color
+                        spendingType = spendingType // Set spendingType
                     )
                     categoryRepository.addSubcategory(parentCategory.categoryId, newSubcategory)
                 } else {
                     // This means we are creating a new PARENT CATEGORY
                     val newCategory = Category(
                         name = name,
-                        allocated = allocation
+                        allocated = allocation,
+                        color = color, // Set color
+                        spendingType = spendingType // Set spendingType
                     )
                     categoryRepository.addCategory(newCategory)
                 }
