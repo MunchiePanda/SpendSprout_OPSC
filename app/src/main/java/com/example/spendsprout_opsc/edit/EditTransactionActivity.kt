@@ -26,6 +26,7 @@ import androidx.lifecycle.lifecycleScope
 import com.example.spendsprout_opsc.BudgetApp
 import com.example.spendsprout_opsc.R
 import com.example.spendsprout_opsc.accounts.AccountsActivity
+import com.example.spendsprout_opsc.reports.ReportsActivity
 import com.example.spendsprout_opsc.settings.SettingsActivity
 import com.example.spendsprout_opsc.transactions.TransactionsActivity
 import com.google.android.material.navigation.NavigationView
@@ -109,7 +110,7 @@ class EditTransactionActivity : AppCompatActivity() {
                     startActivity(Intent(this, AccountsActivity::class.java))
                 }
                 R.id.nav_reports -> {
-                    Toast.makeText(this, "Reports coming soon!", Toast.LENGTH_SHORT).show()
+                    startActivity(Intent(this, ReportsActivity::class.java))
                 }
                 R.id.nav_settings -> {
                     Toast.makeText(this, "Navigating to Settings", Toast.LENGTH_SHORT).show()

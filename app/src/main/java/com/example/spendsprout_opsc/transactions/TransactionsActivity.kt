@@ -19,6 +19,7 @@ import com.example.spendsprout_opsc.R
 import com.example.spendsprout_opsc.accounts.AccountsActivity
 import com.example.spendsprout_opsc.categories.CategoriesActivity
 import com.example.spendsprout_opsc.overview.OverviewActivity
+import com.example.spendsprout_opsc.reports.ReportsActivity
 import com.example.spendsprout_opsc.settings.SettingsActivity
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.datepicker.MaterialDatePicker
@@ -276,7 +277,7 @@ class TransactionsActivity : AppCompatActivity(), NavigationView.OnNavigationIte
                 startActivity(Intent(this, AccountsActivity::class.java))
             }
             R.id.nav_reports -> {
-                android.widget.Toast.makeText(this, "Reports coming soon!", android.widget.Toast.LENGTH_SHORT).show()
+                startActivity(Intent(this, ReportsActivity::class.java))
             }
             R.id.nav_settings -> {
                 startActivity(Intent(this, SettingsActivity::class.java))

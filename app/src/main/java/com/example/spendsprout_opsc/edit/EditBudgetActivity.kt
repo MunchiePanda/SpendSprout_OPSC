@@ -95,7 +95,7 @@ class EditBudgetActivity : AppCompatActivity() {
                     startActivity(Intent(this, AccountsActivity::class.java))
                 }
                 R.id.nav_reports -> {
-                    Toast.makeText(this, "Reports coming soon!", Toast.LENGTH_SHORT).show()
+                    startActivity(Intent(this, ReportsActivity::class.java))
                 }
                 R.id.nav_settings -> {
                     Toast.makeText(this, "Navigating to Settings", Toast.LENGTH_SHORT).show()

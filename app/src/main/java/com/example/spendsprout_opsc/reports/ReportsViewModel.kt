@@ -1,10 +1,12 @@
 package com.example.spendsprout_opsc.reports
 
 import com.example.spendsprout_opsc.BudgetApp
+import com.example.spendsprout_opsc.ExpenseType
 import com.example.spendsprout_opsc.overview.model.ChartDataPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.first
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -19,9 +21,14 @@ class ReportsViewModel {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val expenses = BudgetApp.db.expenseDao().getBetweenDates(startDate, endDate)
-                val total = expenses
-                    .filter { it.expenseType == com.example.spendsprout_opsc.ExpenseType.Expense }
-                    .sumOf { it.expenseAmount }
+                // Calculate total spent (expenses are positive, income is negative)
+                val total = expenses.sumOf { entity ->
+                    if (entity.expenseType == ExpenseType.Expense) {
+                        entity.expenseAmount
+                    } else {
+                        -entity.expenseAmount
+                    }
+                }
                 CoroutineScope(Dispatchers.Main).launch { callback(total) }
             } catch (e: Exception) {
                 CoroutineScope(Dispatchers.Main).launch { callback(0.0) }
@@ -38,19 +45,29 @@ class ReportsViewModel {
     ) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                // Load actual expenses from database
                 val expenses = BudgetApp.db.expenseDao().getBetweenDates(startDate, endDate)
-                    .filter { it.expenseType == com.example.spendsprout_opsc.ExpenseType.Expense }
+                
+                // Group expenses by day and calculate daily totals
+                val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                val totalsByDay = expenses.groupBy { sdf.format(Date(it.expenseDate)) }
+                    .mapValues { (_, list) ->
+                        list.sumOf { entity ->
+                            if (entity.expenseType == ExpenseType.Expense) {
+                                entity.expenseAmount
+                            } else {
+                                -entity.expenseAmount
+                            }
+                        }
+                    }
 
                 val days = getDaysInRange(startDate, endDate)
                 val perDayTarget = if (days.isNotEmpty() && monthlyTarget > 0) monthlyTarget / days.size else 0.0
 
-                val dailySum = expenses.groupBy { sdf.format(Date(it.expenseDate)) }
-                    .mapValues { (_, list) -> list.sumOf { it.expenseAmount } }
-
+                // Create series from actual data
                 val series = days.map { dayMillis ->
                     val key = sdf.format(Date(dayMillis))
-                    val spent = dailySum[key] ?: 0.0
+                    val spent = totalsByDay[key] ?: 0.0
                     ChartDataPoint(
                         month = key,
                         revenue = spent,
@@ -72,6 +89,7 @@ class ReportsViewModel {
     ) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
+                // Load actual category totals from database
                 val totals = BudgetApp.db.expenseDao().totalsByCategory(startDate, endDate)
                 CoroutineScope(Dispatchers.Main).launch { callback(totals) }
             } catch (e: Exception) {
