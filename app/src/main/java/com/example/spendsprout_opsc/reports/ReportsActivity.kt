@@ -545,6 +545,9 @@ class ReportsActivity : AppCompatActivity(), NavigationView.OnNavigationItemSele
             R.id.nav_reports -> {
                 // Already in Reports, do nothing
             }
+            R.id.nav_sprout -> {
+                startActivity(Intent(this, com.example.spendsprout_opsc.sprout.SproutActivity::class.java))
+            }
             R.id.nav_settings -> {
                 startActivity(Intent(this, SettingsActivity::class.java))
             }

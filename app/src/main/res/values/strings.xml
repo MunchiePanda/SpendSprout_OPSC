@@ -12,6 +12,7 @@
     <string name="nav_transactions">Transactions</string>
     <string name="nav_accounts">Accounts</string>
     <string name="nav_reports">Reports</string>
+    <string name="nav_sprout">Sprout</string>
     <string name="nav_settings">Settings</string>
     <string name="nav_exit">Exit</string>
 

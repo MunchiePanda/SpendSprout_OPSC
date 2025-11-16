@@ -111,6 +111,9 @@ class WantsCategoryActivity : AppCompatActivity(), NavigationView.OnNavigationIt
             R.id.nav_reports -> {
                 startActivity(Intent(this, ReportsActivity::class.java))
             }
+            R.id.nav_sprout -> {
+                startActivity(Intent(this, com.example.spendsprout_opsc.sprout.SproutActivity::class.java))
+            }
             R.id.nav_settings -> {
                 startActivity(Intent(this, SettingsActivity::class.java))
             }

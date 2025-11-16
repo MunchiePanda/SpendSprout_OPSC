@@ -97,6 +97,9 @@ class EditBudgetActivity : AppCompatActivity() {
                 R.id.nav_reports -> {
                     startActivity(Intent(this, ReportsActivity::class.java))
                 }
+                R.id.nav_sprout -> {
+                    startActivity(Intent(this, com.example.spendsprout_opsc.sprout.SproutActivity::class.java))
+                }
                 R.id.nav_settings -> {
                     Toast.makeText(this, "Navigating to Settings", Toast.LENGTH_SHORT).show()
                     startActivity(Intent(this, SettingsActivity::class.java))

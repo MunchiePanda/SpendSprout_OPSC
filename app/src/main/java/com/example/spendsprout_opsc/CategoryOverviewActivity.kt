@@ -98,6 +98,7 @@ class CategoryOverviewActivity : AppCompatActivity() {
                 R.id.nav_transactions -> startActivity(Intent(this, com.example.spendsprout_opsc.transactions.TransactionsActivity::class.java))
                 R.id.nav_accounts -> startActivity(Intent(this, com.example.spendsprout_opsc.accounts.AccountsActivity::class.java))
                 R.id.nav_reports -> startActivity(Intent(this, com.example.spendsprout_opsc.reports.ReportsActivity::class.java))
+                R.id.nav_sprout -> startActivity(Intent(this, com.example.spendsprout_opsc.sprout.SproutActivity::class.java))
                 R.id.nav_settings -> startActivity(Intent(this, com.example.spendsprout_opsc.settings.SettingsActivity::class.java))
                 R.id.nav_exit -> finishAffinity()
             }

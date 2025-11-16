@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="200dp"
+    android:viewportWidth="200"
+    android:viewportHeight="200">
+    <!-- Strong green stem -->
+    <path
+        android:fillColor="#006400"
+        android:pathData="M95,180 L95,50 L105,50 L105,180 Z" />
+    <!-- Lush green leaves (many layers) -->
+    <path
+        android:fillColor="#00FF00"
+        android:pathData="M65,60 Q40,20 30,40 Q40,60 65,60" />
+    <path
+        android:fillColor="#00FF00"
+        android:pathData="M135,60 Q160,20 170,40 Q160,60 135,60" />
+    <path
+        android:fillColor="#32CD32"
+        android:pathData="M75,55 Q55,25 50,40 Q55,55 75,55" />
+    <path
+        android:fillColor="#32CD32"
+        android:pathData="M125,55 Q145,25 150,40 Q145,55 125,55" />
+    <path
+        android:fillColor="#228B22"
+        android:pathData="M85,50 Q70,20 65,35 Q70,50 85,50" />
+    <path
+        android:fillColor="#228B22"
+        android:pathData="M115,50 Q130,20 135,35 Q130,50 115,50" />
+    <path
+        android:fillColor="#006400"
+        android:pathData="M95,45 Q95,5 100,30 Q105,55 100,45 Q95,50 95,45" />
+    <!-- Beautiful flowers -->
+    <path
+        android:fillColor="#FF1493"
+        android:pathData="M 100,33 A 12,12 0 1,1 100,57 A 12,12 0 1,1 100,33 Z" />
+    <path
+        android:fillColor="#FF69B4"
+        android:pathData="M 85,40 A 10,10 0 1,1 85,60 A 10,10 0 1,1 85,40 Z" />
+    <path
+        android:fillColor="#FF69B4"
+        android:pathData="M 115,40 A 10,10 0 1,1 115,60 A 10,10 0 1,1 115,40 Z" />
+    <path
+        android:fillColor="#FFB6C1"
+        android:pathData="M 100,44 A 6,6 0 1,1 100,56 A 6,6 0 1,1 100,44 Z" />
+</vector>
+

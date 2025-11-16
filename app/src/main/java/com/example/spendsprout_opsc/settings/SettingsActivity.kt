@@ -151,6 +151,9 @@ class SettingsActivity : AppCompatActivity(), NavigationView.OnNavigationItemSel
             R.id.nav_reports -> {
                 startActivity(Intent(this, ReportsActivity::class.java))
             }
+            R.id.nav_sprout -> {
+                startActivity(Intent(this, com.example.spendsprout_opsc.sprout.SproutActivity::class.java))
+            }
             R.id.nav_settings -> {
                 // Already in Settings, do nothing
             }

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="200dp"
+    android:viewportWidth="200"
+    android:viewportHeight="200">
+    <!-- Brown dead stem -->
+    <path
+        android:fillColor="#8B4513"
+        android:pathData="M95,180 L95,100 L105,100 L105,180 Z" />
+    <!-- Withered brown leaves -->
+    <path
+        android:fillColor="#654321"
+        android:pathData="M85,90 Q75,70 70,75 Q65,80 70,85 Q75,90 85,90" />
+    <path
+        android:fillColor="#654321"
+        android:pathData="M115,90 Q125,70 130,75 Q135,80 130,85 Q125,90 115,90" />
+    <path
+        android:fillColor="#654321"
+        android:pathData="M95,80 Q95,60 100,65 Q105,70 100,75 Q95,80 95,80" />
+</vector>
+

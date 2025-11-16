@@ -44,6 +44,9 @@
             android:name=".settings.SettingsActivity"
             android:exported="false" />
         <activity
+            android:name=".sprout.SproutActivity"
+            android:exported="false" />
+        <activity
             android:name=".wants.WantsCategoryActivity"
             android:exported="false" /> <!-- Edit Activities -->
         <activity

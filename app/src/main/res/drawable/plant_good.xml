@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="200dp"
+    android:viewportWidth="200"
+    android:viewportHeight="200">
+    <!-- Green stem -->
+    <path
+        android:fillColor="#228B22"
+        android:pathData="M95,180 L95,70 L105,70 L105,180 Z" />
+    <!-- Healthy green leaves -->
+    <path
+        android:fillColor="#32CD32"
+        android:pathData="M75,75 Q60,40 55,55 Q60,70 75,75" />
+    <path
+        android:fillColor="#32CD32"
+        android:pathData="M125,75 Q140,40 145,55 Q140,70 125,75" />
+    <path
+        android:fillColor="#32CD32"
+        android:pathData="M95,65 Q95,30 100,50 Q105,70 100,65 Q95,75 95,65" />
+    <path
+        android:fillColor="#228B22"
+        android:pathData="M85,70 Q75,45 70,55 Q75,65 85,70" />
+    <path
+        android:fillColor="#228B22"
+        android:pathData="M115,70 Q125,45 130,55 Q125,65 115,70" />
+    <!-- Small bud -->
+    <path
+        android:fillColor="#FF69B4"
+        android:pathData="M 100,52 A 8,8 0 1,1 100,68 A 8,8 0 1,1 100,52 Z" />
+</vector>
+
