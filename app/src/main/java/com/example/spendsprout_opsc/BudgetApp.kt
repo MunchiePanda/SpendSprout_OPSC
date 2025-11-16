@@ -15,7 +15,7 @@ class BudgetApp : Application() {
     override fun onCreate() {
         super.onCreate()
         db = Room.databaseBuilder(this, BudgetDatabase::class.java, "budget.db")
-            .fallbackToDestructiveMigration(true)   // prototype speed
+            .fallbackToDestructiveMigration()   // prototype speed
             .build()
     }
 }

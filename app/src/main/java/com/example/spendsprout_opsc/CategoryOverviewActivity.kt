@@ -143,11 +143,6 @@ class CategoryOverviewActivity : AppCompatActivity() {
             startDate = selection.first
             endDate = selection.second
             
-            // Format dates for display
-            val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
-            val startDateStr = dateFormat.format(Date(startDate!!))
-            val endDateStr = dateFormat.format(Date(endDate!!))
-            
             // Update display
             updateDateRangeDisplay()
             
@@ -206,10 +201,6 @@ class CategoryOverviewActivity : AppCompatActivity() {
     
     private fun updateDateRangeDisplay() {
         if (startDate != null && endDate != null) {
-            val dateFormat = SimpleDateFormat("MMM dd - MMM dd, yyyy", Locale.getDefault())
-            val startDateStr = dateFormat.format(Date(startDate!!))
-            val endDateStr = dateFormat.format(Date(endDate!!))
-            
             // Calculate days difference for a more user-friendly display
             val daysDifference = ((endDate!! - startDate!!) / (1000 * 60 * 60 * 24)).toInt()
             
@@ -233,11 +224,8 @@ class CategoryOverviewActivity : AppCompatActivity() {
         // Log the selected dates for debugging
         if (startDate != null && endDate != null) {
             val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-            val startDateStr = dateFormat.format(Date(startDate!!))
-            val endDateStr = dateFormat.format(Date(endDate!!))
-            
-            println("Filtering categories from $startDateStr to $endDateStr")
-            Toast.makeText(this, "Filtering from $startDateStr to $endDateStr", Toast.LENGTH_SHORT).show()
+            println("Filtering categories from ${dateFormat.format(Date(startDate!!))} to ${dateFormat.format(Date(endDate!!))}")
+            Toast.makeText(this, "Filtering from ${dateFormat.format(Date(startDate!!))} to ${dateFormat.format(Date(endDate!!))}", Toast.LENGTH_SHORT).show()
         }
     }
 

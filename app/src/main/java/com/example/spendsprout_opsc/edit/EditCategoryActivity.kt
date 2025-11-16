@@ -184,13 +184,14 @@ class EditCategoryActivity : AppCompatActivity() {
                             val parentCategoryName = editCategoryViewModel.getParentCategoryName(subcategory.categoryId)
                             Log.d("EditCategoryActivity", "Parent category name: $parentCategoryName")
                             val spinnerType = findViewById<Spinner>(R.id.spinner_Type)
-                            val adapter = spinnerType.adapter as ArrayAdapter<String>
-                            val position = adapter.getPosition(parentCategoryName)
-                            if (position >= 0) {
-                                spinnerType.setSelection(position)
-                                Log.d("EditCategoryActivity", "Set spinner to position: $position")
-                            } else {
-                                Log.w("EditCategoryActivity", "Could not find parent category '$parentCategoryName' in spinner")
+                            (spinnerType.adapter as? ArrayAdapter<String>)?.let {
+                                val position = it.getPosition(parentCategoryName)
+                                if (position >= 0) {
+                                    spinnerType.setSelection(position)
+                                    Log.d("EditCategoryActivity", "Set spinner to position: $position")
+                                } else {
+                                    Log.w("EditCategoryActivity", "Could not find parent category '$parentCategoryName' in spinner")
+                                }
                             }
                             
                             Log.d("EditCategoryActivity", "Prefilled form with subcategory: ${subcategory.subcategoryName}")

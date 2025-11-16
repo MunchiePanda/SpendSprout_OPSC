@@ -20,18 +20,6 @@ object DatabaseErrorHandler {
     
     fun handleDatabaseError(error: Throwable, operation: String) {
         Log.e(TAG, "Database error in $operation", error)
-
-        when (error) {
-            //is androidx.room.RoomDatabase.CannotCreateRoomDatabaseException -> {
-                //Log.e(TAG, "Cannot create database: ${error.message}")
-            //}
-            //is androidx.room.RoomDatabase.MigrationException -> {
-               // Log.e(TAG, "Database migration failed: ${error.message}")
-            //}
-            //else -> {
-               // Log.e(TAG, "Unknown database error: ${error.message}")
-            //}
-        }
     }
     
     fun safeDatabaseOperation(

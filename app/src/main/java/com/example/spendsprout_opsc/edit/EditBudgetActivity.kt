@@ -1,6 +1,7 @@
 package com.example.spendsprout_opsc.edit
 
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
@@ -38,7 +39,12 @@ class EditBudgetActivity : AppCompatActivity() {
         setContentView(R.layout.activity_edit_budget)
         
         // Get budget data from intent if editing existing budget
-        existingBudget = intent.getSerializableExtra("budget") as? com.example.spendsprout_opsc.roomdb.Budget_Entity
+        existingBudget = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            intent.getSerializableExtra("budget", com.example.spendsprout_opsc.roomdb.Budget_Entity::class.java)
+        } else {
+            @Suppress("DEPRECATION")
+            intent.getSerializableExtra("budget") as? com.example.spendsprout_opsc.roomdb.Budget_Entity
+        }
 
         //MENU DRAWER SETUP
         //MenuDrawer: Drawer Layout/ Menu Code and connections

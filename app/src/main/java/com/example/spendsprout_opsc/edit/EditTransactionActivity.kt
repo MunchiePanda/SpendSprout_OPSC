@@ -13,6 +13,7 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.Spinner
 import android.net.Uri
+import androidx.activity.result.contract.ActivityResultContracts
 import java.text.SimpleDateFormat
 import java.util.Date
 import android.widget.Switch
@@ -43,6 +44,17 @@ class EditTransactionActivity : AppCompatActivity() {
 
     private lateinit var editTransactionViewModel: EditTransactionViewModel
     private var editingTransactionId: Long? = null
+    private var selectedImageUri: Uri? = null
+
+    private val pickImageLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == RESULT_OK) {
+            selectedImageUri = result.data?.data
+            if (selectedImageUri != null) {
+                contentResolver.takePersistableUriPermission(selectedImageUri!!, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                Toast.makeText(this, "Image selected", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -248,7 +260,6 @@ class EditTransactionActivity : AppCompatActivity() {
         val edtAmount = findViewById<EditText>(R.id.edt_Amount)
         val spinnerCategory = findViewById<Spinner>(R.id.spinner_Category)
         val btnDate = findViewById<Button>(R.id.btn_Date)
-        val spinnerAccount = findViewById<Spinner>(R.id.spinner_Account)
         val spinnerRepeat = findViewById<Spinner>(R.id.spinner_Repeat)
         val checkBoxOweOwed = findViewById<CheckBox>(R.id.switch_OweOwed)
         val edtNotes = findViewById<EditText>(R.id.edt_Notes)
@@ -257,7 +268,6 @@ class EditTransactionActivity : AppCompatActivity() {
         val amount = edtAmount.text.toString()
         val category = spinnerCategory.selectedItem.toString()
         val dateString = btnDate.text.toString()
-        val account = spinnerAccount.selectedItem.toString()
         val repeat = spinnerRepeat.selectedItem.toString()
         val oweOwed = checkBoxOweOwed.isChecked
         val notes = edtNotes.text.toString()
@@ -283,14 +293,14 @@ class EditTransactionActivity : AppCompatActivity() {
             if (editingTransactionId != null) {
                 // Update existing transaction
                 editTransactionViewModel.updateTransaction(
-                    editingTransactionId!!, description, amountVal, category, date, account, repeat, oweOwed, notes,
+                    editingTransactionId!!, description, amountVal, category, date, repeat, oweOwed, notes,
                     imagePath = selectedImageUri?.toString()
                 )
                 Toast.makeText(this, "Transaction updated successfully", Toast.LENGTH_SHORT).show()
             } else {
                 // Create new transaction
                 editTransactionViewModel.saveTransaction(
-                    description, amountVal, category, date, account, repeat, oweOwed, notes,
+                    description, amountVal, category, date, repeat, oweOwed, notes,
                     imagePath = selectedImageUri?.toString()
                 )
                 Toast.makeText(this, "Transaction saved successfully", Toast.LENGTH_SHORT).show()
@@ -312,9 +322,6 @@ class EditTransactionActivity : AppCompatActivity() {
         }
     }
 
-    private val pickImageRequestCode = 5011
-    private var selectedImageUri: Uri? = null
-
     private fun setupImagePicker() {
         val btnAddImage = findViewById<Button>(R.id.btn_AddImage)
         btnAddImage?.setOnClickListener {
@@ -322,18 +329,7 @@ class EditTransactionActivity : AppCompatActivity() {
                 addCategory(Intent.CATEGORY_OPENABLE)
                 type = "image/*"
             }
-            startActivityForResult(intent, pickImageRequestCode)
-        }
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == pickImageRequestCode && resultCode == RESULT_OK) {
-            selectedImageUri = data?.data
-            if (selectedImageUri != null) {
-                contentResolver.takePersistableUriPermission(selectedImageUri!!, Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                Toast.makeText(this, "Image selected", Toast.LENGTH_SHORT).show()
-            }
+            pickImageLauncher.launch(intent)
         }
     }
 

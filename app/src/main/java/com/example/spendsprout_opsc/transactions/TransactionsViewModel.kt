@@ -119,4 +119,3 @@ class TransactionsViewModel {
         return calendar.timeInMillis
     }
 }
-

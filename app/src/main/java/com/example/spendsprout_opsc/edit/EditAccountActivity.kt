@@ -1,6 +1,7 @@
 package com.example.spendsprout_opsc.edit
 
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
@@ -39,11 +40,12 @@ class EditAccountActivity : AppCompatActivity() {
         setContentView(R.layout.activity_edit_account)
         
         // Get account data from intent if editing existing account
-        existingAccount = intent.getSerializableExtra("account") as? com.example.spendsprout_opsc.roomdb.Account_Entity
-        
-        // If no account object but we have an accountId, we'll load it later
-        val accountId = intent.getIntExtra("accountId", -1)
-        val isEdit = intent.getBooleanExtra("isEdit", false)
+        existingAccount = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            intent.getSerializableExtra("account", com.example.spendsprout_opsc.roomdb.Account_Entity::class.java)
+        } else {
+            @Suppress("DEPRECATION")
+            intent.getSerializableExtra("account") as? com.example.spendsprout_opsc.roomdb.Account_Entity
+        }
 
         //MENU DRAWER SETUP
         //MenuDrawer: Drawer Layout/ Menu Code and connections
@@ -166,10 +168,11 @@ class EditAccountActivity : AppCompatActivity() {
             // Set spinner selection based on account type
             val spinnerAccountType = findViewById<Spinner>(R.id.spinner_AccountType)
             val accountTypeString = mapAccountTypeToString(existingAccount!!.accountType)
-            val adapter = spinnerAccountType.adapter as ArrayAdapter<String>
-            val position = adapter.getPosition(accountTypeString)
-            if (position >= 0) {
-                spinnerAccountType.setSelection(position)
+            (spinnerAccountType.adapter as? ArrayAdapter<String>)?.let {
+                val position = it.getPosition(accountTypeString)
+                if (position >= 0) {
+                    spinnerAccountType.setSelection(position)
+                }
             }
         }
     }

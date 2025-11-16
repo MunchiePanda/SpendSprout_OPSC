@@ -17,7 +17,6 @@ class EditTransactionViewModel {
         amount: Double,
         category: String,
         date: Long,
-        account: String,
         repeat: String,
         oweOwed: Boolean,
         notes: String,
@@ -90,7 +89,6 @@ class EditTransactionViewModel {
         amount: Double,
         category: String,
         date: Long,
-        account: String,
         repeat: String,
         oweOwed: Boolean,
         notes: String,
@@ -121,4 +119,3 @@ class EditTransactionViewModel {
         }
     }
 }
-

@@ -9,6 +9,7 @@ import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
@@ -40,15 +41,6 @@ import com.google.android.material.navigation.NavigationView
  */
 class OverviewActivity : AppCompatActivity() {
 
-    companion object {
-        private const val BUDGET_EDIT_REQUEST_CODE = 1001
-    }
-
-    // OLD VARIABLES - COMMENTED OUT AS LAYOUT STRUCTURE CHANGED
-    //private lateinit var drawerLayout: DrawerLayout  // OLD: was drawer_layout
-    //private lateinit var navView: NavigationView    // OLD: was nav_view
-    //private lateinit var overviewViewModel: OverviewViewModel  // NOT YET IMPLEMENTED
-
     //Drawer Layout/ Menu variables
     lateinit var toggle: ActionBarDrawerToggle
     lateinit var drawerLayout: DrawerLayout
@@ -60,6 +52,15 @@ class OverviewActivity : AppCompatActivity() {
     
     //Login management
     private lateinit var sharedPreferences: SharedPreferences
+
+    private val budgetEditLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == RESULT_OK) {
+            android.util.Log.d("OverviewActivity", "Budget edit successful, refreshing data...")
+            // Budget was updated successfully, refresh data immediately
+            overviewViewModel.refreshCurrentBudget()
+            Toast.makeText(this, "Budget updated successfully!", Toast.LENGTH_SHORT).show()
+        }
+    }
 
     /**
      * onCreate() - Like Unity's Start() method
@@ -243,7 +244,7 @@ class OverviewActivity : AppCompatActivity() {
                 intent.putExtra("budget", currentBudget)
             }
             
-            startActivityForResult(intent, BUDGET_EDIT_REQUEST_CODE)
+            budgetEditLauncher.launch(intent)
         }
     }
 
@@ -265,9 +266,6 @@ class OverviewActivity : AppCompatActivity() {
 
     private fun setupChart() {
         // Chart setup will be handled by the custom view
-        val chartView = findViewById<com.example.spendsprout_opsc.overview.ChartView>(R.id.chartView)
-        val chartData = overviewViewModel.getChartData()
-        //chartView.setData(chartData) // TODO: Implement chart data setting
     }
 
     private fun observeData() {
@@ -286,19 +284,6 @@ class OverviewActivity : AppCompatActivity() {
             }
         }
         
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        
-        android.util.Log.d("OverviewActivity", "onActivityResult called: requestCode=$requestCode, resultCode=$resultCode")
-        
-        if (requestCode == BUDGET_EDIT_REQUEST_CODE && resultCode == RESULT_OK) {
-            android.util.Log.d("OverviewActivity", "Budget edit successful, refreshing data...")
-            // Budget was updated successfully, refresh data immediately
-            overviewViewModel.refreshCurrentBudget()
-            Toast.makeText(this, "Budget updated successfully!", Toast.LENGTH_SHORT).show()
-        }
     }
 
     override fun onResume() {
@@ -346,4 +331,3 @@ class OverviewActivity : AppCompatActivity() {
         Toast.makeText(this, "Logged out successfully", Toast.LENGTH_SHORT).show()
     }
 }
-

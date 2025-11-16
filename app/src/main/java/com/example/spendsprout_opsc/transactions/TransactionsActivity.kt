@@ -147,10 +147,6 @@ class TransactionsActivity : AppCompatActivity(), NavigationView.OnNavigationIte
     
     private fun updateDateRangeDisplay() {
         if (startDate != null && endDate != null) {
-            val dateFormat = SimpleDateFormat("MMM dd - MMM dd, yyyy", Locale.getDefault())
-            val startDateStr = dateFormat.format(Date(startDate!!))
-            val endDateStr = dateFormat.format(Date(endDate!!))
-            
             // Calculate days difference for a more user-friendly display
             val daysDifference = ((endDate!! - startDate!!) / (1000 * 60 * 60 * 24)).toInt()
             
@@ -174,11 +170,8 @@ class TransactionsActivity : AppCompatActivity(), NavigationView.OnNavigationIte
         // Log the selected dates for debugging
         if (startDate != null && endDate != null) {
             val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-            val startDateStr = dateFormat.format(Date(startDate!!))
-            val endDateStr = dateFormat.format(Date(endDate!!))
-            
-            println("Filtering transactions from $startDateStr to $endDateStr")
-            Toast.makeText(this, "Filtering from $startDateStr to $endDateStr", Toast.LENGTH_SHORT).show()
+            println("Filtering transactions from ${dateFormat.format(Date(startDate!!))} to ${dateFormat.format(Date(endDate!!))}")
+            Toast.makeText(this, "Filtering from ${dateFormat.format(Date(startDate!!))} to ${dateFormat.format(Date(endDate!!))}", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -305,4 +298,3 @@ class TransactionsActivity : AppCompatActivity(), NavigationView.OnNavigationIte
         }
     }
 }
-
