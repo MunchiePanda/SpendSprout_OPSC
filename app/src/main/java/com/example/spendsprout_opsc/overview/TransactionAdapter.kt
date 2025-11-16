@@ -4,48 +4,45 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.spendsprout_opsc.R
-import com.example.spendsprout_opsc.overview.model.Transaction
+import com.example.spendsprout_opsc.model.Transaction
 
-/**
- * TransactionAdapter - UI List Management Script
- * 
- * This is like Unity's UI List management or custom prefab instantiation system.
- * Similar to Unity's UI List with custom prefabs or object pooling.
- * 
- * Responsibilities:
- * - Create transaction list items (like Unity's Instantiate() for UI elements)
- * - Bind data to UI components (like Unity's UI Text updates)
- * - Handle item clicks (like Unity's Button.onClick events)
- * - Manage list scrolling (like Unity's ScrollView or UI List)
- */
-class TransactionAdapter(private val transactions: List<Transaction>) :
-    RecyclerView.Adapter<TransactionAdapter.TransactionViewHolder>() {
+class TransactionAdapter(private val onItemClick: (Transaction) -> Unit) :
+    ListAdapter<Transaction, TransactionAdapter.TransactionViewHolder>(TransactionDiffCallback()) {
 
-    class TransactionViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
-        val dateTextView: TextView = view.findViewById(R.id.txt_Date)
-        //val descriptionTextView: TextView = view.findViewById(R.id.txt_Description)
-        val amountTextView: TextView = view.findViewById(R.id.txt_Amount)
-        //val colorIndicator: View = view.findViewById(R.id.color_indicator)
-    }
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TransactionViewHolder {
-        val view = LayoutInflater.from(parent.context)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int):
+            TransactionViewHolder {
+        val itemView = LayoutInflater.from(parent.context)
             .inflate(R.layout.expense_layout, parent, false)
-        return TransactionViewHolder(view)
+        return TransactionViewHolder(itemView)
     }
 
     override fun onBindViewHolder(holder: TransactionViewHolder, position: Int) {
-        val transaction = transactions[position]
-        holder.dateTextView.text = transaction.date
-        //holder.descriptionTextView.text = transaction.description
-        holder.amountTextView.text = transaction.amount
-        
-        // Set color indicator
-        //holder.colorIndicator.setBackgroundColor(android.graphics.Color.parseColor(transaction.color))
+        val transaction = getItem(position)
+        holder.bind(transaction)
+        holder.itemView.setOnClickListener { onItemClick(transaction) }
     }
 
-    override fun getItemCount(): Int = transactions.size
-}
+    class TransactionViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        private val nameTextView: TextView = itemView.findViewById(R.id.txt_Name)
+        private val amountTextView: TextView = itemView.findViewById(R.id.txt_Amount)
 
+        fun bind(transaction: Transaction) {
+            nameTextView.text = transaction.description
+            amountTextView.text = String.format("R %.2f", transaction.amount)
+        }
+    }
+
+    class TransactionDiffCallback : DiffUtil.ItemCallback<Transaction>() {
+        override fun areItemsTheSame(oldItem: Transaction, newItem: Transaction): Boolean {
+            return oldItem.id == newItem.id
+        }
+
+        override fun areContentsTheSame(oldItem: Transaction, newItem: Transaction): Boolean {
+            return oldItem == newItem
+        }
+    }
+}

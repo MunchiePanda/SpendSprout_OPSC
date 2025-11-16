@@ -44,11 +44,11 @@ class FirebaseTransactionRepository @Inject constructor(
 
     override suspend fun addTransaction(transaction: Transaction) {
         val transactionId = transactionsRef.push().key ?: throw IllegalStateException("Could not generate transaction ID")
-        transactionsRef.child(transactionId).setValue(transaction.copy(transactionId = transactionId)).await()
+        transactionsRef.child(transactionId).setValue(transaction.copy(id = transactionId)).await()
     }
 
     override suspend fun updateTransaction(transaction: Transaction) {
-        transactionsRef.child(transaction.transactionId).setValue(transaction).await()
+        transactionsRef.child(transaction.id).setValue(transaction).await()
     }
 
     override suspend fun deleteTransaction(transactionId: String) {

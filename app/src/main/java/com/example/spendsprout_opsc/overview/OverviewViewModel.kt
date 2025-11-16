@@ -39,22 +39,22 @@ class OverviewViewModel @Inject constructor(
     ) { accounts, transactions, categories ->
 
         val totalBalance = accounts.sumOf { it.accountBalance }
-        val totalIncome = transactions.filter { it.transactionAmount > 0 }.sumOf { it.transactionAmount }
-        val totalExpenses = transactions.filter { it.transactionAmount < 0 }.sumOf { it.transactionAmount }
+        val totalIncome = transactions.filter { it.amount > 0 }.sumOf { it.amount }
+        val totalExpenses = transactions.filter { it.amount < 0 }.sumOf { it.amount }
 
         // Create a map of CategoryID to its name for easy lookup
         val categoryIdToNameMap = categories.associateBy({ it.categoryId }, { it.name })
 
         // Calculate spending per category
         val categorySpends = transactions
-            .filter { it.transactionAmount < 0 } // Only consider expenses
+            .filter { it.amount < 0 } // Only consider expenses
             .groupBy { it.categoryId }
             .mapNotNull { (categoryId, transactionList) ->
                 // Use the map to find the category name
                 val categoryName = categoryIdToNameMap[categoryId]
                 if (categoryName != null) {
                     // We sum the absolute value of the expenses
-                    categoryName to transactionList.sumOf { kotlin.math.abs(it.transactionAmount) }
+                    categoryName to transactionList.sumOf { kotlin.math.abs(it.amount) }
                 } else {
                     null // Ignore transactions with no matching category
                 }

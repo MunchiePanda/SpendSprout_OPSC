@@ -1,5 +1,6 @@
 package com.example.spendsprout_opsc.repository
 
+import android.util.Log
 import com.example.spendsprout_opsc.model.Account
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
@@ -44,7 +45,14 @@ class FirebaseAccountRepository @Inject constructor(
 
     override suspend fun addAccount(account: Account) {
         val accountId = accountsRef.push().key ?: throw IllegalStateException("Could not generate account ID")
-        accountsRef.child(accountId).setValue(account.copy(accountId = accountId)).await()
+        accountsRef.child(accountId).setValue(account.copy(accountId = accountId))
+            .addOnSuccessListener {
+                Log.d("FirebaseAccountRepo", "Account added successfully: ${account.accountName}")
+            }
+            .addOnFailureListener { e ->
+                Log.e("FirebaseAccountRepo", "Error adding account", e)
+            }
+            .await()
     }
 
     override suspend fun updateAccount(account: Account) {

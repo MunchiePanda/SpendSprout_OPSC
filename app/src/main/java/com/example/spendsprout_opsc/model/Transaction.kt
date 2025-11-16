@@ -7,6 +7,6 @@ data class Transaction(
     val description: String = "",
     val accountId: String = "",
     val categoryId: String = "",
-    val userId: String = ""
+    val userId: String = "",
+    val photo: String? = null
 )
-    

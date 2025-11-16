@@ -58,28 +58,20 @@
                     android:textAppearance="@style/SubHeaderTextStyle" />
 
                 <TextView
-                    android:id="@+id/txt_AllocationDescr"
+                    android:id="@+id/txt_IncomeDescr"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Total Allocation"
+                    android:text="Total Income:"
                     android:textAlignment="textStart"
                     android:textAppearance="@style/MainTextStyle" />
 
                 <TextView
-                    android:id="@+id/txt_MinDescr"
+                    android:id="@+id/txt_ExpenseDescr"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Minimum:"
+                    android:text="Total Expenses:"
                     android:textAlignment="textStart"
-                    android:textAppearance="@style/SubTextStyle" />
-
-                <TextView
-                    android:id="@+id/txt_MaxDescr"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Maximum:"
-                    android:textAlignment="textStart"
-                    android:textAppearance="@style/SubTextStyle" />
+                    android:textAppearance="@style/MainTextStyle" />
 
             </LinearLayout>
 
@@ -90,7 +82,7 @@
                 android:orientation="vertical">
 
                 <TextView
-                    android:id="@+id/txt_BudgetBalance"
+                    android:id="@+id/total_balance_textview"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="- R 100 000"
@@ -98,7 +90,7 @@
                     android:textAppearance="@style/SubHeaderTextStyle" />
 
                 <TextView
-                    android:id="@+id/txt_BudgetAllocation"
+                    android:id="@+id/income_textview"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="R 100 000"
@@ -106,20 +98,12 @@
                     android:textAppearance="@style/MainTextStyle" />
 
                 <TextView
-                    android:id="@+id/txt_Min"
+                    android:id="@+id/expenses_textview"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="R200"
+                    android:text="R 100 000"
                     android:textAlignment="textEnd"
-                    android:textAppearance="@style/SubTextStyle" />
-
-                <TextView
-                    android:id="@+id/txt_Max"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="R1000"
-                    android:textAlignment="textEnd"
-                    android:textAppearance="@style/SubTextStyle" />
+                    android:textAppearance="@style/MainTextStyle" />
             </LinearLayout>
 
         </LinearLayout>
@@ -224,10 +208,10 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/chart_Placeholder" />
 
-            <com.example.spendsprout_opsc.overview.ChartView
-                android:id="@+id/chartView"
+            <com.github.mikephil.charting.charts.PieChart
+                android:id="@+id/pieChart"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+                android:layout_height="200dp" />
         </LinearLayout>
     </LinearLayout>
         </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
@@ -256,4 +240,3 @@
         app:menu="@menu/drawer_menu" />
 -->
 </androidx.drawerlayout.widget.DrawerLayout>
-

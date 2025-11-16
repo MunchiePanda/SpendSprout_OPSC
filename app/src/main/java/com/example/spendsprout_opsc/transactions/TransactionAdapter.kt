@@ -9,7 +9,7 @@ import android.view.ViewGroup.LayoutParams
 import android.graphics.BitmapFactory
 import androidx.recyclerview.widget.RecyclerView
 import com.example.spendsprout_opsc.R
-import com.example.spendsprout_opsc.transactions.model.Transaction
+import com.example.spendsprout_opsc.model.Transaction
 
 class TransactionAdapter(
     private var transactions: List<Transaction>,
@@ -32,15 +32,15 @@ class TransactionAdapter(
 
     override fun onBindViewHolder(holder: TransactionViewHolder, position: Int) {
         val transaction = transactions[position]
-        holder.dateTextView.text = transaction.date
+        holder.dateTextView.text = transaction.date.toString()
         holder.nameTextView.text = transaction.description
-        holder.amountTextView.text = transaction.amount
+        holder.amountTextView.text = transaction.amount.toString()
         holder.spentTextView.text = ""
 
         // Show receipt image if present (from file path/URI string)
-        if (!transaction.imagePath.isNullOrBlank()) {
+        if (!transaction.photo.isNullOrBlank()) {
             try {
-                val bmp = BitmapFactory.decodeFile(transaction.imagePath)
+                val bmp = BitmapFactory.decodeFile(transaction.photo)
                 if (bmp != null) {
                     holder.receiptImageView.setImageBitmap(bmp)
                     holder.receiptImageView.visibility = View.VISIBLE
@@ -56,7 +56,7 @@ class TransactionAdapter(
         }
         
         // Set amount color based on positive/negative
-        if (transaction.amount.startsWith("+")) {
+        if (transaction.amount >= 0) {
             holder.amountTextView.setTextColor(android.graphics.Color.parseColor("#77B950"))
         } else {
             holder.amountTextView.setTextColor(android.graphics.Color.parseColor("#E94444"))

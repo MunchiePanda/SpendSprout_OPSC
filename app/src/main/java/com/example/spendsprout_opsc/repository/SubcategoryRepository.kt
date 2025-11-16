@@ -53,7 +53,7 @@ class SubcategoryRepository @Inject constructor(
         // Create a new unique ID for the subcategory
         val subcategoryId = subcategoriesRef.push().key ?: return
         val newSubcategory = Subcategory(
-            id = subcategoryId,
+            subcategoryId = subcategoryId,
             name = subcategoryName,
             categoryId = parentCategoryId
         )
