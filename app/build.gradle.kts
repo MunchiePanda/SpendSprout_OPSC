@@ -77,4 +77,7 @@ dependencies {
     //MPAndroidChart
     implementation ("com.github.yusufkhan08070817:Bargraph_android_kotlin:1.0.1")
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
+    
+    //PDF Generation
+    implementation("com.itextpdf:itext7-core:7.2.5")
 }

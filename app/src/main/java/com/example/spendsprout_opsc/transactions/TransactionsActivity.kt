@@ -21,10 +21,14 @@ import com.example.spendsprout_opsc.categories.CategoriesActivity
 import com.example.spendsprout_opsc.overview.OverviewActivity
 import com.example.spendsprout_opsc.reports.ReportsActivity
 import com.example.spendsprout_opsc.settings.SettingsActivity
+import com.example.spendsprout_opsc.utils.PDFGenerator
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.navigation.NavigationView
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -41,6 +45,12 @@ class TransactionsActivity : AppCompatActivity(), NavigationView.OnNavigationIte
     private var startDate: Long? = null
     private var endDate: Long? = null
     private lateinit var sharedPreferences: SharedPreferences
+    
+    // PDF Generator
+    private val pdfGenerator = PDFGenerator()
+    
+    // Store current transactions for export
+    private var currentTransactions: List<com.example.spendsprout_opsc.transactions.model.Transaction> = emptyList()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -198,13 +208,101 @@ class TransactionsActivity : AppCompatActivity(), NavigationView.OnNavigationIte
         if (startDate != null && endDate != null) {
             // Load transactions with date filtering
             transactionsViewModel.loadTransactionsFromDatabase(startDate!!, endDate!!) { transactions ->
+                currentTransactions = transactions
                 transactionAdapter.updateData(transactions)
             }
         } else {
             // Load all transactions when no date range is selected
             transactionsViewModel.loadAllTransactionsFromDatabase { transactions ->
+                currentTransactions = transactions
                 transactionAdapter.updateData(transactions)
             }
+        }
+    }
+    
+    private fun exportToPDF() {
+        if (currentTransactions.isEmpty()) {
+            Toast.makeText(this, "No transactions to export", Toast.LENGTH_SHORT).show()
+            return
+        }
+        
+        // Show progress
+        Toast.makeText(this, "Generating PDF...", Toast.LENGTH_SHORT).show()
+        
+        // Generate PDF in background thread
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val filePath = pdfGenerator.generateTransactionsPDF(
+                    this@TransactionsActivity,
+                    currentTransactions,
+                    startDate,
+                    endDate
+                )
+                
+                // Switch back to main thread to show result
+                CoroutineScope(Dispatchers.Main).launch {
+                    if (filePath != null) {
+                        Toast.makeText(
+                            this@TransactionsActivity,
+                            "PDF exported successfully!\nSaved to: $filePath",
+                            Toast.LENGTH_LONG
+                        ).show()
+                        
+                        // Optionally share the PDF
+                        sharePDF(filePath)
+                    } else {
+                        Toast.makeText(
+                            this@TransactionsActivity,
+                            "Failed to generate PDF. Please try again.",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("TransactionsActivity", "Error exporting PDF: ${e.message}", e)
+                CoroutineScope(Dispatchers.Main).launch {
+                    Toast.makeText(
+                        this@TransactionsActivity,
+                        "Error: ${e.message}",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+        }
+    }
+    
+    private fun sharePDF(filePath: String) {
+        try {
+            val file = java.io.File(filePath)
+            if (!file.exists()) {
+                android.util.Log.e("TransactionsActivity", "PDF file not found at: $filePath")
+                Toast.makeText(this, "PDF saved successfully. File location: $filePath", Toast.LENGTH_LONG).show()
+                return
+            }
+            
+            try {
+                val uri = androidx.core.content.FileProvider.getUriForFile(
+                    this,
+                    "${packageName}.fileprovider",
+                    file
+                )
+                
+                val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                    type = "application/pdf"
+                    putExtra(Intent.EXTRA_STREAM, uri)
+                    putExtra(Intent.EXTRA_SUBJECT, "SpendSprout Transaction Report")
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }
+                
+                startActivity(Intent.createChooser(shareIntent, "Share PDF via"))
+            } catch (e: java.lang.IllegalArgumentException) {
+                android.util.Log.e("TransactionsActivity", "FileProvider error: ${e.message}", e)
+                // Fallback: just show the file path
+                Toast.makeText(this, "PDF saved to: $filePath", Toast.LENGTH_LONG).show()
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("TransactionsActivity", "Error sharing PDF: ${e.message}", e)
+            Toast.makeText(this, "PDF saved. Location: $filePath", Toast.LENGTH_LONG).show()
         }
     }
     
@@ -216,6 +314,7 @@ class TransactionsActivity : AppCompatActivity(), NavigationView.OnNavigationIte
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menu.add(0, 1001, 0, "Filters")
+        menu.add(0, 1002, 0, "Export to PDF")
         return super.onCreateOptionsMenu(menu)
     }
 
@@ -228,6 +327,10 @@ class TransactionsActivity : AppCompatActivity(), NavigationView.OnNavigationIte
             }
             1001 -> {
                 showFilterDialog()
+                return true
+            }
+            1002 -> {
+                exportToPDF()
                 return true
             }
         }

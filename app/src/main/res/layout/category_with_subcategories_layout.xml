@@ -7,9 +7,12 @@
     android:orientation="vertical"
     android:background="@drawable/roundedcorners_background"
     android:backgroundTint="@color/ItemBackgroundColor"
-    android:layout_marginHorizontal="15dp"
-    android:layout_marginVertical="5dp"
-    android:padding="10dp">
+    android:layout_marginHorizontal="8dp"
+    android:layout_marginVertical="8dp"
+    android:padding="12dp"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?android:attr/selectableItemBackground">
 
     <!-- Main Category Layout -->
     <include layout="@layout/category_layout" />
@@ -19,10 +22,11 @@
         android:id="@+id/recyclerView_Subcategories"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
+        android:layout_marginTop="12dp"
         android:background="@drawable/roundedcorners_background"
         android:backgroundTint="@color/SubItemBackgroundColor"
-        android:padding="5dp"
+        android:padding="8dp"
+        android:nestedScrollingEnabled="false"
         tools:itemCount="3"
         tools:listitem="@layout/subcategory_layout" />
 

@@ -255,20 +255,39 @@ class OverviewActivity : AppCompatActivity() {
         val recyclerView = findViewById<RecyclerView>(R.id.recyclerView_Transactions)
         recyclerView.layoutManager = LinearLayoutManager(this)
 
-        //val transactions = overviewViewModel.getRecentTransactions()
-        //recyclerView.adapter = TransactionAdapter(transactions) // TODO: Implement TransactionAdapter
+        // Observe recent transactions from ViewModel
+        lifecycleScope.launch {
+            overviewViewModel.recentTransactions.collect { transactions ->
+                recyclerView.adapter = TransactionAdapter(transactions)
+            }
+        }
     }
     
     private fun setupCategoriesRecyclerView() {
         val recyclerView = findViewById<RecyclerView>(R.id.recyclerView_Categories)
         recyclerView.layoutManager = LinearLayoutManager(this)
 
-        //val categories = overviewViewModel.getCategories()
-        //recyclerView.adapter = CategoryAdapter(categories) // TODO: Implement CategoryAdapter
+        // Observe top categories from ViewModel
+        lifecycleScope.launch {
+            overviewViewModel.categorySummary.collect { categories ->
+                recyclerView.adapter = CategorySummaryAdapter(categories) { category ->
+                    // Navigate to category overview when clicked
+                    val intent = Intent(this@OverviewActivity, com.example.spendsprout_opsc.CategoryOverviewActivity::class.java)
+                    startActivity(intent)
+                }
+            }
+        }
     }
 
     private fun setupChart() {
-        // Chart setup will be handled by the custom view
+        val chartView = findViewById<ChartView>(R.id.chartView)
+        
+        // Observe chart data from ViewModel
+        lifecycleScope.launch {
+            overviewViewModel.chartData.collect { chartData ->
+                chartView.setData(chartData)
+            }
+        }
     }
 
     private fun observeData() {

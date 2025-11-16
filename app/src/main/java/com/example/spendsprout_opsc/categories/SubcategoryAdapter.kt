@@ -11,7 +11,8 @@ import com.example.spendsprout_opsc.categories.model.Subcategory
 
 class SubcategoryAdapter(
     private var subcategories: List<Subcategory>,
-    private val onItemClick: (Subcategory) -> Unit
+    private val onItemClick: (Subcategory) -> Unit,
+    private val onItemLongClick: ((Subcategory) -> Unit)? = null
 ) : RecyclerView.Adapter<SubcategoryAdapter.SubcategoryViewHolder>() {
 
     class SubcategoryViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
@@ -47,6 +48,14 @@ class SubcategoryAdapter(
         
         // Set click listener
         holder.view.setOnClickListener { onItemClick(subcategory) }
+        
+        // Set long click listener for deletion
+        onItemLongClick?.let { longClick ->
+            holder.view.setOnLongClickListener {
+                longClick(subcategory)
+                true
+            }
+        }
     }
 
     override fun getItemCount(): Int = subcategories.size

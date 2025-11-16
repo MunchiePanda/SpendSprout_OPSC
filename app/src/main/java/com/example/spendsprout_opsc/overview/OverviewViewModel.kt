@@ -2,6 +2,8 @@ package com.example.spendsprout_opsc.overview
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.spendsprout_opsc.BudgetApp
+import com.example.spendsprout_opsc.ExpenseType
 import com.example.spendsprout_opsc.overview.model.Transaction
 import com.example.spendsprout_opsc.overview.model.ChartDataPoint
 import com.example.spendsprout_opsc.overview.model.CategorySummary
@@ -12,10 +14,15 @@ import com.example.spendsprout_opsc.repository.TransactionRepository
 import com.example.spendsprout_opsc.roomdb.Account_Entity
 import com.example.spendsprout_opsc.roomdb.Budget_Entity
 // Removed old Payment_Entity import; using DataService via DataFlow for data
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.text.SimpleDateFormat
+import java.util.*
 
 class OverviewViewModel : ViewModel() {
     
@@ -50,69 +57,140 @@ class OverviewViewModel : ViewModel() {
             // Load real data from database
             loadBudgets()
             
-            // Use real budget data instead of mock data
-            // _totalBalance will be calculated from actual budget data
-
-            // Mock recent transactions
-            _recentTransactions.value = listOf(
-                Transaction(
-                    date = "02 October 2025",
-                    description = "Petrol",
-                    amount = "- R 1,500",
-                    color = "#87CEEB"
-                ),
-                Transaction(
-                    date = "30 September 2025",
-                    description = "Mug 'n Bean",
-                    amount = "- R 360",
-                    color = "#4169E1"
-                ),
-                Transaction(
-                    date = "25 September 2025",
-                    description = "Salary",
-                    amount = "+ R 20,000",
-                    color = "#32CD32"
-                )
-            )
-
-            // Mock category summary
-            _categorySummary.value = listOf(
-                CategorySummary(
-                    name = "Needs",
-                    spent = "R 8,900",
-                    allocated = "R 10,000",
-                    color = "#BD804A"
-                ),
-                CategorySummary(
-                    name = "Wants",
-                    spent = "R 120",
-                    allocated = "R 6,000",
-                    color = "#88618E"
-                ),
-                CategorySummary(
-                    name = "Savings",
-                    spent = "R 4,000",
-                    allocated = "R 4,000",
-                    color = "#6EA19E"
-                )
-            )
-
-            // Mock account summary
-            _accountSummary.value = listOf(
-                AccountSummary(
-                    name = "Cash",
-                    balance = "R 160",
-                    limit = "R 240"
-                ),
-                AccountSummary(
-                    name = "FNB Next Transact",
-                    balance = "R 1,720",
-                    limit = "R 2,580"
-                )
-            )
-
-            // Load chart data (mock for now)
-            _chartData.value = generateMockChartData()
+            // Load recent transactions
+            loadRecentTransactions()
+            
+            // Load top 3 categories
+            loadTopCategories()
+            
+            // Load chart data
+            loadChartData()
+        }
+    }
+    
+    private fun loadRecentTransactions() {
+        viewModelScope.launch {
+            try {
+                val expenses = withContext(Dispatchers.IO) {
+                    BudgetApp.db.expenseDao().getAll()
+                        .sortedByDescending { it.expenseDate }
+                        .take(5)
+                }
+                
+                val transactions = expenses.map { expense ->
+                    Transaction(
+                        date = formatDate(expense.expenseDate),
+                        description = expense.expenseName,
+                        amount = formatAmount(expense.expenseAmount, if (expense.expenseType == ExpenseType.Expense) "Expense" else "Income"),
+                        color = getCategoryColor(expense.expenseCategory)
+                    )
+                }
+                
+                _recentTransactions.value = transactions
+                android.util.Log.d("OverviewViewModel", "Loaded ${transactions.size} recent transactions")
+            } catch (e: Exception) {
+                android.util.Log.e("OverviewViewModel", "Error loading recent transactions: ${e.message}", e)
+                _recentTransactions.value = emptyList()
+            }
+        }
+    }
+    
+    private fun loadTopCategories() {
+        viewModelScope.launch {
+            try {
+                val categories = withContext(Dispatchers.IO) {
+                    BudgetApp.db.categoryDao().getAll().first()
+                }
+                
+                // Calculate spent amount for each category from actual expenses and take top 3
+                val categorySummaries = withContext(Dispatchers.IO) {
+                    val expenses = BudgetApp.db.expenseDao().getAll()
+                    
+                    categories.map { category ->
+                        // Get subcategories for this category
+                        val subcategories = BudgetApp.db.subcategoryDao().getByCategoryId(category.id.toLong())
+                        val subcategoryNames = subcategories.map { it.subcategoryName }.toSet()
+                        
+                        // Calculate category spent from expenses
+                        // Expenses can be tagged with either category name or subcategory name
+                        val categoryExpenses = expenses.filter { expense ->
+                            expense.expenseCategory == category.categoryName || 
+                            subcategoryNames.contains(expense.expenseCategory)
+                        }
+                        val categorySpent = categoryExpenses.sumOf { expense ->
+                            if (expense.expenseType == ExpenseType.Expense) {
+                                expense.expenseAmount  // Expenses are positive spending
+                            } else {
+                                0.0  // Ignore income for spending calculation
+                            }
+                        }
+                        
+                        // Calculate total allocation from subcategories
+                        val categoryAllocation = subcategories.sumOf { it.subcategoryAllocation }
+                        
+                        CategorySummary(
+                            name = category.categoryName,
+                            spent = "R ${String.format("%.0f", categorySpent)}",
+                            allocated = "R ${String.format("%.0f", categoryAllocation)}",
+                            color = getColorFromInt(category.categoryColor)
+                        )
+                    }
+                }
+                    .sortedByDescending { catSummary -> parseMoneyToDouble(catSummary.spent) }
+                    .take(3)
+                
+                _categorySummary.value = categorySummaries
+                android.util.Log.d("OverviewViewModel", "Loaded ${categorySummaries.size} top categories")
+            } catch (e: Exception) {
+                android.util.Log.e("OverviewViewModel", "Error loading top categories: ${e.message}", e)
+                _categorySummary.value = emptyList()
+            }
+        }
+    }
+    
+    private fun loadChartData() {
+        viewModelScope.launch {
+            try {
+                val expenses = withContext(Dispatchers.IO) {
+                    BudgetApp.db.expenseDao().getAll()
+                }
+                
+                // Group expenses by month
+                val calendar = Calendar.getInstance()
+                val monthFormat = SimpleDateFormat("yyyy-MM", Locale.getDefault())
+                val expensesByMonth = expenses.groupBy { expense ->
+                    calendar.timeInMillis = expense.expenseDate
+                    monthFormat.format(Calendar.getInstance().apply { timeInMillis = expense.expenseDate }.time)
+                }
+                
+                // Calculate revenue (income) and target (expenses) for each month
+                val chartData = expensesByMonth.map { (month, monthExpenses) ->
+                    val revenue = monthExpenses
+                        .filter { it.expenseType == ExpenseType.Income }
+                        .sumOf { it.expenseAmount }
+                    val target = monthExpenses
+                        .filter { it.expenseType == ExpenseType.Expense }
+                        .sumOf { it.expenseAmount }
+                    
+                    ChartDataPoint(month, revenue, target)
+                }
+                    .sortedBy { it.month }
+                    .takeLast(6) // Last 6 months
+                
+                _chartData.value = chartData
+                android.util.Log.d("OverviewViewModel", "Loaded chart data for ${chartData.size} months")
+            } catch (e: Exception) {
+                android.util.Log.e("OverviewViewModel", "Error loading chart data: ${e.message}", e)
+                _chartData.value = emptyList()
+            }
+        }
+    }
+    
+    private fun parseMoneyToDouble(moneyString: String): Double {
+        return try {
+            moneyString.replace("R", "").replace(",", "").replace(" ", "").trim().toDoubleOrNull() ?: 0.0
+        } catch (e: Exception) {
+            0.0
         }
     }
     
@@ -127,26 +205,37 @@ class OverviewViewModel : ViewModel() {
         return "$sign R ${String.format("%.0f", amount)}"
     }
     
-    private fun getCategoryColor(subcategoryId: Int): String {
-        // Mock color based on subcategory ID
-        val colors = listOf("#FF6B6B", "#FFB6C1", "#9370DB", "#4ECDC4", "#45B7D1")
-        return colors[subcategoryId % colors.size]
+    private suspend fun getCategoryColor(categoryName: String): String {
+        // Get color from category in database or use default
+        return when (categoryName.lowercase()) {
+            "needs" -> "#BD804A"
+            "wants" -> "#88618E"
+            "savings" -> "#6EA19E"
+            else -> {
+                // Try to get from database
+                try {
+                    val categories = withContext(Dispatchers.IO) {
+                        BudgetApp.db.categoryDao().getAll().first()
+                    }
+                    val category = categories.find { cat ->
+                        cat.categoryName.equals(categoryName, ignoreCase = true)
+                    }
+                    if (category != null) {
+                        getColorFromInt(category.categoryColor)
+                    } else {
+                        "#D3D3D3"
+                    }
+                } catch (e: Exception) {
+                    "#D3D3D3"
+                }
+            }
+        }
     }
     
     private fun getColorFromInt(colorInt: Int): String {
         return String.format("#%06X", 0xFFFFFF and colorInt)
     }
     
-    private fun generateMockChartData(): List<ChartDataPoint> {
-        return listOf(
-            ChartDataPoint("2025-01", 15000.0, 12000.0),
-            ChartDataPoint("2025-02", 18000.0, 15000.0),
-            ChartDataPoint("2025-03", 20000.0, 18000.0),
-            ChartDataPoint("2025-04", 22000.0, 20000.0),
-            ChartDataPoint("2025-05", 25000.0, 22000.0),
-            ChartDataPoint("2025-06", 28000.0, 25000.0)
-        )
-    }
     
     // Database loading methods
     private fun loadBudgets() {

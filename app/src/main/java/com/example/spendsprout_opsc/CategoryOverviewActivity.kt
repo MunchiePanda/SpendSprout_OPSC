@@ -13,8 +13,14 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.snackbar.Snackbar
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import com.example.spendsprout_opsc.BudgetApp
 import com.example.spendsprout_opsc.categories.HierarchicalCategoryAdapter
 import com.example.spendsprout_opsc.categories.CategoryViewModel
 import com.example.spendsprout_opsc.categories.model.Category
@@ -71,7 +77,9 @@ class CategoryOverviewActivity : AppCompatActivity() {
         drawerLayout = findViewById(R.id.main)
         navView = findViewById(R.id.navigationView)
 
-        val toolbar: androidx.appcompat.widget.Toolbar = findViewById(R.id.toolbar)
+        // Set up the toolbar from the included layout
+        val headerBar = findViewById<android.view.View>(R.id.layout_HeaderBar)
+        val toolbar: androidx.appcompat.widget.Toolbar = headerBar.findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
 
         // Enable back button functionality
@@ -80,7 +88,7 @@ class CategoryOverviewActivity : AppCompatActivity() {
         supportActionBar?.title = "Categories"
 
         // Set up menu button click listener
-        val btnMenu = findViewById<android.widget.ImageButton>(R.id.btn_Menu)
+        val btnMenu = headerBar.findViewById<android.widget.ImageButton>(R.id.btn_Menu)
         btnMenu.setOnClickListener {
             drawerLayout.openDrawer(GravityCompat.START)
         }
@@ -171,6 +179,10 @@ class CategoryOverviewActivity : AppCompatActivity() {
                 intent.putExtra("subcategoryName", subcategory.name)
                 intent.putExtra("isEditMode", true)
                 startActivity(intent)
+            },
+            onSubcategoryLongClick = { subcategory ->
+                // Handle long press - delete subcategory with undo option
+                handleDeleteSubcategory(subcategory)
             }
         )
         recyclerView.adapter = hierarchicalCategoryAdapter
@@ -227,6 +239,63 @@ class CategoryOverviewActivity : AppCompatActivity() {
             val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
             println("Filtering categories from ${dateFormat.format(Date(startDate!!))} to ${dateFormat.format(Date(endDate!!))}")
             Toast.makeText(this, "Filtering from ${dateFormat.format(Date(startDate!!))} to ${dateFormat.format(Date(endDate!!))}", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun handleDeleteSubcategory(subcategory: Subcategory) {
+        // Get the subcategory entity to delete
+        lifecycleScope.launch {
+            try {
+                val subcategoryId = subcategory.id.toIntOrNull()
+                if (subcategoryId == null) {
+                    Toast.makeText(this@CategoryOverviewActivity, "Invalid subcategory ID", Toast.LENGTH_SHORT).show()
+                    return@launch
+                }
+                
+                // Load the entity from database
+                val subcategoryEntity = withContext(Dispatchers.IO) {
+                    BudgetApp.db.subcategoryDao().getById(subcategoryId)
+                }
+                
+                if (subcategoryEntity == null) {
+                    Toast.makeText(this@CategoryOverviewActivity, "Subcategory not found", Toast.LENGTH_SHORT).show()
+                    return@launch
+                }
+                
+                // Delete the subcategory
+                withContext(Dispatchers.IO) {
+                    BudgetApp.db.subcategoryDao().delete(subcategoryEntity)
+                }
+                
+                // Reload the list
+                loadCategoriesWithSubcategoriesFromDatabase()
+                
+                // Show Snackbar with undo option
+                val snackbar = Snackbar.make(
+                    findViewById(R.id.recyclerView_Categories),
+                    "Subcategory '${subcategory.name}' deleted",
+                    Snackbar.LENGTH_LONG
+                )
+                snackbar.setAction("UNDO") {
+                    // Restore the subcategory
+                    lifecycleScope.launch {
+                        try {
+                            withContext(Dispatchers.IO) {
+                                BudgetApp.db.subcategoryDao().insertAll(subcategoryEntity)
+                            }
+                            // Reload the list
+                            loadCategoriesWithSubcategoriesFromDatabase()
+                            Toast.makeText(this@CategoryOverviewActivity, "Subcategory restored", Toast.LENGTH_SHORT).show()
+                        } catch (e: Exception) {
+                            Toast.makeText(this@CategoryOverviewActivity, "Error restoring subcategory: ${e.message}", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+                snackbar.show()
+                
+            } catch (e: Exception) {
+                Toast.makeText(this@CategoryOverviewActivity, "Error deleting subcategory: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 

@@ -6,6 +6,7 @@ import android.util.Log
 import android.view.MenuItem
 import android.view.View
 import android.widget.ArrayAdapter
+import android.widget.AutoCompleteTextView
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
@@ -19,6 +20,7 @@ import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import com.example.spendsprout_opsc.R
 import com.example.spendsprout_opsc.accounts.AccountsActivity
+import com.example.spendsprout_opsc.categories.SubcategorySuggestions
 import com.example.spendsprout_opsc.reports.ReportsActivity
 import com.example.spendsprout_opsc.settings.SettingsActivity
 import com.example.spendsprout_opsc.transactions.TransactionsActivity
@@ -136,6 +138,7 @@ class EditCategoryActivity : AppCompatActivity() {
         setupTypeSpinner()
         setupColorSpinner()
         setupButtons()
+        setupSubcategorySuggestions()
     }
 
     private fun setupTypeSpinner() {
@@ -144,6 +147,28 @@ class EditCategoryActivity : AppCompatActivity() {
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, types)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerType.adapter = adapter
+        
+        // Update suggestions when type changes
+        spinnerType.onItemSelectedListener = object : android.widget.AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: android.widget.AdapterView<*>?, view: android.view.View?, position: Int, id: Long) {
+                updateSubcategorySuggestions(spinnerType.selectedItem.toString())
+            }
+            override fun onNothingSelected(parent: android.widget.AdapterView<*>?) {}
+        }
+    }
+    
+    private fun setupSubcategorySuggestions() {
+        val spinnerType = findViewById<Spinner>(R.id.spinner_Type)
+        // Set initial suggestions based on default selection (usually "Needs")
+        val defaultType = spinnerType.selectedItem?.toString() ?: "Needs"
+        updateSubcategorySuggestions(defaultType)
+    }
+    
+    private fun updateSubcategorySuggestions(categoryType: String) {
+        val autoCompleteTextView = findViewById<AutoCompleteTextView>(R.id.edt_CategoryName)
+        val suggestions = SubcategorySuggestions.getSuggestionsForCategory(categoryType)
+        val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, suggestions)
+        autoCompleteTextView.setAdapter(adapter)
     }
 
     private fun setupColorSpinner() {
@@ -180,7 +205,7 @@ class EditCategoryActivity : AppCompatActivity() {
                             Log.d("EditCategoryActivity", "Loaded subcategory: ${subcategory.subcategoryName}, allocation: ${subcategory.subcategoryAllocation}")
                             
                             // Pre-fill the form fields
-                            findViewById<EditText>(R.id.edt_CategoryName).setText(subcategory.subcategoryName)
+                            findViewById<AutoCompleteTextView>(R.id.edt_CategoryName).setText(subcategory.subcategoryName)
                             findViewById<EditText>(R.id.edt_AllocatedAmount).setText(String.format("%.2f", subcategory.subcategoryAllocation))
                             findViewById<EditText>(R.id.edt_Notes).setText(subcategory.subcategoryNotes ?: "")
                             
@@ -213,7 +238,7 @@ class EditCategoryActivity : AppCompatActivity() {
     }
 
     private fun saveCategory() {
-        val edtCategoryName = findViewById<EditText>(R.id.edt_CategoryName)
+        val edtCategoryName = findViewById<AutoCompleteTextView>(R.id.edt_CategoryName)
         val spinnerType = findViewById<Spinner>(R.id.spinner_Type)
         val edtAllocatedAmount = findViewById<EditText>(R.id.edt_AllocatedAmount)
         val spinnerColor = findViewById<Spinner>(R.id.spinner_Color)

@@ -2,6 +2,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+
     <application
         android:name=".BudgetApp"
         android:allowBackup="true"
@@ -12,19 +17,25 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.SpendSprout_OPSC">
+        <!-- Splash Activity (Main Launcher) -->
         <activity
-            android:name=".edit.EditBudgetActivity"
-            android:exported="false" />
-        <!-- Login Activity (Main Launcher) -->
-        <activity
-            android:name=".login.LoginActivity"
-            android:exported="true">
+            android:name=".splash.SplashActivity"
+            android:exported="true"
+            android:theme="@style/SplashTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity> <!-- Overview Activity -->
+        </activity>
+        
+        <activity
+            android:name=".edit.EditBudgetActivity"
+            android:exported="false" />
+        <!-- Login Activity -->
+        <activity
+            android:name=".login.LoginActivity"
+            android:exported="false" /> <!-- Overview Activity -->
         <activity
             android:name=".overview.OverviewActivity"
             android:exported="false" /> <!-- Screen Activities -->
@@ -61,6 +72,17 @@
         <activity
             android:name=".CategoryOverviewActivity"
             android:exported="false" />
+        
+        <!-- FileProvider for sharing PDF files -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_provider_paths" />
+        </provider>
     </application>
 
 </manifest>

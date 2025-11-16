@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/splashContainer"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/splash_background"
+    android:clickable="true"
+    android:focusable="true">
+
+    <!-- Gradient Background -->
+    <View
+        android:id="@+id/backgroundGradient"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/splash_gradient" />
+
+    <!-- Content Container -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="32dp">
+
+        <!-- Plant Image -->
+        <ImageView
+            android:id="@+id/plantImageView"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:src="@drawable/plant_flourishing"
+            android:contentDescription="@string/app_name"
+            android:layout_marginBottom="32dp"
+            android:scaleType="fitCenter" />
+
+        <!-- App Name -->
+        <TextView
+            android:id="@+id/appNameTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/app_name"
+            android:textColor="@color/HighlightTextColor"
+            android:textSize="48sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.05"
+            android:layout_marginBottom="16dp"
+            android:fontFamily="sans-serif-medium"
+            android:shadowColor="#80000000"
+            android:shadowDx="0"
+            android:shadowDy="2"
+            android:shadowRadius="4" />
+
+        <!-- Tagline -->
+        <TextView
+            android:id="@+id/taglineTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/splash_tagline"
+            android:textColor="@color/SubTextColor"
+            android:textSize="16sp"
+            android:textAlignment="center"
+            android:layout_marginBottom="64dp"
+            android:maxWidth="280dp"
+            android:lineSpacingExtra="4dp" />
+
+        <!-- Tap to Continue Button -->
+        <TextView
+            android:id="@+id/tapToContinueButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/tap_to_continue"
+            android:textColor="@color/BackgroundColor"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:paddingHorizontal="32dp"
+            android:paddingVertical="16dp"
+            android:background="@drawable/splash_button_background"
+            android:gravity="center"
+            android:layout_gravity="bottom|center_horizontal"
+            android:layout_marginBottom="80dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:elevation="8dp" />
+
+    </LinearLayout>
+
+</FrameLayout>
+

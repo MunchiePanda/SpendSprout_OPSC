@@ -14,7 +14,8 @@ import com.example.spendsprout_opsc.categories.model.Subcategory
 class HierarchicalCategoryAdapter(
     private var categories: List<CategoryWithSubcategories>,
     private val onCategoryClick: (Category) -> Unit,
-    private val onSubcategoryClick: (Subcategory) -> Unit
+    private val onSubcategoryClick: (Subcategory) -> Unit,
+    private val onSubcategoryLongClick: ((Subcategory) -> Unit)? = null
 ) : RecyclerView.Adapter<HierarchicalCategoryAdapter.CategoryViewHolder>() {
 
     data class CategoryWithSubcategories(
@@ -67,9 +68,11 @@ class HierarchicalCategoryAdapter(
 
     private fun setupSubcategoriesRecyclerView(recyclerView: RecyclerView, subcategories: List<Subcategory>) {
         recyclerView.layoutManager = LinearLayoutManager(recyclerView.context)
-        val subcategoryAdapter = SubcategoryAdapter(subcategories) { subcategory ->
-            onSubcategoryClick(subcategory)
-        }
+        val subcategoryAdapter = SubcategoryAdapter(
+            subcategories,
+            onItemClick = { subcategory -> onSubcategoryClick(subcategory) },
+            onItemLongClick = onSubcategoryLongClick
+        )
         recyclerView.adapter = subcategoryAdapter
     }
 

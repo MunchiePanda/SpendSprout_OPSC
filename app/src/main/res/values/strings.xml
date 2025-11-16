@@ -1,5 +1,7 @@
 <resources>
-    <string name="app_name">SpendSprout_OPSC</string>
+    <string name="app_name">SpendSprout</string>
+    <string name="splash_tagline">Grow your wealth, one budget at a time</string>
+    <string name="tap_to_continue">Tap to continue</string>
     <string name="blank_string"></string>
 
     <!-- Navigation Drawer -->
