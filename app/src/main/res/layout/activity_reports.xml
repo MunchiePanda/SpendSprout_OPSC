@@ -9,81 +9,140 @@
     android:fitsSystemWindows="true"
     android:background="@color/BackgroundColor">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:paddingHorizontal="10dp"
+        android:paddingVertical="5dp">
+
         <!-- Header Bar -->
         <include
             android:id="@+id/header_bar"
             layout="@layout/header_bar_layout"
             android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <!-- Date Range Picker -->
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            android:orientation="horizontal"
+            android:padding="5dp"
+            android:background="@drawable/roundedcorners_background"
+            android:backgroundTint="@color/ItemBackgroundColor"
+            android:layout_margin="10dp"
+            android:layout_marginBottom="8dp">
 
-        <Spinner
-            android:id="@+id/spinner_Month"
-            android:layout_width="wrap_content"
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_selectDateRange"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Select Date Range"
+                android:textColor="@color/MainTextColor"
+                android:backgroundTint="@color/ButtonColor"
+                android:layout_marginEnd="8dp" />
+
+            <TextView
+                android:id="@+id/txt_dateRange"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="All Time"
+                android:textColor="@color/MainTextColor"
+                android:textSize="14sp"
+                android:gravity="center_vertical"
+                android:padding="12dp" />
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/header_bar" />
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:background="@drawable/roundedcorners_background"
+            android:backgroundTint="@color/ItemBackgroundColor"
+            android:layout_marginHorizontal="10dp"
+            android:layout_marginBottom="10dp"
+            android:padding="10dp">
 
-        <Button
-            android:id="@+id/btn_Export"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Export"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/spinner_Month" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:background="@drawable/roundedcorners_background"
+                android:backgroundTint="@color/SubItemBackgroundColor"
+                android:layout_marginBottom="15dp"
+                android:padding="10dp">
 
-        <ProgressBar
-            android:id="@+id/progressBar_Spending"
-            style="?android:attr/progressBarStyleHorizontal"
-            android:layout_width="200dp"
-            android:layout_height="200dp"
-            android:layout_marginTop="32dp"
-            android:progress="75"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/spinner_Month" />
+                <TextView
+                    android:id="@+id/textView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Budget"
+                    style="@style/MainTextStyle"
+                    android:textAlignment="center"/>
 
-        <TextView
-            android:id="@+id/txt_ProgressAmount"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="R 6000"
-            android:textAppearance="@style/HeaderTextStyle"
-            app:layout_constraintBottom_toBottomOf="@+id/progressBar_Spending"
-            app:layout_constraintEnd_toEndOf="@+id/progressBar_Spending"
-            app:layout_constraintStart_toStartOf="@+id/progressBar_Spending"
-            app:layout_constraintTop_toTopOf="@+id/progressBar_Spending" />
+                <com.github.mikephil.charting.charts.LineChart
+                    android:id="@+id/lineChart_BudgetOverview"
+                    android:layout_width="match_parent"
+                    android:layout_height="200dp" />
+            </LinearLayout>
 
-        <com.example.spendsprout_opsc.overview.ChartView
-            android:id="@+id/chartView"
-            android:layout_width="0dp"
-            android:layout_height="300dp"
-            android:layout_marginTop="32dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/progressBar_Spending" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:background="@drawable/roundedcorners_background"
+                android:backgroundTint="@color/SubItemBackgroundColor"
+                android:padding="10dp">
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+                <TextView
+                    android:id="@+id/textView2"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Category and SubCategory"
+                    style="@style/MainTextStyle"
+                    android:textAlignment="center"/>
 
-    <com.google.android.material.navigation.NavigationView
-        android:id="@+id/nav_view"
-        android:layout_width="280dp"
-        android:layout_height="match_parent"
-        android:layout_gravity="start"
-        android:fitsSystemWindows="true"
-        app:headerLayout="@layout/menu_header_layout"
-        app:menu="@menu/drawer_menu"
-        android:backgroundTint="@color/MenuBackgroundColor"
-        app:itemTextColor="@color/black"
-        app:subheaderColor="@color/black"
-        app:itemIconTint="@color/IconColor" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
 
-</androidx.drawerlayout.widget.DrawerLayout>
+                    <com.github.mikephil.charting.charts.PieChart
+                        android:id="@+id/pieChart_Category"
+                        android:layout_width="160dp"
+                        android:layout_height="160dp" />
+
+                    <com.github.mikephil.charting.charts.PieChart
+                        android:id="@+id/pieChart_Subcategory"
+                        android:layout_width="160dp"
+                        android:layout_height="160dp" />
+                </LinearLayout>
+
+            </LinearLayout>
+        </LinearLayout>
+
+</LinearLayout>
+
+
+<com.google.android.material.navigation.NavigationView
+android:id="@+id/nav_view"
+android:layout_width="280dp"
+android:layout_height="match_parent"
+android:layout_gravity="start"
+android:fitsSystemWindows="true"
+app:headerLayout="@layout/menu_header_layout"
+app:menu="@menu/drawer_menu"
+android:backgroundTint="@color/MenuBackgroundColor"
+app:itemTextColor="@color/black"
+app:subheaderColor="@color/black"
+app:itemIconTint="@color/IconColor" />
+
+    </androidx.drawerlayout.widget.DrawerLayout>
 

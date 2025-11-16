@@ -73,4 +73,8 @@ dependencies {
 
     //Material design
     implementation("com.google.android.material:material:1.11.0")
+
+    //MPAndroidChart
+    implementation ("com.github.yusufkhan08070817:Bargraph_android_kotlin:1.0.1")
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
 }

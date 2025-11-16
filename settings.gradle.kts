@@ -10,6 +10,8 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        maven (url="https://jitpack.io" )   //added for MPAndroidChart
+        maven { url = uri("https://jitpack.io") } //added for MPAndroidChart
     }
     versionCatalogs {
         create("libs") {
