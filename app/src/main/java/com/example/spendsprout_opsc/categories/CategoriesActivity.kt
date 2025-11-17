@@ -21,6 +21,7 @@ import com.example.spendsprout_opsc.wants.WantsCategoryActivity
 import com.example.spendsprout_opsc.wants.SubcategoryAdapter
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.navigation.NavigationView
+import com.example.spendsprout_opsc.utils.UserDisplayUtils
 
 class CategoriesActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
@@ -53,6 +54,7 @@ class CategoriesActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
         }
 
         navView.setNavigationItemSelectedListener(this)
+        UserDisplayUtils.bindNavHeader(navView, this)
 
         // Get filter parameter
         filterByCategory = intent.getStringExtra("filterByCategory")

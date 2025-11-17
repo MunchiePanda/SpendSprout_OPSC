@@ -1,14 +1,14 @@
 package com.example.spendsprout_opsc.edit
 
 import android.util.Log
-import com.example.spendsprout_opsc.BudgetApp
 import com.example.spendsprout_opsc.AccountType
+import com.example.spendsprout_opsc.firebase.AccountRepository
 import com.example.spendsprout_opsc.roomdb.Account_Entity
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.first
 
 class EditAccountViewModel {
+    
+    private val accountRepository = AccountRepository()
     
     suspend fun saveAccount(name: String, type: String, balance: Double, notes: String) {
         // Validate
@@ -26,7 +26,7 @@ class EditAccountViewModel {
                 accountBalance = balance,
                 accountNotes = notes.ifBlank { null }
             )
-            BudgetApp.db.accountDao().insert(entity)
+            accountRepository.insertAccount(entity)
             Log.d("EditAccountViewModel", "Account saved: $name ($accountType) balance=$balance")
         } catch (e: Exception) {
             Log.e("EditAccountViewModel", "Error saving account: ${e.message}", e)
@@ -63,8 +63,7 @@ class EditAccountViewModel {
             )
             
             Log.d("EditAccountViewModel", "Updating with entity: $entity")
-            val result = BudgetApp.db.accountDao().update(entity)
-            Log.d("EditAccountViewModel", "Update result: $result")
+            accountRepository.updateAccount(entity)
             Log.d("EditAccountViewModel", "Account updated successfully: $name ($accountType) balance=$balance")
         } catch (e: Exception) {
             Log.e("EditAccountViewModel", "Error updating account: ${e.message}", e)
@@ -74,8 +73,8 @@ class EditAccountViewModel {
 
     private suspend fun getNextAccountId(): Int {
         return try {
-            val count = BudgetApp.db.accountDao().getCount()
-            count + 1
+            val accounts = accountRepository.getAllAccounts().first()
+            (accounts.maxOfOrNull { it.id } ?: 0) + 1
         } catch (e: Exception) {
             1
         }

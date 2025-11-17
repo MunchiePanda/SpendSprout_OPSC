@@ -1,16 +1,28 @@
 package com.example.spendsprout_opsc.reports
 
-import com.example.spendsprout_opsc.BudgetApp
 import com.example.spendsprout_opsc.ExpenseType
+import com.example.spendsprout_opsc.firebase.TransactionRepository
+import com.example.spendsprout_opsc.firebase.BudgetRepository
+import com.example.spendsprout_opsc.firebase.CategoryRepository
+import com.example.spendsprout_opsc.firebase.SubcategoryRepository
 import com.example.spendsprout_opsc.overview.model.ChartDataPoint
+import com.example.spendsprout_opsc.roomdb.Budget_Entity
+import com.example.spendsprout_opsc.roomdb.Category_Entity
+import com.example.spendsprout_opsc.roomdb.Subcategory_Entity
+import com.example.spendsprout_opsc.roomdb.Expense_Entity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
 class ReportsViewModel {
+    
+    private val transactionRepository = TransactionRepository()
+    private val budgetRepository = BudgetRepository()
+    private val categoryRepository = CategoryRepository()
+    private val subcategoryRepository = SubcategoryRepository()
     
     // Total spent this month from DB (expenses only)
     fun loadMonthlySpent(
@@ -20,7 +32,7 @@ class ReportsViewModel {
     ) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val expenses = BudgetApp.db.expenseDao().getBetweenDates(startDate, endDate)
+                val expenses = transactionRepository.getTransactionsBetweenDates(startDate, endDate)
                 // Calculate total spent (expenses are positive, income is negative)
                 val total = expenses.sumOf { entity ->
                     if (entity.expenseType == ExpenseType.Expense) {
@@ -46,7 +58,7 @@ class ReportsViewModel {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 // Load actual expenses from database
-                val expenses = BudgetApp.db.expenseDao().getBetweenDates(startDate, endDate)
+                val expenses = transactionRepository.getTransactionsBetweenDates(startDate, endDate)
                 
                 // Group expenses by day and calculate daily totals
                 val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
@@ -90,7 +102,7 @@ class ReportsViewModel {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 // Load actual category totals from database
-                val totals = BudgetApp.db.expenseDao().totalsByCategory(startDate, endDate)
+                val totals = transactionRepository.getCategoryTotals(startDate, endDate)
                 CoroutineScope(Dispatchers.Main).launch { callback(totals) }
             } catch (e: Exception) {
                 CoroutineScope(Dispatchers.Main).launch { callback(emptyList()) }
@@ -112,6 +124,22 @@ class ReportsViewModel {
             cal.add(Calendar.DAY_OF_MONTH, 1)
         }
         return days
+    }
+
+    suspend fun getTransactionsBetweenDates(start: Long, end: Long): List<Expense_Entity> {
+        return transactionRepository.getTransactionsBetweenDates(start, end)
+    }
+
+    suspend fun getBudgetsSnapshot(): List<Budget_Entity> {
+        return budgetRepository.getAllBudgets().first()
+    }
+
+    suspend fun getCategoriesSnapshot(): List<Category_Entity> {
+        return categoryRepository.getAllCategories().first()
+    }
+
+    suspend fun getSubcategoriesSnapshot(): List<Subcategory_Entity> {
+        return subcategoryRepository.getAllSubcategories().first()
     }
 
     fun getStartOfMonth(): Long {

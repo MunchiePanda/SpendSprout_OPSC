@@ -9,30 +9,34 @@
     android:fitsSystemWindows="true"
     android:background="@color/BackgroundColor">
 
-    <LinearLayout
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:paddingHorizontal="10dp"
-        android:paddingVertical="5dp"
-        >
-
-    <!-- Header Bar -->
-    <include
-        android:id="@+id/header_bar"
-        layout="@layout/header_bar_layout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:fillViewport="true">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/ItemBackgroundColor"
             android:orientation="vertical"
             android:paddingHorizontal="10dp"
-            android:paddingVertical="10dp"
-            android:layout_gravity="center"
-            android:layout_marginVertical="5dp">
+            android:paddingVertical="5dp">
+
+            <!-- Header Bar -->
+            <include
+                android:id="@+id/header_bar"
+                layout="@layout/header_bar_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/ItemBackgroundColor"
+                android:orientation="vertical"
+                android:paddingHorizontal="10dp"
+                android:paddingVertical="10dp"
+                android:layout_gravity="center"
+                android:layout_marginVertical="5dp">
 
 
             <LinearLayout
@@ -111,8 +115,7 @@
 
         </LinearLayout>
 
-        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-            xmlns:app="http://schemas.android.com/apk/res-auto"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/ItemBackgroundColor"
@@ -137,8 +140,7 @@
 
         </LinearLayout>
 
-        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-            xmlns:app="http://schemas.android.com/apk/res-auto"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/ItemBackgroundColor"
@@ -163,8 +165,7 @@
 
         </LinearLayout>
 
-        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-            xmlns:app="http://schemas.android.com/apk/res-auto"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/ItemBackgroundColor"
@@ -189,8 +190,9 @@
 
         </LinearLayout>
 
+        </LinearLayout>
 
-    </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
 
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/nav_view"

@@ -26,6 +26,7 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.navigation.NavigationView
+import com.example.spendsprout_opsc.utils.UserDisplayUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -81,10 +82,7 @@ class TransactionsActivity : AppCompatActivity(), NavigationView.OnNavigationIte
         sharedPreferences = getSharedPreferences("login_prefs", MODE_PRIVATE)
         
         // Set the username in the navigation header
-        val headerView = navView.getHeaderView(0)
-        val txtUsername = headerView.findViewById<TextView>(R.id.txt_Username)
-        val currentUsername = sharedPreferences.getString("username", "User")
-        txtUsername.text = currentUsername
+        UserDisplayUtils.bindNavHeader(navView, this)
 
         // Initialize ViewModel
         transactionsViewModel = TransactionsViewModel()

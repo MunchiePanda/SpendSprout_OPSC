@@ -35,6 +35,7 @@ class EditAccountActivity : AppCompatActivity() {
 
     private lateinit var editAccountViewModel: EditAccountViewModel
     private var existingAccount: com.example.spendsprout_opsc.roomdb.Account_Entity? = null
+    private val accountRepository = com.example.spendsprout_opsc.firebase.AccountRepository()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -139,7 +140,7 @@ class EditAccountActivity : AppCompatActivity() {
             // Load account from database
             lifecycleScope.launch {
                 try {
-                    existingAccount = com.example.spendsprout_opsc.BudgetApp.db.accountDao().getById(accountId)
+                    existingAccount = accountRepository.getAccountById(accountId)
                     populateFields()
                 } catch (e: Exception) {
                     Log.e("EditAccountActivity", "Error loading account: ${e.message}", e)

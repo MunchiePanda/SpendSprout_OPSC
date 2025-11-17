@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.example.spendsprout_opsc" />
+                  <option name="mobileSdkAppId" value="1:481728876021:android:6628e7bd233c04750f64bc" />
+                  <option name="projectId" value="spendsprout-49aaa" />
+                  <option name="projectNumber" value="481728876021" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

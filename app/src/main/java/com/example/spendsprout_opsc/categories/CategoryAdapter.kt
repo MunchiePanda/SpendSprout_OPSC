@@ -1,8 +1,10 @@
 package com.example.spendsprout_opsc.categories
 
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.spendsprout_opsc.R
@@ -14,6 +16,7 @@ class CategoryAdapter(
 ) : RecyclerView.Adapter<CategoryAdapter.CategoryViewHolder>() {
 
     class CategoryViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
+        val iconView: ImageView = view.findViewById(R.id.img_Category)
         val nameTextView: TextView = view.findViewById(R.id.txt_Name)
         val balanceTextView: TextView = view.findViewById(R.id.txt_Balance)
         val allocationTextView: TextView = view.findViewById(R.id.txt_Allocation)
@@ -31,16 +34,20 @@ class CategoryAdapter(
         holder.nameTextView.text = category.name
         holder.balanceTextView.text = category.spent
         holder.allocationTextView.text = category.allocation
-        holder.spentTextView.text = "" // Clear the spent text
-        
+        holder.spentTextView.text = holder.view.context.getString(R.string.label_allocated)
+
+        // Color indicator
+        runCatching { Color.parseColor(category.color) }
+            .getOrNull()
+            ?.let { holder.iconView.setColorFilter(it) }
+
         // Set amount color based on positive/negative
-        if (category.spent.startsWith("+")) {
-            holder.balanceTextView.setTextColor(android.graphics.Color.parseColor("#77B950"))
+        if (category.spent.startsWith("-")) {
+            holder.balanceTextView.setTextColor(Color.parseColor("#E94444"))
         } else {
-            holder.balanceTextView.setTextColor(android.graphics.Color.parseColor("#E94444"))
+            holder.balanceTextView.setTextColor(Color.parseColor("#77B950"))
         }
-        
-        // Set click listener
+
         holder.view.setOnClickListener { onItemClick(category) }
     }
 

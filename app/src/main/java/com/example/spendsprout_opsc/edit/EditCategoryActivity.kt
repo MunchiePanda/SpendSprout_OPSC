@@ -281,7 +281,7 @@ class EditCategoryActivity : AppCompatActivity() {
                         )
                         
                         // Update in database
-                        com.example.spendsprout_opsc.BudgetApp.db.subcategoryDao().update(updatedSubcategory)
+                        editCategoryViewModel.updateSubcategory(updatedSubcategory)
                         
                         Toast.makeText(this@EditCategoryActivity, "Subcategory '$categoryName' updated successfully", Toast.LENGTH_SHORT).show()
                         

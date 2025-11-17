@@ -3,6 +3,7 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -80,4 +81,10 @@ dependencies {
     
     //PDF Generation
     implementation("com.itextpdf:itext7-core:7.2.5")
+    
+    //Firebase
+    implementation(platform("com.google.firebase:firebase-bom:32.7.0"))
+    implementation("com.google.firebase:firebase-database-ktx")
+    implementation("com.google.firebase:firebase-auth-ktx")
+    implementation("com.google.firebase:firebase-analytics-ktx")
 }

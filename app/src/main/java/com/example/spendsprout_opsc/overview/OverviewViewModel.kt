@@ -8,9 +8,9 @@ import com.example.spendsprout_opsc.overview.model.Transaction
 import com.example.spendsprout_opsc.overview.model.ChartDataPoint
 import com.example.spendsprout_opsc.overview.model.CategorySummary
 import com.example.spendsprout_opsc.overview.model.AccountSummary
-import com.example.spendsprout_opsc.repository.AccountRepository
-import com.example.spendsprout_opsc.repository.CategoryRepository
-import com.example.spendsprout_opsc.repository.TransactionRepository
+import com.example.spendsprout_opsc.firebase.CategoryRepository as FirebaseCategoryRepository
+import com.example.spendsprout_opsc.firebase.SubcategoryRepository as FirebaseSubcategoryRepository
+import com.example.spendsprout_opsc.firebase.TransactionRepository as FirebaseTransactionRepository
 import com.example.spendsprout_opsc.roomdb.Account_Entity
 import com.example.spendsprout_opsc.roomdb.Budget_Entity
 // Removed old Payment_Entity import; using DataService via DataFlow for data
@@ -25,6 +25,9 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 class OverviewViewModel : ViewModel() {
+    private val transactionRepository = FirebaseTransactionRepository()
+    private val categoryRepository = FirebaseCategoryRepository()
+    private val subcategoryRepository = FirebaseSubcategoryRepository()
     
     private val _totalBalance = MutableStateFlow(0.0)
     val totalBalance: StateFlow<Double> = _totalBalance.asStateFlow()
@@ -72,7 +75,7 @@ class OverviewViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 val expenses = withContext(Dispatchers.IO) {
-                    BudgetApp.db.expenseDao().getAll()
+                    transactionRepository.getAllTransactionsSnapshot()
                         .sortedByDescending { it.expenseDate }
                         .take(5)
                 }
@@ -99,16 +102,16 @@ class OverviewViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 val categories = withContext(Dispatchers.IO) {
-                    BudgetApp.db.categoryDao().getAll().first()
+                    categoryRepository.getAllCategories().first()
                 }
                 
                 // Calculate spent amount for each category from actual expenses and take top 3
                 val categorySummaries = withContext(Dispatchers.IO) {
-                    val expenses = BudgetApp.db.expenseDao().getAll()
+                    val expenses = transactionRepository.getAllTransactionsSnapshot()
                     
                     categories.map { category ->
                         // Get subcategories for this category
-                        val subcategories = BudgetApp.db.subcategoryDao().getByCategoryId(category.id.toLong())
+                        val subcategories = subcategoryRepository.getByCategoryId(category.id.toLong())
                         val subcategoryNames = subcategories.map { it.subcategoryName }.toSet()
                         
                         // Calculate category spent from expenses
@@ -152,7 +155,7 @@ class OverviewViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 val expenses = withContext(Dispatchers.IO) {
-                    BudgetApp.db.expenseDao().getAll()
+                    transactionRepository.getAllTransactionsSnapshot()
                 }
                 
                 // Group expenses by month
@@ -215,7 +218,7 @@ class OverviewViewModel : ViewModel() {
                 // Try to get from database
                 try {
                     val categories = withContext(Dispatchers.IO) {
-                        BudgetApp.db.categoryDao().getAll().first()
+                        categoryRepository.getAllCategories().first()
                     }
                     val category = categories.find { cat ->
                         cat.categoryName.equals(categoryName, ignoreCase = true)
@@ -241,7 +244,8 @@ class OverviewViewModel : ViewModel() {
     private fun loadBudgets() {
         viewModelScope.launch {
             try {
-                val budgetFlow = com.example.spendsprout_opsc.BudgetApp.db.budgetDao().getAll()
+                val budgetRepository = com.example.spendsprout_opsc.firebase.BudgetRepository()
+                val budgetFlow = budgetRepository.getAllBudgets()
                 budgetFlow.collect { budgetList ->
                     _budgets.value = budgetList
                     
@@ -301,7 +305,8 @@ class OverviewViewModel : ViewModel() {
             try {
                 val currentBudget = _currentBudget.value
                 if (currentBudget != null) {
-                    val updatedBudget = com.example.spendsprout_opsc.BudgetApp.db.budgetDao().getById(currentBudget.id)
+                    val budgetRepository = com.example.spendsprout_opsc.firebase.BudgetRepository()
+                    val updatedBudget = budgetRepository.getBudgetById(currentBudget.id)
                     if (updatedBudget != null) {
                         _currentBudget.value = updatedBudget
                         android.util.Log.d("OverviewViewModel", "Refreshed current budget: ${updatedBudget.budgetName}")

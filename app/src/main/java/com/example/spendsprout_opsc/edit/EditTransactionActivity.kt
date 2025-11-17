@@ -23,7 +23,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.lifecycleScope
-import com.example.spendsprout_opsc.BudgetApp
 import com.example.spendsprout_opsc.R
 import com.example.spendsprout_opsc.accounts.AccountsActivity
 import com.example.spendsprout_opsc.reports.ReportsActivity
@@ -32,6 +31,7 @@ import com.example.spendsprout_opsc.transactions.TransactionsActivity
 import com.google.android.material.navigation.NavigationView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import java.util.Calendar
 
@@ -46,6 +46,7 @@ class EditTransactionActivity : AppCompatActivity() {
     private lateinit var editTransactionViewModel: EditTransactionViewModel
     private var editingTransactionId: Long? = null
     private var selectedImageUri: Uri? = null
+    private val subcategoryRepository = com.example.spendsprout_opsc.firebase.SubcategoryRepository()
 
     private val pickImageLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == RESULT_OK) {
@@ -155,7 +156,7 @@ class EditTransactionActivity : AppCompatActivity() {
         lifecycleScope.launch {
             // run the database query on a background thread
             val categories = withContext(Dispatchers.IO) {
-                BudgetApp.db.subcategoryDao().getAll()
+                subcategoryRepository.getAllSubcategories().first()
             }
 
             // extract subcategory names

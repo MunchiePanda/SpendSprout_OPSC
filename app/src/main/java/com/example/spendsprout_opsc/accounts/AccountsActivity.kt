@@ -17,6 +17,7 @@ import com.example.spendsprout_opsc.settings.SettingsActivity
 import com.example.spendsprout_opsc.transactions.TransactionsActivity
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.navigation.NavigationView
+import com.example.spendsprout_opsc.utils.UserDisplayUtils
 
 class AccountsActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
@@ -48,6 +49,7 @@ class AccountsActivity : AppCompatActivity(), NavigationView.OnNavigationItemSel
         }
 
         navView.setNavigationItemSelectedListener(this)
+        UserDisplayUtils.bindNavHeader(navView, this)
 
         // Initialize ViewModel
         accountsViewModel = AccountsViewModel()

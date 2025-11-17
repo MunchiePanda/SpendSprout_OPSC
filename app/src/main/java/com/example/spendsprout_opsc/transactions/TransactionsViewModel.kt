@@ -1,7 +1,7 @@
 package com.example.spendsprout_opsc.transactions
 
-import com.example.spendsprout_opsc.BudgetApp
 import com.example.spendsprout_opsc.transactions.model.Transaction
+import com.example.spendsprout_opsc.firebase.TransactionRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -11,6 +11,7 @@ import java.util.*
 class TransactionsViewModel {
     
     private val dateFormat = SimpleDateFormat("d MMMM yyyy", Locale.getDefault())
+    private val transactionRepository = TransactionRepository()
     
     fun getAllTransactions(): List<Transaction> {
         // For now, return empty list - will be populated by database queries
@@ -31,7 +32,7 @@ class TransactionsViewModel {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 android.util.Log.d("TransactionsViewModel", "Loading transactions from $startDate to $endDate")
-                val expenses = BudgetApp.db.expenseDao().getBetweenDates(startDate, endDate)
+                val expenses = transactionRepository.getTransactionsBetweenDates(startDate, endDate)
                 val transactions = expenses.sortedByDescending { it.expenseDate }.map { expense ->
                     Transaction(
                         id = expense.id.toString(),
@@ -60,7 +61,7 @@ class TransactionsViewModel {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 android.util.Log.d("TransactionsViewModel", "Loading all transactions")
-                val expenses = BudgetApp.db.expenseDao().getAll()
+                val expenses = transactionRepository.getAllTransactionsSnapshot()
                 val transactions = expenses.sortedByDescending { it.expenseDate }.map { expense ->
                     Transaction(
                         id = expense.id.toString(),

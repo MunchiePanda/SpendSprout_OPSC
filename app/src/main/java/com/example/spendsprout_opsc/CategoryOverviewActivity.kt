@@ -9,10 +9,7 @@ import android.view.MenuItem
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.core.view.GravityCompat
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -20,13 +17,13 @@ import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import com.example.spendsprout_opsc.BudgetApp
 import com.example.spendsprout_opsc.categories.HierarchicalCategoryAdapter
 import com.example.spendsprout_opsc.categories.CategoryViewModel
 import com.example.spendsprout_opsc.categories.model.Category
 import com.example.spendsprout_opsc.categories.model.Subcategory
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.navigation.NavigationView
+import com.example.spendsprout_opsc.utils.UserDisplayUtils
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import java.text.SimpleDateFormat
@@ -41,20 +38,14 @@ class CategoryOverviewActivity : AppCompatActivity() {
     private lateinit var txtDateRange: TextView
     private lateinit var categoryViewModel: CategoryViewModel
     private lateinit var hierarchicalCategoryAdapter: HierarchicalCategoryAdapter
+    private val subcategoryRepository = com.example.spendsprout_opsc.firebase.SubcategoryRepository()
     private var startDate: Long? = null
     private var endDate: Long? = null
     private lateinit var sharedPreferences: SharedPreferences
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContentView(R.layout.activity_category_overview)
-        
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
-        }
         
         // Set up drawer + toolbar
         setupDrawer()
@@ -95,9 +86,7 @@ class CategoryOverviewActivity : AppCompatActivity() {
 
         // Set the username in the navigation header
         val headerView = navView.getHeaderView(0)
-        val txtUsername = headerView.findViewById<TextView>(R.id.txt_Username)
-        val currentUsername = sharedPreferences.getString("username", "User")
-        txtUsername.text = currentUsername
+        UserDisplayUtils.bindNavHeader(navView, this)
 
         navView.setNavigationItemSelectedListener { item ->
             when (item.itemId) {
@@ -254,7 +243,7 @@ class CategoryOverviewActivity : AppCompatActivity() {
                 
                 // Load the entity from database
                 val subcategoryEntity = withContext(Dispatchers.IO) {
-                    BudgetApp.db.subcategoryDao().getById(subcategoryId)
+                    subcategoryRepository.getSubcategoryById(subcategoryId)
                 }
                 
                 if (subcategoryEntity == null) {
@@ -264,7 +253,7 @@ class CategoryOverviewActivity : AppCompatActivity() {
                 
                 // Delete the subcategory
                 withContext(Dispatchers.IO) {
-                    BudgetApp.db.subcategoryDao().delete(subcategoryEntity)
+                    subcategoryRepository.deleteSubcategory(subcategoryEntity)
                 }
                 
                 // Reload the list
@@ -281,7 +270,7 @@ class CategoryOverviewActivity : AppCompatActivity() {
                     lifecycleScope.launch {
                         try {
                             withContext(Dispatchers.IO) {
-                                BudgetApp.db.subcategoryDao().insertAll(subcategoryEntity)
+                                subcategoryRepository.insertSubcategory(subcategoryEntity)
                             }
                             // Reload the list
                             loadCategoriesWithSubcategoriesFromDatabase()

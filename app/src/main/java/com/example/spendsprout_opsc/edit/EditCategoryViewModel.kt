@@ -1,8 +1,9 @@
 package com.example.spendsprout_opsc.edit
 
-import com.example.spendsprout_opsc.BudgetApp
 import com.example.spendsprout_opsc.roomdb.Subcategory_Entity
 import com.example.spendsprout_opsc.roomdb.Category_Entity
+import com.example.spendsprout_opsc.firebase.CategoryRepository
+import com.example.spendsprout_opsc.firebase.SubcategoryRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -11,6 +12,9 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 
 class EditCategoryViewModel {
+    
+    private val categoryRepository = CategoryRepository()
+    private val subcategoryRepository = SubcategoryRepository()
     
     fun saveCategory(name: String, type: String, allocatedBudget: Double, color: String, notes: String) {
         // Save category logic - validate first
@@ -30,7 +34,7 @@ class EditCategoryViewModel {
                     subcategoryAllocation = allocatedBudget,
                     subcategoryNotes = notes.ifBlank { null }
                 )
-                BudgetApp.db.subcategoryDao().insertAll(subcategory)
+                subcategoryRepository.insertSubcategory(subcategory)
                 android.util.Log.d("EditCategoryViewModel", "Subcategory saved: $name under $type")
             } catch (e: Exception) {
                 android.util.Log.e("EditCategoryViewModel", "Error saving subcategory: ${e.message}", e)
@@ -45,7 +49,7 @@ class EditCategoryViewModel {
             "savings" -> "Savings"
             else -> type.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
         }
-        val existing = BudgetApp.db.categoryDao().loadAllByNames(listOf(normalized))
+        val existing = categoryRepository.getAllCategories().first().filter { it.categoryName == normalized }
         if (existing.isNotEmpty()) return existing.first().id
 
         val nextId = getNextCategoryId()
@@ -57,28 +61,32 @@ class EditCategoryViewModel {
             categoryAllocation = 0.0,
             categoryNotes = null
         )
-        BudgetApp.db.categoryDao().insertAll(entity)
+        categoryRepository.insertCategory(entity)
         return nextId
     }
 
     private suspend fun getNextCategoryId(): Int {
-        val existing = BudgetApp.db.categoryDao().getAll().first()
+        val existing = categoryRepository.getAllCategories().first()
         return (existing.maxOfOrNull { it.id } ?: 0) + 1
     }
 
     private suspend fun getNextSubcategoryId(): Int {
         return try {
-            val existingSubcategories = BudgetApp.db.subcategoryDao().getAll()
+            val existingSubcategories = subcategoryRepository.getAllSubcategories().first()
             (existingSubcategories.maxOfOrNull { it.id } ?: 0) + 1
         } catch (e: Exception) {
             1 // Default to 1 if there's an error
         }
     }
     
+    suspend fun updateSubcategory(subcategory: Subcategory_Entity) {
+        subcategoryRepository.updateSubcategory(subcategory)
+    }
+    
     fun loadSubcategoryById(subcategoryId: Int, callback: (Subcategory_Entity?) -> Unit) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val subcategory = BudgetApp.db.subcategoryDao().getById(subcategoryId)
+                val subcategory = subcategoryRepository.getSubcategoryById(subcategoryId)
                 CoroutineScope(Dispatchers.Main).launch {
                     callback(subcategory)
                 }
@@ -93,7 +101,7 @@ class EditCategoryViewModel {
     fun getParentCategoryName(categoryId: Int): String {
         return try {
             runBlocking {
-                val categories = BudgetApp.db.categoryDao().getAll().first()
+                val categories = categoryRepository.getAllCategories().first()
                 categories.find { it.id == categoryId }?.categoryName ?: "Needs"
             }
         } catch (e: Exception) {

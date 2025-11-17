@@ -1,14 +1,20 @@
 package com.example.spendsprout_opsc.categories
 
-import com.example.spendsprout_opsc.BudgetApp
 import com.example.spendsprout_opsc.categories.model.Category
 import com.example.spendsprout_opsc.categories.model.Subcategory
+import com.example.spendsprout_opsc.firebase.CategoryRepository
+import com.example.spendsprout_opsc.firebase.SubcategoryRepository
+import com.example.spendsprout_opsc.firebase.TransactionRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.first
 
 class CategoryViewModel {
+    
+    private val categoryRepository = CategoryRepository()
+    private val subcategoryRepository = SubcategoryRepository()
+    private val transactionRepository = TransactionRepository()
     
     fun getAllCategories(): List<Category> {
         // For now, return empty list - will be populated by database queries
@@ -27,7 +33,7 @@ class CategoryViewModel {
                 // Ensure main categories exist (Needs, Wants, Savings)
                 ensureMainCategoriesExist()
                 
-                val categories = BudgetApp.db.categoryDao().getAll().first()
+                val categories = categoryRepository.getAllCategories().first()
                 val categoryList = mutableListOf<HierarchicalCategoryAdapter.CategoryWithSubcategories>()
                 for (category in categories) {
                     val allSubcategories = getSubcategoriesForCategory(category.id.toLong(), startDate, endDate)
@@ -79,7 +85,7 @@ class CategoryViewModel {
     fun loadCategoriesFromDatabase(callback: (List<Category>) -> Unit) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val categories = BudgetApp.db.categoryDao().getAll().first()
+                val categories = categoryRepository.getAllCategories().first()
                 val categoryList = mutableListOf<Category>()
                 for (category in categories) {
                     val spent = getCategorySpent(category.id.toLong())
@@ -108,7 +114,7 @@ class CategoryViewModel {
     fun loadCategoriesForDateRange(startDate: Long, endDate: Long, callback: (List<Category>) -> Unit) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val categories = BudgetApp.db.categoryDao().getAll().first()
+                val categories = categoryRepository.getAllCategories().first()
                 val categoryList = mutableListOf<Category>()
                 for (category in categories) {
                     val spent = getCategorySpentForDateRange(category.id.toLong(), startDate, endDate)
@@ -141,8 +147,8 @@ class CategoryViewModel {
     
     private suspend fun getCategorySpent(categoryId: Long): Double {
         return try {
-            val expenses = BudgetApp.db.expenseDao().getAll()
-            val categoryName = BudgetApp.db.categoryDao().getById(categoryId.toInt())?.categoryName
+            val expenses = transactionRepository.getAllTransactionsSnapshot()
+            val categoryName = categoryRepository.getCategoryById(categoryId.toInt())?.categoryName
             if (categoryName != null) {
                 expenses.filter { it.expenseCategory == categoryName }
                     .sumOf { expense ->
@@ -163,8 +169,8 @@ class CategoryViewModel {
     
     private suspend fun getCategorySpentForDateRange(categoryId: Long, startDate: Long, endDate: Long): Double {
         return try {
-            val expenses = BudgetApp.db.expenseDao().getAll()
-            val categoryName = BudgetApp.db.categoryDao().getById(categoryId.toInt())?.categoryName
+            val expenses = transactionRepository.getAllTransactionsSnapshot()
+            val categoryName = categoryRepository.getCategoryById(categoryId.toInt())?.categoryName
             if (categoryName != null) {
                 expenses.filter { 
                     it.expenseCategory == categoryName && 
@@ -192,7 +198,7 @@ class CategoryViewModel {
     
     private suspend fun getSubcategoriesForCategory(categoryId: Long, startDate: Long?, endDate: Long?): List<com.example.spendsprout_opsc.wants.model.Subcategory> {
         return try {
-            val subcategoryEntities = BudgetApp.db.subcategoryDao().getByCategoryId(categoryId)
+            val subcategoryEntities = subcategoryRepository.getByCategoryId(categoryId)
             subcategoryEntities.map { subcategory ->
                 // Calculate actual spent amount from transactions for this subcategory
                 val actualSpent = getSubcategorySpent(subcategory.id.toLong(), startDate, endDate)
@@ -215,8 +221,8 @@ class CategoryViewModel {
     
     private suspend fun getSubcategorySpent(subcategoryId: Long, startDate: Long?, endDate: Long?): Double {
         return try {
-            val expenses = BudgetApp.db.expenseDao().getAll()
-            val subcategoryName = BudgetApp.db.subcategoryDao().getById(subcategoryId.toInt())?.subcategoryName
+            val expenses = transactionRepository.getAllTransactionsSnapshot()
+            val subcategoryName = subcategoryRepository.getSubcategoryById(subcategoryId.toInt())?.subcategoryName
             if (subcategoryName != null) {
                 val filteredExpenses = if (startDate != null && endDate != null) {
                     android.util.Log.d("CategoryViewModel", "Filtering subcategory '$subcategoryName' by date: $startDate to $endDate")
@@ -253,7 +259,7 @@ class CategoryViewModel {
     
     private suspend fun ensureMainCategoriesExist() {
         try {
-            val existingCategories = BudgetApp.db.categoryDao().getAll().first()
+            val existingCategories = categoryRepository.getAllCategories().first()
             val existingNames = existingCategories.map { it.categoryName.lowercase() }.toSet()
 
             val toInsert = mutableListOf<com.example.spendsprout_opsc.roomdb.Category_Entity>()
@@ -294,7 +300,7 @@ class CategoryViewModel {
                 )
             }
             if (toInsert.isNotEmpty()) {
-                BudgetApp.db.categoryDao().insertAll(*toInsert.toTypedArray())
+                toInsert.forEach { categoryRepository.insertCategory(it) }
             }
         } catch (e: Exception) {
             android.util.Log.e("CategoryViewModel", "Error ensuring main categories: ${e.message}", e)
@@ -321,7 +327,7 @@ class CategoryViewModel {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 // Find the category by name
-                val categories = BudgetApp.db.categoryDao().getAll().first()
+                val categories = categoryRepository.getAllCategories().first()
                 val category = categories.find { it.categoryName.equals(categoryName, ignoreCase = true) }
                 
                 if (category != null) {

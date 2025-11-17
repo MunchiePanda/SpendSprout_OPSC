@@ -2,8 +2,11 @@ package com.example.spendsprout_opsc.sprout
 
 import android.content.Context
 import android.content.SharedPreferences
-import com.example.spendsprout_opsc.BudgetApp
 import com.example.spendsprout_opsc.ExpenseType
+import com.example.spendsprout_opsc.firebase.BudgetRepository
+import com.example.spendsprout_opsc.firebase.CategoryRepository
+import com.example.spendsprout_opsc.firebase.SubcategoryRepository
+import com.example.spendsprout_opsc.firebase.TransactionRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -13,12 +16,16 @@ import java.util.*
 class SproutViewModel(private val context: Context) {
     
     private val prefs: SharedPreferences = context.getSharedPreferences("SproutPrefs", Context.MODE_PRIVATE)
+    private val budgetRepository = BudgetRepository()
+    private val categoryRepository = CategoryRepository()
+    private val subcategoryRepository = SubcategoryRepository()
+    private val transactionRepository = TransactionRepository()
     
     // Calculate budget adherence (0-100%)
     fun calculateBudgetAdherence(callback: (Int) -> Unit) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val budgets = BudgetApp.db.budgetDao().getAll().first()
+                val budgets = budgetRepository.getAllBudgets().first()
                 if (budgets.isEmpty()) {
                     CoroutineScope(Dispatchers.Main).launch { callback(0) }
                     return@launch
@@ -43,7 +50,7 @@ class SproutViewModel(private val context: Context) {
                 }.timeInMillis
                 
                 // Get expenses for current month
-                val expenses = BudgetApp.db.expenseDao().getBetweenDates(startOfMonth, endOfMonth)
+                val expenses = transactionRepository.getTransactionsBetweenDates(startOfMonth, endOfMonth)
                 val totalSpent = expenses
                     .filter { it.expenseType == ExpenseType.Expense }
                     .sumOf { it.expenseAmount }
@@ -157,8 +164,8 @@ class SproutViewModel(private val context: Context) {
     fun calculateCategoryAdherence(callback: (Int) -> Unit) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val categories = BudgetApp.db.categoryDao().getAll().first()
-                val subcategories = BudgetApp.db.subcategoryDao().getAll()
+                val categories = categoryRepository.getAllCategories().first()
+                val subcategories = subcategoryRepository.getAllSubcategories().first()
                 
                 if (categories.isEmpty() && subcategories.isEmpty()) {
                     CoroutineScope(Dispatchers.Main).launch { callback(0) }
@@ -182,7 +189,7 @@ class SproutViewModel(private val context: Context) {
                     set(Calendar.MILLISECOND, 999)
                 }.timeInMillis
                 
-                val expenses = BudgetApp.db.expenseDao().getBetweenDates(startOfMonth, endOfMonth)
+                val expenses = transactionRepository.getTransactionsBetweenDates(startOfMonth, endOfMonth)
                 val expenseTransactions = expenses.filter { it.expenseType == ExpenseType.Expense }
                 
                 var totalAdherence = 0.0

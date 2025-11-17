@@ -39,13 +39,12 @@ import com.google.android.material.datepicker.MaterialDatePicker
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.flow.first
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
-import com.example.spendsprout_opsc.BudgetApp
 import com.example.spendsprout_opsc.ExpenseType
+import com.example.spendsprout_opsc.utils.UserDisplayUtils
 
 class ReportsActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
@@ -88,6 +87,7 @@ class ReportsActivity : AppCompatActivity(), NavigationView.OnNavigationItemSele
         }
 
         navView.setNavigationItemSelectedListener(this)
+        UserDisplayUtils.bindNavHeader(navView, this)
 
         // Initialize ViewModel
         reportsViewModel = ReportsViewModel()
@@ -238,8 +238,7 @@ class ReportsActivity : AppCompatActivity(), NavigationView.OnNavigationItemSele
             try {
                 val (effectiveStart, effectiveEnd) = resolveEffectiveDateRange()
 
-                // Load actual expenses from database
-                val expenses = BudgetApp.db.expenseDao().getBetweenDates(effectiveStart, effectiveEnd)
+                val expenses = reportsViewModel.getTransactionsBetweenDates(effectiveStart, effectiveEnd)
 
                 // Group expenses by day and calculate daily totals
                 val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
@@ -271,7 +270,7 @@ class ReportsActivity : AppCompatActivity(), NavigationView.OnNavigationItemSele
                 }
 
                 // Get budget data from database (use first budget or fallback to settings)
-                val budgets = BudgetApp.db.budgetDao().getAll().first()
+                val budgets = reportsViewModel.getBudgetsSnapshot()
                 val minBudget: Float
                 val maxBudget: Float
                 
@@ -371,14 +370,12 @@ class ReportsActivity : AppCompatActivity(), NavigationView.OnNavigationItemSele
             try {
                 val (effectiveStart, effectiveEnd) = resolveEffectiveDateRange()
 
-                // Load expenses from database
-                val expenses = BudgetApp.db.expenseDao().getBetweenDates(effectiveStart, effectiveEnd)
+                val expenses = reportsViewModel.getTransactionsBetweenDates(effectiveStart, effectiveEnd)
 
                 // Filter only expense transactions (not income)
                 val expenseTransactions = expenses.filter { it.expenseType == ExpenseType.Expense }
 
-                // Load categories to get colors
-                val categories = BudgetApp.db.categoryDao().getAll().first()
+                val categories = reportsViewModel.getCategoriesSnapshot()
                 val categoryColorMap = categories.associate { it.categoryName to it.categoryColor }
 
                 // Group expenses by category and calculate totals
@@ -420,8 +417,7 @@ class ReportsActivity : AppCompatActivity(), NavigationView.OnNavigationItemSele
                     }
                 }
 
-                // Load subcategories to get their data
-                val subcategories = BudgetApp.db.subcategoryDao().getAll()
+                val subcategories = reportsViewModel.getSubcategoriesSnapshot()
                 val subcategoryColorMap = subcategories.associate { it.subcategoryName to it.subcategoryColor }
 
                 // Group expenses by subcategory name (expenseCategory field stores subcategory name)

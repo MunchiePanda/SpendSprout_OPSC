@@ -22,6 +22,7 @@ import com.example.spendsprout_opsc.reports.ReportsActivity
 import com.example.spendsprout_opsc.settings.SettingsActivity
 import com.example.spendsprout_opsc.transactions.TransactionsActivity
 import com.google.android.material.navigation.NavigationView
+import com.example.spendsprout_opsc.utils.UserDisplayUtils
 
 class SproutActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
@@ -68,6 +69,7 @@ class SproutActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelec
         }
 
         navView.setNavigationItemSelectedListener(this)
+        UserDisplayUtils.bindNavHeader(navView, this)
 
         // Initialize ViewModel
         sproutViewModel = SproutViewModel(this)

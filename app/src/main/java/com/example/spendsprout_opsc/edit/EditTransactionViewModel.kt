@@ -1,8 +1,8 @@
 package com.example.spendsprout_opsc.edit
 
-import com.example.spendsprout_opsc.BudgetApp
 import com.example.spendsprout_opsc.ExpenseType
 import com.example.spendsprout_opsc.RepeatType
+import com.example.spendsprout_opsc.firebase.TransactionRepository
 import com.example.spendsprout_opsc.roomdb.Expense_Entity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -11,6 +11,8 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 class EditTransactionViewModel {
+    
+    private val transactionRepository = TransactionRepository()
     
     fun saveTransaction(
         description: String,
@@ -43,7 +45,7 @@ class EditTransactionViewModel {
                     expenseStart = null, // TODO: Add time picker support
                     expenseEnd = null    // TODO: Add time picker support
                 )
-                BudgetApp.db.expenseDao().insert(entity)
+                transactionRepository.insertTransaction(entity)
                 android.util.Log.d("EditTransactionViewModel", "Transaction saved: $description, $amount, $category")
             } catch (e: Exception) {
                 android.util.Log.e("EditTransactionViewModel", "Error saving transaction: ${e.message}", e)
@@ -71,7 +73,7 @@ class EditTransactionViewModel {
     fun loadTransactionById(transactionId: Long, callback: (Expense_Entity?) -> Unit) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val expense = BudgetApp.db.expenseDao().getById(transactionId)
+                val expense = transactionRepository.getTransactionById(transactionId)
                 CoroutineScope(Dispatchers.Main).launch {
                     callback(expense)
                 }
@@ -111,7 +113,7 @@ class EditTransactionViewModel {
                     expenseEnd = null
                 )
                 
-                BudgetApp.db.expenseDao().update(expense)
+                transactionRepository.updateTransaction(expense)
                 android.util.Log.d("EditTransactionViewModel", "Transaction updated: $name")
             } catch (e: Exception) {
                 android.util.Log.e("EditTransactionViewModel", "Error updating transaction: ${e.message}", e)

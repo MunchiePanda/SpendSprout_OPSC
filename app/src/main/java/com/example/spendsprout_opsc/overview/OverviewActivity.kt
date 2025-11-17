@@ -26,6 +26,8 @@ import com.example.spendsprout_opsc.reports.ReportsActivity
 import com.example.spendsprout_opsc.settings.SettingsActivity
 import com.example.spendsprout_opsc.transactions.TransactionsActivity
 import com.google.android.material.navigation.NavigationView
+import com.example.spendsprout_opsc.utils.UserDisplayUtils
+import com.google.firebase.auth.FirebaseAuth
 
 /**
  * OverviewActivity - Main Dashboard Scene
@@ -98,10 +100,7 @@ class OverviewActivity : AppCompatActivity() {
             val headerView = navigationView.getHeaderView(0)
             btnCloseMenu = headerView.findViewById(R.id.btn_CloseMenu)
             
-            // Set the username in the navigation header
-            val txtUsername = headerView.findViewById<TextView>(R.id.txt_Username)
-            val currentUsername = sharedPreferences.getString("username", "User")
-            txtUsername.text = currentUsername
+            UserDisplayUtils.bindNavHeader(navigationView, this)
 
             //MenuDrawer: Close menu button click listener to close drawer
             btnCloseMenu.setOnClickListener {
@@ -338,11 +337,11 @@ class OverviewActivity : AppCompatActivity() {
     }
     
     private fun logout() {
-        // Clear login status
-        sharedPreferences.edit()
-            .putBoolean("is_logged_in", false)
-            .remove("username")
-            .apply()
+        // Sign out from Firebase and clear SharedPreferences
+        com.example.spendsprout_opsc.login.LoginActivity.logout(
+            sharedPreferences,
+            FirebaseAuth.getInstance()
+        )
         
         // Navigate back to login screen
         val intent = Intent(this, com.example.spendsprout_opsc.login.LoginActivity::class.java)

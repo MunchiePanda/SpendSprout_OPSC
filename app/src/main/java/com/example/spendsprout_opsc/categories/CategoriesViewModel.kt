@@ -1,13 +1,20 @@
 package com.example.spendsprout_opsc.categories
 
 import com.example.spendsprout_opsc.categories.model.Category
-import com.example.spendsprout_opsc.BudgetApp
+import com.example.spendsprout_opsc.firebase.CategoryRepository
+import com.example.spendsprout_opsc.firebase.SubcategoryRepository
+import com.example.spendsprout_opsc.firebase.TransactionRepository
+import com.example.spendsprout_opsc.ExpenseType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.first
 
 class CategoriesViewModel {
+    
+    private val categoryRepository = CategoryRepository()
+    private val subcategoryRepository = SubcategoryRepository()
+    private val transactionRepository = TransactionRepository()
     
     fun getAllCategories(): List<Category> {
         return listOf(
@@ -48,16 +55,18 @@ class CategoriesViewModel {
     fun loadMainCategoriesFromDatabase(callback: (List<Category>) -> Unit) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val categories = BudgetApp.db.categoryDao().getAll().first()
+                val categories = categoryRepository.getAllCategories().first()
                 val categoryList = mutableListOf<Category>()
                 for (category in categories) {
-                    val spent = getCategorySpent(category.id.toLong())
+                    val categoryId = category.id.toLong()
+                    val spent = getCategorySpent(categoryId)
+                    val allocation = calculateCategoryAllocation(categoryId, category.categoryAllocation)
                     categoryList.add(
                         Category(
                             id = category.id.toString(),
                             name = category.categoryName,
                             spent = formatAmount(spent),
-                            allocation = formatAmount(category.categoryAllocation),
+                            allocation = formatAmount(allocation),
                             color = getCategoryColor(category.categoryName)
                         )
                     )
@@ -75,20 +84,15 @@ class CategoriesViewModel {
     
     private suspend fun getCategorySpent(categoryId: Long): Double {
         return try {
-            val expenses = BudgetApp.db.expenseDao().getAll()
-            val categoryName = BudgetApp.db.categoryDao().getById(categoryId.toInt())?.categoryName
-            if (categoryName != null) {
-                expenses.filter { it.expenseCategory == categoryName }
-                    .sumOf { expense ->
-                        // Expenses should be negative values (decreases)
-                        if (expense.expenseType.name == "Expense") {
-                            -expense.expenseAmount  // Negative for expenses
-                        } else {
-                            expense.expenseAmount   // Positive for income
-                        }
-                    }
-            } else {
-                0.0
+            val category = categoryRepository.getCategoryById(categoryId.toInt()) ?: return 0.0
+            val subcategories = subcategoryRepository.getByCategoryId(categoryId)
+            val subcategoryNames = subcategories.map { it.subcategoryName }.toSet()
+            val expenses = transactionRepository.getAllTransactionsSnapshot()
+            expenses.filter { expense ->
+                expense.expenseCategory == category.categoryName ||
+                        subcategoryNames.contains(expense.expenseCategory)
+            }.sumOf { expense ->
+                if (expense.expenseType == ExpenseType.Expense) expense.expenseAmount else 0.0
             }
         } catch (e: Exception) {
             0.0
@@ -109,7 +113,7 @@ class CategoriesViewModel {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 // Find the category by name
-                val categories = BudgetApp.db.categoryDao().getAll().first()
+                val categories = categoryRepository.getAllCategories().first()
                 val category = categories.find { it.categoryName.equals(categoryName, ignoreCase = true) }
                 
                 if (category != null) {
@@ -134,7 +138,7 @@ class CategoriesViewModel {
     
     private suspend fun getSubcategoriesForCategory(categoryId: Long): List<com.example.spendsprout_opsc.wants.model.Subcategory> {
         return try {
-            val subcategoryEntities = BudgetApp.db.subcategoryDao().getByCategoryId(categoryId)
+            val subcategoryEntities = subcategoryRepository.getByCategoryId(categoryId)
             android.util.Log.d("CategoriesViewModel", "Found ${subcategoryEntities.size} subcategories for categoryId: $categoryId")
             
             subcategoryEntities.map { subcategory ->
@@ -158,8 +162,8 @@ class CategoriesViewModel {
     
     private suspend fun getSubcategorySpent(subcategoryId: Long): Double {
         return try {
-            val expenses = BudgetApp.db.expenseDao().getAll()
-            val subcategoryName = BudgetApp.db.subcategoryDao().getById(subcategoryId.toInt())?.subcategoryName
+            val expenses = transactionRepository.getAllTransactionsSnapshot()
+            val subcategoryName = subcategoryRepository.getSubcategoryById(subcategoryId.toInt())?.subcategoryName
             if (subcategoryName != null) {
                 expenses.filter { it.expenseCategory == subcategoryName }
                     .sumOf { expense ->
@@ -177,11 +181,24 @@ class CategoriesViewModel {
             0.0
         }
     }
+
+    private suspend fun calculateCategoryAllocation(categoryId: Long, fallback: Double): Double {
+        return try {
+            val subcategories = subcategoryRepository.getByCategoryId(categoryId)
+            if (subcategories.isNotEmpty()) {
+                subcategories.sumOf { it.subcategoryAllocation }
+            } else {
+                fallback
+            }
+        } catch (e: Exception) {
+            fallback
+        }
+    }
     
     private fun formatAmount(amount: Double): String {
-        val sign = if (amount < 0) "-" else ""
         val absoluteAmount = kotlin.math.abs(amount)
-        return "$sign R ${String.format("%.2f", absoluteAmount)}"
+        val prefix = if (amount < 0) "- R" else "R"
+        return "$prefix ${String.format("%.2f", absoluteAmount)}"
     }
     
     private fun getSubcategoryColor(colorInt: Int): String {
