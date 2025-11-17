@@ -142,7 +142,8 @@ class CategoryViewModel {
     private fun formatAmount(amount: Double): String {
         val sign = if (amount < 0) "-" else ""
         val absoluteAmount = kotlin.math.abs(amount)
-        return "$sign R ${String.format("%.2f", absoluteAmount)}"
+        // Use Locale.US to ensure consistent formatting with dot as decimal separator
+        return "$sign R ${String.format(java.util.Locale.US, "%.2f", absoluteAmount)}"
     }
     
     private suspend fun getCategorySpent(categoryId: Long): Double {
@@ -236,18 +237,25 @@ class CategoryViewModel {
                     expenses.filter { it.expenseCategory == subcategoryName }
                 }
                 
-                filteredExpenses.sumOf { expense ->
-                    // Expenses should be negative values (decreases)
+                android.util.Log.d("CategoryViewModel", "Found ${filteredExpenses.size} transactions for subcategory '$subcategoryName'")
+                
+                val totalSpent = filteredExpenses.sumOf { expense ->
+                    // For expenses, use positive amount (how much was spent)
+                    // For income, subtract it (income reduces spending)
                     if (expense.expenseType.name == "Expense") {
-                        -expense.expenseAmount  // Negative for expenses
+                        expense.expenseAmount  // Positive amount for expenses
                     } else {
-                        expense.expenseAmount   // Positive for income
+                        -expense.expenseAmount   // Negative for income (reduces spending)
                     }
                 }
+                
+                android.util.Log.d("CategoryViewModel", "Subcategory '$subcategoryName' total spent: $totalSpent")
+                totalSpent
             } else {
                 0.0
             }
         } catch (e: Exception) {
+            android.util.Log.e("CategoryViewModel", "Error calculating subcategory spent: ${e.message}", e)
             0.0
         }
     }
@@ -316,8 +324,17 @@ class CategoryViewModel {
     
     private fun parseAmountFromString(amountString: String): Double {
         return try {
-            // Remove "R " prefix and any commas, then parse as double
-            amountString.replace("R ", "").replace(",", "").toDouble()
+            // Remove "R " prefix and spaces, then handle locale-specific decimal separators
+            var cleaned = amountString.replace("R ", "").replace(" ", "").trim()
+            // Replace comma decimal separator with dot if present (for locales like "980000,00")
+            if (cleaned.contains(",") && !cleaned.contains(".")) {
+                // If it has comma but no dot, assume comma is decimal separator
+                cleaned = cleaned.replace(",", ".")
+            } else {
+                // Otherwise, remove commas as thousands separators
+                cleaned = cleaned.replace(",", "")
+            }
+            cleaned.toDouble()
         } catch (e: Exception) {
             0.0
         }

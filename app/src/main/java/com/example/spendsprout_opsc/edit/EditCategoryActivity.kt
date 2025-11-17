@@ -200,33 +200,58 @@ class EditCategoryActivity : AppCompatActivity() {
                     Log.d("EditCategoryActivity", "Loading subcategory with ID: $subcategoryId")
                     // Load existing subcategory data
                     editCategoryViewModel.loadSubcategoryById(subcategoryId!!) { subcategory ->
-                        if (subcategory != null) {
-                            existingSubcategory = subcategory
-                            Log.d("EditCategoryActivity", "Loaded subcategory: ${subcategory.subcategoryName}, allocation: ${subcategory.subcategoryAllocation}")
-                            
-                            // Pre-fill the form fields
-                            findViewById<AutoCompleteTextView>(R.id.edt_CategoryName).setText(subcategory.subcategoryName)
-                            findViewById<EditText>(R.id.edt_AllocatedAmount).setText(String.format("%.2f", subcategory.subcategoryAllocation))
-                            findViewById<EditText>(R.id.edt_Notes).setText(subcategory.subcategoryNotes ?: "")
-                            
-                            // Set the parent category type
-                            val parentCategoryName = editCategoryViewModel.getParentCategoryName(subcategory.categoryId)
-                            Log.d("EditCategoryActivity", "Parent category name: $parentCategoryName")
-                            val spinnerType = findViewById<Spinner>(R.id.spinner_Type)
-                            (spinnerType.adapter as? ArrayAdapter<String>)?.let {
-                                val position = it.getPosition(parentCategoryName)
-                                if (position >= 0) {
-                                    spinnerType.setSelection(position)
-                                    Log.d("EditCategoryActivity", "Set spinner to position: $position")
+                        lifecycleScope.launch {
+                            try {
+                                if (subcategory != null) {
+                                    existingSubcategory = subcategory
+                                    Log.d("EditCategoryActivity", "Loaded subcategory: ${subcategory.subcategoryName}, allocation: ${subcategory.subcategoryAllocation}")
+                                    
+                                    // Pre-fill the form fields
+                                    findViewById<AutoCompleteTextView>(R.id.edt_CategoryName).setText(subcategory.subcategoryName)
+                                    findViewById<EditText>(R.id.edt_AllocatedAmount).setText(String.format("%.2f", subcategory.subcategoryAllocation))
+                                    findViewById<EditText>(R.id.edt_Notes).setText(subcategory.subcategoryNotes ?: "")
+                                    
+                                    // Set the parent category type
+                                    val parentCategoryName = try {
+                                        editCategoryViewModel.getParentCategoryName(subcategory.categoryId)
+                                    } catch (e: Exception) {
+                                        Log.e("EditCategoryActivity", "Error getting parent category name", e)
+                                        "Needs"
+                                    }
+                                    Log.d("EditCategoryActivity", "Parent category name: $parentCategoryName")
+                                    val spinnerType = findViewById<Spinner>(R.id.spinner_Type)
+                                    (spinnerType.adapter as? ArrayAdapter<String>)?.let {
+                                        val position = it.getPosition(parentCategoryName)
+                                        if (position >= 0) {
+                                            spinnerType.setSelection(position)
+                                            Log.d("EditCategoryActivity", "Set spinner to position: $position")
+                                        } else {
+                                            Log.w("EditCategoryActivity", "Could not find parent category '$parentCategoryName' in spinner")
+                                        }
+                                    }
+                                    
+                                    // Set the color spinner based on subcategory color
+                                    val colorName = getColorNameFromInt(subcategory.subcategoryColor)
+                                    val spinnerColor = findViewById<Spinner>(R.id.spinner_Color)
+                                    (spinnerColor.adapter as? ArrayAdapter<String>)?.let {
+                                        val colorPosition = it.getPosition(colorName)
+                                        if (colorPosition >= 0) {
+                                            spinnerColor.setSelection(colorPosition)
+                                            Log.d("EditCategoryActivity", "Set color spinner to position: $colorPosition ($colorName)")
+                                        } else {
+                                            Log.w("EditCategoryActivity", "Could not find color '$colorName' in spinner")
+                                        }
+                                    }
+                                    
+                                    Log.d("EditCategoryActivity", "Prefilled form with subcategory: ${subcategory.subcategoryName}")
                                 } else {
-                                    Log.w("EditCategoryActivity", "Could not find parent category '$parentCategoryName' in spinner")
+                                    Log.w("EditCategoryActivity", "Subcategory not found for ID: $subcategoryId")
+                                    Toast.makeText(this@EditCategoryActivity, "Subcategory not found", Toast.LENGTH_SHORT).show()
                                 }
+                            } catch (e: Exception) {
+                                Log.e("EditCategoryActivity", "Error prefilling form: ${e.message}", e)
+                                Toast.makeText(this@EditCategoryActivity, "Error loading subcategory data", Toast.LENGTH_SHORT).show()
                             }
-                            
-                            Log.d("EditCategoryActivity", "Prefilled form with subcategory: ${subcategory.subcategoryName}")
-                        } else {
-                            Log.w("EditCategoryActivity", "Subcategory not found for ID: $subcategoryId")
-                            Toast.makeText(this@EditCategoryActivity, "Subcategory not found", Toast.LENGTH_SHORT).show()
                         }
                     }
                 } catch (e: Exception) {
@@ -234,6 +259,18 @@ class EditCategoryActivity : AppCompatActivity() {
                     Toast.makeText(this@EditCategoryActivity, "Error loading subcategory data", Toast.LENGTH_SHORT).show()
                 }
             }
+        }
+    }
+    
+    private fun getColorNameFromInt(colorInt: Int): String {
+        val colorHex = String.format("#%06X", 0xFFFFFF and colorInt)
+        return when (colorHex.uppercase()) {
+            "#F44336" -> "Red"
+            "#2196F3" -> "Blue"
+            "#4CAF50" -> "Green"
+            "#9C27B0" -> "Purple"
+            "#FF9800" -> "Orange"
+            else -> "None"
         }
     }
 

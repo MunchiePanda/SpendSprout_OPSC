@@ -165,19 +165,26 @@ class CategoriesViewModel {
             val expenses = transactionRepository.getAllTransactionsSnapshot()
             val subcategoryName = subcategoryRepository.getSubcategoryById(subcategoryId.toInt())?.subcategoryName
             if (subcategoryName != null) {
-                expenses.filter { it.expenseCategory == subcategoryName }
-                    .sumOf { expense ->
-                        // Expenses should be negative values (decreases)
-                        if (expense.expenseType.name == "Expense") {
-                            -expense.expenseAmount  // Negative for expenses
-                        } else {
-                            expense.expenseAmount   // Positive for income
-                        }
+                val filteredExpenses = expenses.filter { it.expenseCategory == subcategoryName }
+                android.util.Log.d("CategoriesViewModel", "Found ${filteredExpenses.size} transactions for subcategory '$subcategoryName'")
+                
+                val totalSpent = filteredExpenses.sumOf { expense ->
+                    // For expenses, use positive amount (how much was spent)
+                    // For income, subtract it (income reduces spending)
+                    if (expense.expenseType.name == "Expense") {
+                        expense.expenseAmount  // Positive amount for expenses
+                    } else {
+                        -expense.expenseAmount   // Negative for income (reduces spending)
                     }
+                }
+                
+                android.util.Log.d("CategoriesViewModel", "Subcategory '$subcategoryName' total spent: $totalSpent")
+                totalSpent
             } else {
                 0.0
             }
         } catch (e: Exception) {
+            android.util.Log.e("CategoriesViewModel", "Error calculating subcategory spent: ${e.message}", e)
             0.0
         }
     }
@@ -196,9 +203,12 @@ class CategoriesViewModel {
     }
     
     private fun formatAmount(amount: Double): String {
+        // Spent amounts should always be positive (representing how much was spent)
+        // Negative values indicate income that reduces spending
         val absoluteAmount = kotlin.math.abs(amount)
         val prefix = if (amount < 0) "- R" else "R"
-        return "$prefix ${String.format("%.2f", absoluteAmount)}"
+        // Use Locale.US to ensure consistent formatting with dot as decimal separator
+        return "$prefix ${String.format(java.util.Locale.US, "%.2f", absoluteAmount)}"
     }
     
     private fun getSubcategoryColor(colorInt: Int): String {

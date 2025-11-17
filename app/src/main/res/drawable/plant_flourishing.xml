@@ -32,16 +32,16 @@
         android:pathData="M95,45 Q95,5 100,30 Q105,55 100,45 Q95,50 95,45" />
     <!-- Beautiful flowers -->
     <path
-        android:fillColor="#FF1493"
+        android:fillColor="#7B5EA4"
         android:pathData="M 100,33 A 12,12 0 1,1 100,57 A 12,12 0 1,1 100,33 Z" />
     <path
-        android:fillColor="#FF69B4"
+        android:fillColor="#9F8DD0"
         android:pathData="M 85,40 A 10,10 0 1,1 85,60 A 10,10 0 1,1 85,40 Z" />
     <path
-        android:fillColor="#FF69B4"
+        android:fillColor="#9F8DD0"
         android:pathData="M 115,40 A 10,10 0 1,1 115,60 A 10,10 0 1,1 115,40 Z" />
     <path
-        android:fillColor="#FFB6C1"
+        android:fillColor="#D9B498"
         android:pathData="M 100,44 A 6,6 0 1,1 100,56 A 6,6 0 1,1 100,44 Z" />
 </vector>
 

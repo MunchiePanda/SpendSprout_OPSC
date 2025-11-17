@@ -47,9 +47,9 @@ class SubcategoryAdapter(
         
         // Format balance with proper sign
         val balanceText = if (balanceValue >= 0) {
-            "R ${String.format("%.2f", balanceValue)}"
+            "R ${String.format(java.util.Locale.US, "%.2f", balanceValue)}"
         } else {
-            "-R ${String.format("%.2f", kotlin.math.abs(balanceValue))}"
+            "-R ${String.format(java.util.Locale.US, "%.2f", kotlin.math.abs(balanceValue))}"
         }
         holder.balanceTextView.text = balanceText
         
@@ -79,14 +79,25 @@ class SubcategoryAdapter(
     override fun getItemCount(): Int = subcategories.size
 
     private fun parseMoney(text: String): Double {
-        // Remove currency symbol, commas, and extra spaces
-        val cleanedText = text.replace("R", "").replace(",", "").replace(" ", "").trim()
+        // Remove currency symbol and extra spaces
+        var cleanedText = text.replace("R", "").replace(" ", "").trim()
         
         // Handle negative values properly
         val isNegative = cleanedText.startsWith("-")
-        val absoluteValue = if (isNegative) cleanedText.substring(1) else cleanedText
+        if (isNegative) {
+            cleanedText = cleanedText.substring(1)
+        }
         
-        val value = absoluteValue.toDoubleOrNull() ?: 0.0
+        // Handle locale-specific decimal separators
+        // If it has comma but no dot, assume comma is decimal separator
+        if (cleanedText.contains(",") && !cleanedText.contains(".")) {
+            cleanedText = cleanedText.replace(",", ".")
+        } else {
+            // Otherwise, remove commas as thousands separators
+            cleanedText = cleanedText.replace(",", "")
+        }
+        
+        val value = cleanedText.toDoubleOrNull() ?: 0.0
         return if (isNegative) -value else value
     }
 }

@@ -98,12 +98,10 @@ class EditCategoryViewModel {
         }
     }
     
-    fun getParentCategoryName(categoryId: Int): String {
+    suspend fun getParentCategoryName(categoryId: Int): String {
         return try {
-            runBlocking {
-                val categories = categoryRepository.getAllCategories().first()
-                categories.find { it.id == categoryId }?.categoryName ?: "Needs"
-            }
+            val categories = categoryRepository.getAllCategories().first()
+            categories.find { it.id == categoryId }?.categoryName ?: "Needs"
         } catch (e: Exception) {
             "Needs"
         }

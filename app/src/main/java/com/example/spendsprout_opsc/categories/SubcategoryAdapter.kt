@@ -32,18 +32,37 @@ class SubcategoryAdapter(
     override fun onBindViewHolder(holder: SubcategoryViewHolder, position: Int) {
         val subcategory = subcategories[position]
         holder.nameTextView.text = subcategory.name
-        holder.balanceTextView.text = subcategory.spent
         holder.allocationTextView.text = subcategory.allocation
-        holder.spentTextView.text = "" // Clear spent text
+        holder.spentTextView.text = subcategory.spent
+        
+        // Parse spent and allocation to calculate balance
+        val spentValue = parseMoney(subcategory.spent)
+        val allocationValue = parseMoney(subcategory.allocation)
+        val balanceValue = allocationValue - kotlin.math.abs(spentValue) // Balance = allocation - spent
+        
+        // Format balance with proper sign
+        val balanceText = if (balanceValue >= 0) {
+            "R ${String.format(java.util.Locale.US, "%.2f", balanceValue)}"
+        } else {
+            "-R ${String.format(java.util.Locale.US, "%.2f", kotlin.math.abs(balanceValue))}"
+        }
+        holder.balanceTextView.text = balanceText
         
         // Set subcategory color
         holder.imageView.setColorFilter(android.graphics.Color.parseColor(subcategory.color))
         
-        // Set amount color based on positive/negative
-        if (subcategory.spent.startsWith("+") || !subcategory.spent.startsWith("-")) {
+        // Set balance color based on positive/negative
+        if (balanceValue >= 0) {
             holder.balanceTextView.setTextColor(android.graphics.Color.parseColor("#77B950"))
         } else {
             holder.balanceTextView.setTextColor(android.graphics.Color.parseColor("#E94444"))
+        }
+        
+        // Set spent amount color
+        if (spentValue < 0 || subcategory.spent.trim().startsWith("-")) {
+            holder.spentTextView.setTextColor(android.graphics.Color.parseColor("#E94444"))
+        } else {
+            holder.spentTextView.setTextColor(android.graphics.Color.parseColor("#77B950"))
         }
         
         // Set click listener
@@ -56,6 +75,29 @@ class SubcategoryAdapter(
                 true
             }
         }
+    }
+    
+    private fun parseMoney(text: String): Double {
+        // Remove currency symbol and extra spaces
+        var cleanedText = text.replace("R", "").replace(" ", "").trim()
+        
+        // Handle negative values properly
+        val isNegative = cleanedText.startsWith("-")
+        if (isNegative) {
+            cleanedText = cleanedText.substring(1)
+        }
+        
+        // Handle locale-specific decimal separators
+        // If it has comma but no dot, assume comma is decimal separator
+        if (cleanedText.contains(",") && !cleanedText.contains(".")) {
+            cleanedText = cleanedText.replace(",", ".")
+        } else {
+            // Otherwise, remove commas as thousands separators
+            cleanedText = cleanedText.replace(",", "")
+        }
+        
+        val value = cleanedText.toDoubleOrNull() ?: 0.0
+        return if (isNegative) -value else value
     }
 
     override fun getItemCount(): Int = subcategories.size
