@@ -15,7 +15,6 @@ import android.widget.Spinner
 import android.net.Uri
 import androidx.activity.result.contract.ActivityResultContracts
 import java.text.SimpleDateFormat
-import java.util.Date
 import android.widget.Switch
 import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
@@ -34,6 +33,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 
 class EditTransactionActivity : AppCompatActivity() {
 
@@ -46,6 +47,7 @@ class EditTransactionActivity : AppCompatActivity() {
     private lateinit var editTransactionViewModel: EditTransactionViewModel
     private var editingTransactionId: Long? = null
     private var selectedImageUri: Uri? = null
+    private var selectedDateMillis: Long? = null
     private val subcategoryRepository = com.example.spendsprout_opsc.firebase.SubcategoryRepository()
 
     private val pickImageLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -192,21 +194,35 @@ class EditTransactionActivity : AppCompatActivity() {
 
     private fun setupDateButton() {
         val btnDate = findViewById<Button>(R.id.btn_Date)
-        btnDate.text = "12 September 2025"
-        
+        btnDate.text = getString(R.string.select_date_prompt)
+
         btnDate.setOnClickListener {
-            val calendar = Calendar.getInstance()
-            val datePickerDialog = DatePickerDialog(
+            val calendar = Calendar.getInstance().apply {
+                timeInMillis = selectedDateMillis ?: System.currentTimeMillis()
+            }
+            DatePickerDialog(
                 this,
                 { _, year, month, dayOfMonth ->
-                    btnDate.text = "$dayOfMonth ${getMonthName(month)} $year"
+                    calendar.set(Calendar.YEAR, year)
+                    calendar.set(Calendar.MONTH, month)
+                    calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
+                    calendar.set(Calendar.HOUR_OF_DAY, 0)
+                    calendar.set(Calendar.MINUTE, 0)
+                    calendar.set(Calendar.SECOND, 0)
+                    calendar.set(Calendar.MILLISECOND, 0)
+                    selectedDateMillis = calendar.timeInMillis
+                    btnDate.text = formatDate(selectedDateMillis!!)
                 },
                 calendar.get(Calendar.YEAR),
                 calendar.get(Calendar.MONTH),
                 calendar.get(Calendar.DAY_OF_MONTH)
-            )
-            datePickerDialog.show()
+            ).show()
         }
+    }
+
+    private fun formatDate(millis: Long): String {
+        val sdf = SimpleDateFormat("d MMMM yyyy", Locale.getDefault())
+        return sdf.format(Date(millis))
     }
 
     private fun getMonthName(month: Int): String {
@@ -241,7 +257,8 @@ class EditTransactionActivity : AppCompatActivity() {
                 val edtNotes = findViewById<EditText>(R.id.edt_Notes)
                 edtDescription.setText(expense.expenseName)
                 edtAmount.setText(expense.expenseAmount.toString())
-                btnDate.setText(SimpleDateFormat("d MMMM yyyy", java.util.Locale.getDefault()).format(java.util.Date(expense.expenseDate)))
+                selectedDateMillis = expense.expenseDate
+                btnDate.text = formatDate(expense.expenseDate)
                 edtNotes.setText(expense.expenseNotes ?: "")
                 selectedImageUri = expense.expenseImage?.let { android.net.Uri.parse(it) }
 
@@ -272,16 +289,17 @@ class EditTransactionActivity : AppCompatActivity() {
         val description = edtDescription.text.toString()
         val amount = edtAmount.text.toString()
         val category = spinnerCategory.selectedItem.toString()
-        val dateString = btnDate.text.toString()
         val repeat = spinnerRepeat.selectedItem.toString()
         val oweOwed = checkBoxOweOwed.isChecked
         val notes = edtNotes.text.toString()
-        
-        // Convert date string to Long
-        val date = editTransactionViewModel.parseUiDateToMillis(dateString)
 
         if (description.isEmpty() || amount.isEmpty()) {
             Toast.makeText(this, "Please fill in all required fields", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        if (selectedDateMillis == null) {
+            Toast.makeText(this, "Please select a transaction date", Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -298,14 +316,14 @@ class EditTransactionActivity : AppCompatActivity() {
             if (editingTransactionId != null) {
                 // Update existing transaction
                 editTransactionViewModel.updateTransaction(
-                    editingTransactionId!!, description, amountVal, category, date, repeat, oweOwed, notes,
+                    editingTransactionId!!, description, amountVal, category, selectedDateMillis!!, repeat, oweOwed, notes,
                     imagePath = selectedImageUri?.toString()
                 )
                 Toast.makeText(this, "Transaction updated successfully", Toast.LENGTH_SHORT).show()
             } else {
                 // Create new transaction
                 editTransactionViewModel.saveTransaction(
-                    description, amountVal, category, date, repeat, oweOwed, notes,
+                    description, amountVal, category, selectedDateMillis!!, repeat, oweOwed, notes,
                     imagePath = selectedImageUri?.toString()
                 )
                 Toast.makeText(this, "Transaction saved successfully", Toast.LENGTH_SHORT).show()
@@ -316,7 +334,7 @@ class EditTransactionActivity : AppCompatActivity() {
                 putExtra("description", description)
                 putExtra("amount", formattedAmount)
                 putExtra("category", category)
-                putExtra("date", date)
+                putExtra("date", selectedDateMillis!!)
                 putExtra("updated", editingTransactionId != null)
             }
             setResult(RESULT_OK, resultIntent)

@@ -191,15 +191,21 @@ class SproutViewModel(private val context: Context) {
                 
                 val expenses = transactionRepository.getTransactionsBetweenDates(startOfMonth, endOfMonth)
                 val expenseTransactions = expenses.filter { it.expenseType == ExpenseType.Expense }
+                val expenseTotalsByName = expenseTransactions.groupBy { it.expenseCategory }
+                    .mapValues { (_, list) -> list.sumOf { it.expenseAmount } }
+                
+                val subcategoryNamesByCategory = subcategories.groupBy { it.categoryId }
+                    .mapValues { entry -> entry.value.map { it.subcategoryName }.toSet() }
                 
                 var totalAdherence = 0.0
                 var categoryCount = 0
                 
                 // Check category adherence
                 categories.forEach { category ->
-                    val categorySpending = expenseTransactions
-                        .filter { it.expenseCategory == category.categoryName }
-                        .sumOf { it.expenseAmount }
+                    val names = subcategoryNamesByCategory[category.id] ?: emptySet()
+                    val categorySpending =
+                        (expenseTotalsByName[category.categoryName] ?: 0.0) +
+                                names.sumOf { subName -> expenseTotalsByName[subName] ?: 0.0 }
                     
                     if (category.categoryAllocation > 0) {
                         val adherence = if (categorySpending <= category.categoryAllocation) {
@@ -228,10 +234,8 @@ class SproutViewModel(private val context: Context) {
                 
                 // Check subcategory adherence
                 subcategories.forEach { subcategory ->
-                    val subcategorySpending = expenseTransactions
-                        .filter { it.expenseCategory == subcategory.subcategoryName }
-                        .sumOf { it.expenseAmount }
-                    
+                    val subcategorySpending = expenseTotalsByName[subcategory.subcategoryName] ?: 0.0
+
                     if (subcategory.subcategoryAllocation > 0) {
                         val adherence = if (subcategorySpending <= subcategory.subcategoryAllocation) {
                             val percentage = (subcategorySpending / subcategory.subcategoryAllocation * 100).coerceAtMost(100.0)

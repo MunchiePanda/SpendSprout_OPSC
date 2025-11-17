@@ -236,9 +236,21 @@ class ReportsActivity : AppCompatActivity(), NavigationView.OnNavigationItemSele
     private fun loadAndRenderLineChartData() {
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val (effectiveStart, effectiveEnd) = resolveEffectiveDateRange()
+                val usingAllTime = startDate == null && endDate == null
+                var (effectiveStart, effectiveEnd) = resolveEffectiveDateRange()
 
-                val expenses = reportsViewModel.getTransactionsBetweenDates(effectiveStart, effectiveEnd)
+                val baseExpenses = if (usingAllTime) {
+                    reportsViewModel.getAllTransactionsSnapshot()
+                } else {
+                    reportsViewModel.getTransactionsBetweenDates(effectiveStart, effectiveEnd)
+                }
+
+                if (usingAllTime && baseExpenses.isNotEmpty()) {
+                    effectiveStart = normalizeStartOfDay(baseExpenses.minOf { it.expenseDate })
+                    effectiveEnd = normalizeEndOfDay(baseExpenses.maxOf { it.expenseDate })
+                }
+
+                val expenses = baseExpenses.filter { it.expenseDate in effectiveStart..effectiveEnd }
 
                 // Group expenses by day and calculate daily totals
                 val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
@@ -340,12 +352,33 @@ class ReportsActivity : AppCompatActivity(), NavigationView.OnNavigationItemSele
         var s = startDate
         var e = endDate
         if (s == null || e == null) {
-            // TODO: Use Firebase repository when available
-            // For now, default to current month
             s = reportsViewModel.getStartOfMonth()
             e = reportsViewModel.getEndOfMonth()
         }
-        return Pair(s!!, e!!)
+        return Pair(
+            normalizeStartOfDay(s!!),
+            normalizeEndOfDay(e!!)
+        )
+    }
+
+    private fun normalizeStartOfDay(epochMillis: Long): Long {
+        val cal = Calendar.getInstance()
+        cal.timeInMillis = epochMillis
+        cal.set(Calendar.HOUR_OF_DAY, 0)
+        cal.set(Calendar.MINUTE, 0)
+        cal.set(Calendar.SECOND, 0)
+        cal.set(Calendar.MILLISECOND, 0)
+        return cal.timeInMillis
+    }
+
+    private fun normalizeEndOfDay(epochMillis: Long): Long {
+        val cal = Calendar.getInstance()
+        cal.timeInMillis = epochMillis
+        cal.set(Calendar.HOUR_OF_DAY, 23)
+        cal.set(Calendar.MINUTE, 59)
+        cal.set(Calendar.SECOND, 59)
+        cal.set(Calendar.MILLISECOND, 999)
+        return cal.timeInMillis
     }
     private fun setupChart() {
         val chartView = findViewById<com.example.spendsprout_opsc.overview.ChartView>(R.id.chartView)
@@ -368,20 +401,40 @@ class ReportsActivity : AppCompatActivity(), NavigationView.OnNavigationItemSele
     private fun loadAndRenderPieChartData() {
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val (effectiveStart, effectiveEnd) = resolveEffectiveDateRange()
+                val usingAllTime = startDate == null && endDate == null
+                var (effectiveStart, effectiveEnd) = resolveEffectiveDateRange()
 
-                val expenses = reportsViewModel.getTransactionsBetweenDates(effectiveStart, effectiveEnd)
+                val baseExpenses = if (usingAllTime) {
+                    reportsViewModel.getAllTransactionsSnapshot()
+                } else {
+                    reportsViewModel.getTransactionsBetweenDates(effectiveStart, effectiveEnd)
+                }
+
+                if (usingAllTime && baseExpenses.isNotEmpty()) {
+                    effectiveStart = normalizeStartOfDay(baseExpenses.minOf { it.expenseDate })
+                    effectiveEnd = normalizeEndOfDay(baseExpenses.maxOf { it.expenseDate })
+                }
+
+                val expenses = baseExpenses.filter { it.expenseDate in effectiveStart..effectiveEnd }
 
                 // Filter only expense transactions (not income)
                 val expenseTransactions = expenses.filter { it.expenseType == ExpenseType.Expense }
 
                 val categories = reportsViewModel.getCategoriesSnapshot()
+                val subcategories = reportsViewModel.getSubcategoriesSnapshot()
                 val categoryColorMap = categories.associate { it.categoryName to it.categoryColor }
 
-                // Group expenses by category and calculate totals
-                val categoryTotals = expenseTransactions.groupBy { it.expenseCategory }
-                    .mapValues { (_, list) -> list.sumOf { it.expenseAmount } }
-                    .filter { it.value > 0 } // Only include categories with spending
+                // Build lookup of subcategory name -> parent category name
+                val subcategoryToCategory = subcategories.associate { sub ->
+                    val parentName = categories.firstOrNull { it.id == sub.categoryId }?.categoryName
+                    sub.subcategoryName to (parentName ?: sub.subcategoryName)
+                }
+
+                // Group expenses by resolved top-level category
+                val categoryTotals = expenseTransactions.groupBy { expense ->
+                    subcategoryToCategory[expense.expenseCategory] ?: expense.expenseCategory
+                }.mapValues { (_, list) -> list.sumOf { it.expenseAmount } }
+                    .filter { it.value > 0 }
 
                 // Create category pie chart entries
                 val categoryEntries = categoryTotals.map { (category, total) ->
@@ -389,11 +442,14 @@ class ReportsActivity : AppCompatActivity(), NavigationView.OnNavigationItemSele
                 }
 
                 if (categoryEntries.isNotEmpty()) {
-                    val categoryDataSet = PieDataSet(categoryEntries, "Categories").apply {
-                        colors = categoryTotals.keys.mapIndexed { index, category ->
-                            val color = categoryColorMap[category] ?: ColorTemplate.COLORFUL_COLORS[index % ColorTemplate.COLORFUL_COLORS.size]
-                            color
+                    val categoryColors = ArrayList<Int>(categoryEntries.size).apply {
+                        categoryEntries.forEachIndexed { index, entry ->
+                            add(pickColor(categoryColorMap[entry.label], index))
                         }
+                    }
+
+                    val categoryDataSet = PieDataSet(categoryEntries, "Categories").apply {
+                        colors = categoryColors
                         setDrawValues(true)
                         valueTextSize = 12f
                         valueTextColor = Color.BLACK
@@ -417,54 +473,32 @@ class ReportsActivity : AppCompatActivity(), NavigationView.OnNavigationItemSele
                     }
                 }
 
-                val subcategories = reportsViewModel.getSubcategoriesSnapshot()
                 val subcategoryColorMap = subcategories.associate { it.subcategoryName to it.subcategoryColor }
 
                 // Group expenses by subcategory name (expenseCategory field stores subcategory name)
                 // Calculate spending for each subcategory from expenses filtered by date range
-                val subcategoryTotals = mutableMapOf<String, Double>()
-                
-                // Get all subcategories and calculate their spending from expenses
-                subcategories.forEach { subcategory ->
-                    // Match expenses to subcategories by comparing expenseCategory with subcategoryName
-                    val subcategorySpending = expenseTransactions
-                        .filter { it.expenseCategory == subcategory.subcategoryName }
-                        .sumOf { it.expenseAmount }
-                    
-                    // Only include subcategories with spending in the date range
-                    if (subcategorySpending > 0) {
-                        subcategoryTotals[subcategory.subcategoryName] = subcategorySpending
-                    }
-                }
-
-                // If no expenses found for date range, fall back to using subcategory balances directly
-                // (but only if we have balances - these represent overall spending, not date-filtered)
-                if (subcategoryTotals.isEmpty()) {
-                    subcategories.forEach { subcategory ->
-                        // Use absolute value of balance since balance might be negative
-                        val balance = kotlin.math.abs(subcategory.subcategoryBalance)
-                        if (balance > 0) {
-                            subcategoryTotals[subcategory.subcategoryName] = balance
-                        }
-                    }
-                }
+                val subcategoryTotals = expenseTransactions
+                    .groupBy { it.expenseCategory }
+                    .mapValues { (_, list) -> list.sumOf { it.expenseAmount } }
+                    .filter { it.value > 0 }
 
                 // Create subcategory pie chart entries (limit to top 10)
-                val subcategoryEntries = subcategoryTotals
-                    .toList()
-                    .sortedByDescending { it.second }
+                val subcategoryEntries = subcategoryTotals.entries
+                    .sortedByDescending { it.value }
                     .take(10)
                     .map { (name, total) ->
                         PieEntry(total.toFloat(), name)
                     }
 
                 if (subcategoryEntries.isNotEmpty()) {
-                    val subcategoryDataSet = PieDataSet(subcategoryEntries, "Subcategories").apply {
-                        colors = subcategoryEntries.mapIndexed { index, _ ->
-                            val entryName = subcategoryEntries[index].label
-                            val color = subcategoryColorMap[entryName] ?: ColorTemplate.COLORFUL_COLORS[index % ColorTemplate.COLORFUL_COLORS.size]
-                            color
+                    val subcategoryColors = ArrayList<Int>(subcategoryEntries.size).apply {
+                        subcategoryEntries.forEachIndexed { index, entry ->
+                            add(pickColor(subcategoryColorMap[entry.label], index))
                         }
+                    }
+
+                    val subcategoryDataSet = PieDataSet(subcategoryEntries, "Subcategories").apply {
+                        colors = subcategoryColors
                         setDrawValues(true)
                         valueTextSize = 10f
                         valueTextColor = Color.BLACK
@@ -522,6 +556,16 @@ class ReportsActivity : AppCompatActivity(), NavigationView.OnNavigationItemSele
 
     private fun observeData() {
         // Observe ViewModel data changes
+    }
+
+    private fun pickColor(colorInt: Int?, fallbackIndex: Int): Int {
+        val palette = ColorTemplate.MATERIAL_COLORS
+        val safeColor = colorInt ?: 0
+        return if (safeColor != 0) {
+            safeColor
+        } else {
+            palette[fallbackIndex % palette.size]
+        }
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {

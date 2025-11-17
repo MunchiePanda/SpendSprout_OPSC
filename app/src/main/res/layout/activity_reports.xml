@@ -116,13 +116,13 @@
 
                     <com.github.mikephil.charting.charts.PieChart
                         android:id="@+id/pieChart_Category"
-                        android:layout_width="160dp"
-                        android:layout_height="160dp" />
+                        android:layout_width="140dp"
+                        android:layout_height="140dp" />
 
                     <com.github.mikephil.charting.charts.PieChart
                         android:id="@+id/pieChart_Subcategory"
-                        android:layout_width="160dp"
-                        android:layout_height="160dp" />
+                        android:layout_width="140dp"
+                        android:layout_height="140dp" />
                 </LinearLayout>
 
             </LinearLayout>

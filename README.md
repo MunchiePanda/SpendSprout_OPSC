@@ -24,6 +24,7 @@ The app is organized into three main parts that work together:
 - **RecyclerView 1.4.0** - This efficiently displays long lists of transactions or categories without slowing down the app.
 - **Android Gradle Plugin 8.12.3** - Modern build system for Android development
 - **KSP (Kotlin Symbol Processing)** - Fast annotation processing for Room and Hilt
+- **Firebase(Realtime Database)** - Online data handling and capturing
 
 ## How Data Is Stored
 
@@ -188,18 +189,18 @@ When you first run the app, it automatically sets up the database with sample da
 
 ## Recent Features and Improvements
 
-### **New Features Added**
-- **Comprehensive Reports System** - Interactive charts and analytics for spending patterns and budget performance
-- **User Authentication** - Secure login system to protect financial data
-- **Settings Management** - Customizable app preferences and user controls
-- **Enhanced Data Validation** - Improved error handling and data consistency
-- **Modern Architecture** - Updated to latest Android development practices with Hilt 2.52 and Room 2.7.2
+### **New Features Delivered**
+- **Firebase Sync + Auth** – Budgets, categories, subcategories, accounts, and transactions now flow through Firebase Realtime Database with Firebase Authentication controlling access. When a user signs in, every screen reflects live cloud data while Room provides an offline fallback.
+- **Reports Refresh** – The daily spending line chart and both pie charts read from the same Firebase snapshots, so the analytics screen always matches the data shown elsewhere in the app.
+- **Category & Sprout Overhaul** – Category overview cards combine top-level and subcategory totals, and the Sprout wellness screen became scrollable with tidier cards and progress tiles.
+- **Sprout Habit Tracking** – The Sprout feature now monitors budget adherence, check‑in streaks, and category discipline to turn healthy spending into a visual “plant health” score that reacts to user behavior in real time.
+- **Navigation Drawer Update** – Header layout was rebuilt to respect safe-area insets, show the signed-in identity, and keep the close action within thumb reach on all devices.
+- **PDF Export** – The transactions screen can export any filtered list to a sharable PDF using iText7 and a FileProvider link.
 
 ### **Technical Improvements**
-- **KSP Integration** - Faster annotation processing for Room and Hilt
-- **Updated Dependencies** - Latest versions of all libraries for better performance and security
-- **Enhanced Database Schema** - Improved data structure with better relationships and constraints
-- **Modern UI Components** - Updated Material Design components for better user experience
+- **Repository Unification** – New Firebase-backed repositories mirror writes to Room so the migration can happen feature by feature without breaking older flows.
+- **UI Polish** – Shared utility classes keep drawer headers consistent, category cards have better color handling, and splash typography now fits smaller displays.
+- **Instrumentation Hooks** – Extensive logging around Firebase reads/writes makes it easier to trace data when debugging deployments.
 
 ## What's Coming Next
 
@@ -223,7 +224,7 @@ This is a personal project that demonstrates modern Android development practice
 
 ## License
 
-This project is for educational and portfolio purposes, demonstrating proficiency in Android development with Kotlin, Room database, and modern Android architecture patterns.
+This project is for educational and portfolio purposes, demonstrating proficiency in Android development with Kotlin, Room database, Firebase, and modern Android architecture patterns.
 
 ---Link to Presentation Video----
 https://drive.google.com/file/d/17DMQCbJxKcLOZDTivYcKsxCmXe2rjAf5/view?usp=sharing

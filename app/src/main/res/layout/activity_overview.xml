@@ -8,226 +8,215 @@
     android:fitsSystemWindows="true"
     tools:openDrawer="start">
 
-    <LinearLayout
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/BackgroundColor"
-        android:orientation="vertical"
-        android:layout_marginTop="0dp"
-        android:padding="10dp">
-
-        <!-- Total Budget Info -->
-        <include
-            android:id="@+id/header_bar"
-            layout="@layout/header_bar_layout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+        android:fillViewport="true">
 
         <LinearLayout
-            android:id="@+id/layout_budgetOverview"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:gravity="center"
-            android:orientation="horizontal"
-            android:background="@drawable/roundedcorners_background"
-            android:backgroundTint="@color/ItemBackgroundColor"
-            android:paddingHorizontal="10dp"
-            android:paddingVertical="5dp">
+            android:background="@color/BackgroundColor"
+            android:orientation="vertical"
+            android:padding="10dp">
+
+            <!-- Total Budget Info -->
+            <include
+                android:id="@+id/header_bar"
+                layout="@layout/header_bar_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
 
             <LinearLayout
-                android:layout_width="190dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:orientation="vertical">
-
-                <TextView
-                    android:id="@+id/txt_BalanceDescr"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Total Balance: "
-                    android:textAlignment="textStart"
-                    android:textAppearance="@style/SubHeaderTextStyle" />
-
-                <TextView
-                    android:id="@+id/txt_AllocationDescr"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Total Allocation"
-                    android:textAlignment="textStart"
-                    android:textAppearance="@style/MainTextStyle" />
-
-                <TextView
-                    android:id="@+id/txt_MinDescr"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Minimum:"
-                    android:textAlignment="textStart"
-                    android:textAppearance="@style/SubTextStyle" />
-
-                <TextView
-                    android:id="@+id/txt_MaxDescr"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Maximum:"
-                    android:textAlignment="textStart"
-                    android:textAppearance="@style/SubTextStyle" />
-
-            </LinearLayout>
-
-            <LinearLayout
+                android:id="@+id/layout_budgetOverview"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:orientation="vertical">
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:background="@drawable/roundedcorners_background"
+                android:backgroundTint="@color/ItemBackgroundColor"
+                android:paddingHorizontal="10dp"
+                android:paddingVertical="5dp">
 
-                <TextView
-                    android:id="@+id/txt_BudgetBalance"
+                <LinearLayout
+                    android:layout_width="190dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/txt_BalanceDescr"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Total Balance: "
+                        android:textAlignment="textStart"
+                        android:textAppearance="@style/SubHeaderTextStyle" />
+
+                    <TextView
+                        android:id="@+id/txt_AllocationDescr"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Total Allocation"
+                        android:textAlignment="textStart"
+                        android:textAppearance="@style/MainTextStyle" />
+
+                    <TextView
+                        android:id="@+id/txt_MinDescr"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Minimum:"
+                        android:textAlignment="textStart"
+                        android:textAppearance="@style/SubTextStyle" />
+
+                    <TextView
+                        android:id="@+id/txt_MaxDescr"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Maximum:"
+                        android:textAlignment="textStart"
+                        android:textAppearance="@style/SubTextStyle" />
+
+                </LinearLayout>
+
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="- R 100 000"
-                    android:textAlignment="textEnd"
-                    android:textAppearance="@style/SubHeaderTextStyle" />
+                    android:layout_gravity="center"
+                    android:orientation="vertical">
 
-                <TextView
-                    android:id="@+id/txt_BudgetAllocation"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="R 100 000"
-                    android:textAlignment="textEnd"
-                    android:textAppearance="@style/MainTextStyle" />
+                    <TextView
+                        android:id="@+id/txt_BudgetBalance"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="- R 100 000"
+                        android:textAlignment="textEnd"
+                        android:textAppearance="@style/SubHeaderTextStyle" />
 
-                <TextView
-                    android:id="@+id/txt_Min"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="R200"
-                    android:textAlignment="textEnd"
-                    android:textAppearance="@style/SubTextStyle" />
+                    <TextView
+                        android:id="@+id/txt_BudgetAllocation"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="R 100 000"
+                        android:textAlignment="textEnd"
+                        android:textAppearance="@style/MainTextStyle" />
 
-                <TextView
-                    android:id="@+id/txt_Max"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="R1000"
-                    android:textAlignment="textEnd"
-                    android:textAppearance="@style/SubTextStyle" />
+                    <TextView
+                        android:id="@+id/txt_Min"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="R200"
+                        android:textAlignment="textEnd"
+                        android:textAppearance="@style/SubTextStyle" />
+
+                    <TextView
+                        android:id="@+id/txt_Max"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="R1000"
+                        android:textAlignment="textEnd"
+                        android:textAppearance="@style/SubTextStyle" />
+                </LinearLayout>
+
             </LinearLayout>
 
-        </LinearLayout>
-
-        <!-- Categories -->
-        <LinearLayout
-            android:id="@+id/layout_categoryOverview"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:gravity="center"
-            android:orientation="vertical"
-            android:background="@drawable/roundedcorners_background"
-            android:backgroundTint="@color/ItemBackgroundColor"
-            android:paddingHorizontal="10dp"
-            android:paddingVertical="5dp"
-            android:layout_marginTop="15dp">
-
-            <TextView
-                android:id="@+id/txt_Categories"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Categories"
-                android:textAppearance="@style/SubHeaderTextStyle"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/chart_Placeholder" />
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recyclerView_Categories"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="0dp"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/txt_RecentTransactions"
-                tools:itemCount="3"
-                tools:listitem="@layout/expense_layout" />
-        </LinearLayout>
-
-        <!-- Recent Transactions -->
-        <LinearLayout
-            android:id="@+id/layout_transactionOverview"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:gravity="center"
-            android:orientation="vertical"
-            android:background="@drawable/roundedcorners_background"
-            android:backgroundTint="@color/ItemBackgroundColor"
-            android:paddingHorizontal="10dp"
-            android:paddingVertical="5dp"
-            android:layout_marginTop="15dp">
-
-            <TextView
-                android:id="@+id/txt_RecentTransactions"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Recent Transactions"
-                android:textAppearance="@style/SubHeaderTextStyle"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/chart_Placeholder" />
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recyclerView_Transactions"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/txt_RecentTransactions"
-                tools:itemCount="3"
-                tools:listitem="@layout/expense_layout" />
-        </LinearLayout>
-
-        <!-- Reports -->
-        <LinearLayout
-            android:id="@+id/chart_Placeholder"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:gravity="center"
-            android:orientation="vertical"
-            android:background="@drawable/roundedcorners_background"
-            android:backgroundTint="@color/ItemBackgroundColor"
-            android:paddingHorizontal="10dp"
-            android:paddingVertical="5dp"
-            android:layout_marginTop="15dp">
-
-            <TextView
-                android:id="@+id/txt_Reports"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Reports"
-                android:textAppearance="@style/SubHeaderTextStyle"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/chart_Placeholder" />
-
-            <com.example.spendsprout_opsc.overview.ChartView
-                android:id="@+id/chartView"
+            <!-- Categories -->
+            <LinearLayout
+                android:id="@+id/layout_categoryOverview"
                 android:layout_width="match_parent"
-                android:layout_height="300dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginBottom="8dp"
-                android:minHeight="300dp" />
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:background="@drawable/roundedcorners_background"
+                android:backgroundTint="@color/ItemBackgroundColor"
+                android:paddingHorizontal="10dp"
+                android:paddingVertical="5dp"
+                android:layout_marginTop="15dp">
+
+                <TextView
+                    android:id="@+id/txt_Categories"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Categories"
+                    android:textAppearance="@style/SubHeaderTextStyle" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclerView_Categories"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="0dp"
+                    android:nestedScrollingEnabled="false"
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                    tools:itemCount="3"
+                    tools:listitem="@layout/expense_layout" />
+            </LinearLayout>
+
+            <!-- Recent Transactions -->
+            <LinearLayout
+                android:id="@+id/layout_transactionOverview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:background="@drawable/roundedcorners_background"
+                android:backgroundTint="@color/ItemBackgroundColor"
+                android:paddingHorizontal="10dp"
+                android:paddingVertical="5dp"
+                android:layout_marginTop="15dp">
+
+                <TextView
+                    android:id="@+id/txt_RecentTransactions"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Recent Transactions"
+                    android:textAppearance="@style/SubHeaderTextStyle" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclerView_Transactions"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:nestedScrollingEnabled="false"
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                    tools:itemCount="3"
+                    tools:listitem="@layout/expense_layout" />
+            </LinearLayout>
+
+            <!-- Reports -->
+            <LinearLayout
+                android:id="@+id/chart_Placeholder"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:background="@drawable/roundedcorners_background"
+                android:backgroundTint="@color/ItemBackgroundColor"
+                android:paddingHorizontal="10dp"
+                android:paddingVertical="5dp"
+                android:layout_marginTop="15dp"
+                android:layout_marginBottom="20dp">
+
+                <TextView
+                    android:id="@+id/txt_Reports"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Reports"
+                    android:textAppearance="@style/SubHeaderTextStyle" />
+
+                <com.example.spendsprout_opsc.overview.ChartView
+                    android:id="@+id/chartView"
+                    android:layout_width="match_parent"
+                    android:layout_height="300dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="8dp"
+                    android:minHeight="300dp" />
+            </LinearLayout>
         </LinearLayout>
-    </LinearLayout>
+
+    </androidx.core.widget.NestedScrollView>
 
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/navigationView"

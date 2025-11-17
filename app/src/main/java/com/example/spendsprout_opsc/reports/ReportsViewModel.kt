@@ -142,6 +142,10 @@ class ReportsViewModel {
         return subcategoryRepository.getAllSubcategories().first()
     }
 
+    suspend fun getAllTransactionsSnapshot(): List<Expense_Entity> {
+        return transactionRepository.getAllTransactionsSnapshot()
+    }
+
     fun getStartOfMonth(): Long {
         val calendar = Calendar.getInstance()
         calendar.set(Calendar.DAY_OF_MONTH, 1)
